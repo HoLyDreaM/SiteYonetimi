@@ -20,6 +20,12 @@ public class Apartment : BaseEntity
     public string? OwnerName { get; set; }
     public string? OwnerPhone { get; set; }
     public string? OwnerEmail { get; set; }
+    /// <summary>Ev sahibi mi kiracı mı oturuyor</summary>
+    public ApartmentOccupancyType OccupancyType { get; set; } = ApartmentOccupancyType.OwnerOccupied;
+    /// <summary>Kiracı adı (kiracı oturuyorsa)</summary>
+    public string? TenantName { get; set; }
+    /// <summary>Kiracı telefonu</summary>
+    public string? TenantPhone { get; set; }
 
     public Site Site { get; set; } = null!;
     public Building? Building { get; set; }
@@ -29,4 +35,10 @@ public class Apartment : BaseEntity
     public ICollection<Meter> Meters { get; set; } = new List<Meter>();
     public ICollection<RecurringCharge> RecurringCharges { get; set; } = new List<RecurringCharge>();
     public ICollection<Income> Incomes { get; set; } = new List<Income>();
+}
+
+public enum ApartmentOccupancyType
+{
+    OwnerOccupied = 0,  // Ev sahibi oturuyor
+    TenantOccupied = 1  // Kiracı oturuyor
 }

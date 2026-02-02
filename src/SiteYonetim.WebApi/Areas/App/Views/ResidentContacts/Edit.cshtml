@@ -1,0 +1,53 @@
+@model SiteYonetim.Domain.Entities.ResidentContact
+@{
+    ViewData["Title"] = "Kayıt Düzenle";
+    var siteId = ViewBag.SiteId as Guid? ?? Model.SiteId;
+    var apartments = ViewBag.Apartments as IReadOnlyList<SiteYonetim.Domain.Entities.Apartment> ?? new List<SiteYonetim.Domain.Entities.Apartment>();
+}
+<h1 class="h3 mb-4">Kayıt Düzenle</h1>
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+<form asp-area="App" asp-controller="ResidentContacts" asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="SiteId" />
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Name" class="form-label">Ad Soyad *</label>
+                    <input asp-for="Name" class="form-control" placeholder="Ad Soyad" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Phone" class="form-label">Telefon *</label>
+                    <input asp-for="Phone" type="tel" class="form-control" placeholder="05XX XXX XX XX" />
+                    <span asp-validation-for="Phone" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ContactType" class="form-label">Tür</label>
+                    <select asp-for="ContactType" class="form-select">
+                        <option value="0">Kat Maliki</option>
+                        <option value="1">Kiracı</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ApartmentId" class="form-label">Daire (opsiyonel)</label>
+                    <select asp-for="ApartmentId" class="form-select">
+                        <option value="">-- Seçin --</option>
+                        @foreach (var a in apartments)
+                        {
+                            <option value="@a.Id" selected="@(Model.ApartmentId == a.Id)">@(a.BlockOrBuildingName) - @a.ApartmentNumber</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Notes" class="form-label">Notlar</label>
+                    <textarea asp-for="Notes" class="form-control" rows="2" placeholder="Ek bilgiler"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+            <button type="submit" class="btn btn-primary">Güncelle</button>
+            <a asp-action="Index" asp-route-siteId="@siteId" class="btn btn-secondary">İptal</a>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,52 @@
+@model IReadOnlyList<SiteYonetim.Domain.Entities.Apartment>
+@using SiteYonetim.Domain.Entities
+@{
+    ViewData["Title"] = "Site Sakinleri";
+    var siteId = (Guid)ViewBag.SiteId;
+    var siteName = ViewBag.SiteName as string ?? "";
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Site Sakinleri - @siteName</h1>
+    <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+</div>
+<p class="text-muted mb-3">Dairelerde oturan kişilerin listesi. Bilgiler Daireler bölümünden güncellenir.</p>
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İsim</th>
+                        <th>Kat</th>
+                        <th>Daire</th>
+                        <th>Telefon</th>
+                        <th>Kiracı / Kat Maliki</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.OrderBy(x => x.BlockOrBuildingName).ThenBy(x => x.ApartmentNumber))
+                    {
+                        var isOwner = a.OccupancyType == ApartmentOccupancyType.OwnerOccupied;
+                        var name = isOwner ? (a.OwnerName ?? "-") : (a.TenantName ?? "-");
+                        var phone = isOwner ? (a.OwnerPhone ?? "-") : (a.TenantPhone ?? "-");
+                        var typeLabel = isOwner ? "Kat Maliki" : "Kiracı";
+                        <tr>
+                            <td>@name</td>
+                            <td>@(a.Floor?.ToString() ?? "-")</td>
+                            <td><strong>@(string.IsNullOrEmpty(a.BlockOrBuildingName) ? a.ApartmentNumber : a.BlockOrBuildingName + " " + a.ApartmentNumber)</strong></td>
+                            <td>@phone</td>
+                            <td><span class="badge @(isOwner ? "bg-primary" : "bg-secondary")">@typeLabel</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        Bu sitede henüz daire kaydı yok. <a asp-area="App" asp-controller="Apartments" asp-action="Index" asp-route-siteId="@siteId">Daireler</a> bölümünden daire ekleyebilirsiniz.
+    </div>
+}

@@ -1,0 +1,52 @@
+@model IReadOnlyList<SiteYonetim.Domain.Entities.ResidentContact>
+@{
+    ViewData["Title"] = "Kat Malikleri ve Kiracılar";
+    var siteId = (Guid)ViewBag.SiteId;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Kat Malikleri ve Kiracılar</h1>
+    <div>
+        <a asp-area="App" asp-controller="ResidentContacts" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Kayıt</a>
+        <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+    </div>
+</div>
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>Telefon</th>
+                        <th>Tür</th>
+                        <th>Daire</th>
+                        <th width="180"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model)
+                    {
+                        <tr>
+                            <td><strong>@c.Name</strong></td>
+                            <td><a href="tel:@c.Phone">@c.Phone</a></td>
+                            <td><span class="badge @(c.ContactType == SiteYonetim.Domain.Entities.ResidentContactType.Owner ? "bg-primary" : "bg-secondary")">@(c.ContactType == SiteYonetim.Domain.Entities.ResidentContactType.Owner ? "Kat Maliki" : "Kiracı")</span></td>
+                            <td>@(c.Apartment != null ? c.Apartment.BlockOrBuildingName + " - " + c.Apartment.ApartmentNumber : "-")</td>
+                            <td>
+                                <a asp-area="App" asp-controller="ResidentContacts" asp-action="Edit" asp-route-id="@c.Id" asp-route-siteId="@siteId" class="btn btn-sm btn-outline-primary">Düzenle</a>
+                                <form asp-area="App" asp-controller="ResidentContacts" asp-action="Delete" asp-route-id="@c.Id" asp-route-siteId="@siteId" method="post" class="d-inline" onsubmit="return confirm('Bu kaydı silmek istediğinize emin misiniz?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">Henüz kayıt eklenmemiş. <a asp-area="App" asp-controller="ResidentContacts" asp-action="Create" asp-route-siteId="@siteId">İlk kaydı ekleyin</a>.</div>
+}

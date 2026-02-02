@@ -1,16 +1,29 @@
-@model SiteYonetim.Domain.Interfaces.MonthlyReportDto
+@model SiteYonetim.Domain.Interfaces.MonthlyReportDetailDto
 @{
-    ViewData["Title"] = "Aylık Rapor";
     var siteId = (Guid)ViewBag.SiteId;
     var siteName = ViewBag.SiteName as string ?? "";
     var year = (int)ViewBag.Year;
+    var month = (int)ViewBag.Month;
     var monthName = ViewBag.MonthName as string ?? "";
+    ViewData["Title"] = $"{year} {monthName} - {siteName}";
 }
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Aylık Rapor - @siteName (@year - @monthName)</h1>
-    <a asp-area="App" asp-controller="Reports" asp-action="Index" asp-route-siteId="@siteId" class="btn btn-outline-secondary">Geri</a>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2 no-print">
+    <h1 class="h3 mb-0">@year @monthName - @siteName</h1>
+    <div class="d-flex gap-2">
+        <a asp-area="App" asp-controller="Reports" asp-action="MonthlyExcel" asp-route-siteId="@siteId" asp-route-year="@year" asp-route-month="@month" class="btn btn-success">
+            <i class="bi bi-file-earmark-excel me-1"></i> Excel İndir
+        </a>
+        <button type="button" class="btn btn-primary" onclick="window.print();">
+            <i class="bi bi-printer me-1"></i> Yazdır
+        </button>
+        <a asp-area="App" asp-controller="Reports" asp-action="Index" asp-route-siteId="@siteId" class="btn btn-outline-secondary">Geri</a>
+    </div>
 </div>
-<div class="row g-3 mb-4">
+
+<div class="print-only mb-3" style="display:none;">
+    <h2 class="h4">@year @monthName - @siteName</h2>
+</div>
+<div class="row g-3 mb-4 report-summary-row">
     <div class="col-md-3">
         <div class="card border-0 bg-success text-white">
             <div class="card-body">
@@ -22,7 +35,7 @@
     <div class="col-md-3">
         <div class="card border-0 bg-secondary text-white">
             <div class="card-body">
-                <h6 class="card-subtitle mb-1">Bekleyen (Aidat)</h6>
+                <h6 class="card-subtitle mb-1">Bekleyen aidat ve diğer gelirler</h6>
                 <h4 class="card-title mb-0">@Model.PendingIncome.ToString("N2") ₺</h4>
             </div>
         </div>
@@ -44,3 +57,136 @@
         </div>
     </div>
 </div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-arrow-down-circle me-2"></i>Gelirler (Kalem Kalem)</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Blok/Bina</th>
+                                <th>Daire No</th>
+                                <th>Ev Sahibi</th>
+                                <th>Tür</th>
+                                <th>Açıklama</th>
+                                <th class="text-end">Tutar</th>
+                                <th class="text-end">Tahsil Edilen</th>
+                                <th class="text-end">Kalan</th>
+                                <th>Vade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.IncomeItems)
+                            {
+                                <tr>
+                                    <td>@item.BlockOrBuildingName</td>
+                                    <td>@item.ApartmentNumber</td>
+                                    <td>@(item.OwnerName ?? "-")</td>
+                                    <td>@item.TypeName</td>
+                                    <td>@(item.Description ?? "-")</td>
+                                    <td class="text-end">@item.Amount.ToString("N2") ₺</td>
+                                    <td class="text-end">@item.PaidAmount.ToString("N2") ₺</td>
+                                    <td class="text-end @(item.RemainingAmount > 0 ? "text-warning fw-bold" : "")">@item.RemainingAmount.ToString("N2") ₺</td>
+                                    <td>@item.DueDate.ToString("dd.MM.yyyy")</td>
+                                </tr>
+                            }
+                            @if (!Model.IncomeItems.Any())
+                            {
+                                <tr><td colspan="9" class="text-center text-muted py-3">Bu ayda gelir kaydı bulunmuyor.</td></tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light fw-bold">
+                            <tr>
+                                <td colspan="5" class="text-end">Toplam Tahsil Edilen:</td>
+                                <td class="text-end" colspan="2">@Model.TotalIncome.ToString("N2") ₺</td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" class="text-end">Bekleyen Gelir:</td>
+                                <td class="text-end" colspan="2">@Model.PendingIncome.ToString("N2") ₺</td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-arrow-up-circle me-2"></i>Giderler (Kalem Kalem)</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Gider Türü</th>
+                                <th>Açıklama</th>
+                                <th>Tarih</th>
+                                <th>Fatura No</th>
+                                <th class="text-end">Tutar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.ExpenseItems)
+                            {
+                                <tr>
+                                    <td>@item.ExpenseTypeName</td>
+                                    <td>@item.Description</td>
+                                    <td>@item.ExpenseDate.ToString("dd.MM.yyyy")</td>
+                                    <td>@(item.InvoiceNumber ?? "-")</td>
+                                    <td class="text-end">@item.Amount.ToString("N2") ₺</td>
+                                </tr>
+                            }
+                            @if (!Model.ExpenseItems.Any())
+                            {
+                                <tr><td colspan="5" class="text-center text-muted py-3">Bu ayda gider kaydı bulunmuyor.</td></tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light fw-bold">
+                            <tr>
+                                <td colspan="4" class="text-end">Toplam Gider:</td>
+                                <td class="text-end">@Model.TotalExpense.ToString("N2") ₺</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm border-primary">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="mb-0">Genel Toplam - Bakiye</h5>
+                <p class="text-muted small mb-0">(Tahsil Edilen + Bekleyen Gelir) - Toplam Gider</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <h3 class="mb-0 @(Model.Balance >= 0 ? "text-success" : "text-danger")">@Model.Balance.ToString("N2") ₺</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .no-print { display: none !important; }
+        .print-only { display: block !important; }
+        .report-summary-row { display: flex !important; flex-wrap: nowrap !important; }
+        .report-summary-row > div { flex: 0 0 25% !important; max-width: 25% !important; }
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .card-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+</style>

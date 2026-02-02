@@ -1,19 +1,36 @@
 @model IReadOnlyList<SiteYonetim.Domain.Entities.Income>
 @{
-    ViewData["Title"] = "Gelirler (Aidat)";
+    ViewData["Title"] = "Gelirler";
     var siteId = (Guid)ViewBag.SiteId;
     var year = (int)ViewBag.Year;
     var month = (int)ViewBag.Month;
-    var total = ViewBag.Total as decimal? ?? 0;
+    var totalCollected = ViewBag.TotalCollected as decimal? ?? 0;
+    var totalPending = ViewBag.TotalPending as decimal? ?? 0;
     var monthNames = new[] { "", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
 }
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Gelirler (Aidat) - @year @monthNames[month]</h1>
-    <div>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h1 class="h3 mb-0">Gelirler - @year @monthNames[month]</h1>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <form asp-action="Index" method="get" class="d-flex gap-2 align-items-center">
+            <input type="hidden" name="siteId" value="@siteId" />
+            <select name="year" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                @for (var y = DateTime.Today.Year; y >= DateTime.Today.Year - 5; y--)
+                {
+                    <option value="@y" selected="@(y == year)">@y</option>
+                }
+            </select>
+            <select name="month" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                @for (var m = 1; m <= 12; m++)
+                {
+                    <option value="@m" selected="@(m == month)">@monthNames[m]</option>
+                }
+            </select>
+        </form>
         <form asp-area="App" asp-controller="Incomes" asp-action="CreateMonth" method="post" class="d-inline" asp-route-siteId="@siteId" asp-route-year="@year" asp-route-month="@month">
             @Html.AntiForgeryToken()
             <button type="submit" class="btn btn-success me-2"><i class="bi bi-plus-circle me-1"></i> Bu Ay Aidat Oluştur</button>
         </form>
+        <a asp-area="App" asp-controller="Incomes" asp-action="CreateExtraCollection" asp-route-siteId="@siteId" asp-route-year="@year" asp-route-month="@month" class="btn btn-outline-success me-2"><i class="bi bi-cash-stack me-1"></i> Ek Para Toplama</a>
         <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
     </div>
 </div>
@@ -21,47 +38,109 @@
     <div class="col-md-4">
         <div class="card border-0 bg-success text-white">
             <div class="card-body">
-                <h6 class="card-subtitle mb-1">Toplam Gelir</h6>
-                <h4 class="card-title mb-0">@total.ToString("N2") ₺</h4>
+                <h6 class="card-subtitle mb-1">Tahsil Edilen</h6>
+                <h4 class="card-title mb-0">@totalCollected.ToString("N2") ₺</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-warning text-dark">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-1">Bekleyen Gelirler</h6>
+                <h4 class="card-title mb-0">@totalPending.ToString("N2") ₺</h4>
             </div>
         </div>
     </div>
 </div>
 @if (Model != null && Model.Count > 0)
 {
+    <form asp-area="App" asp-controller="Incomes" asp-action="DeleteBulk" method="post" id="deleteBulkForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="siteId" value="@siteId" />
+        <input type="hidden" name="year" value="@year" />
+        <input type="hidden" name="month" value="@month" />
     <div class="card border-0 shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
+                        <th width="40">
+                            <input type="checkbox" id="selectAll" title="Tümünü seç" />
+                        </th>
+                        <th>Tür</th>
                         <th>Blok / Bina</th>
                         <th>Daire No</th>
                         <th>Malik</th>
                         <th>Tutar</th>
                         <th>Ödeme Dönemi</th>
                         <th>Durum</th>
-                        <th width="100"></th>
+                        <th width="120"></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var i in Model)
                     {
+                        var paidAmounts = ViewBag.PaidAmounts as Dictionary<Guid, decimal> ?? new Dictionary<Guid, decimal>();
+                        var paid = paidAmounts.GetValueOrDefault(i.Id, 0m);
+                        var canDelete = paid <= 0;
                         <tr>
+                            <td>
+                                @if (canDelete)
+                                {
+                                    <input type="checkbox" name="incomeIds" value="@i.Id" class="income-check" />
+                                }
+                            </td>
+                            <td>
+                                @if (i.Type == SiteYonetim.Domain.Entities.IncomeType.Aidat)
+                                { <span class="badge bg-primary">Aidat</span> }
+                                else if (i.Type == SiteYonetim.Domain.Entities.IncomeType.ExtraCollection)
+                                { <span class="badge bg-info">Özel Toplama</span> }
+                                else
+                                { <span class="badge bg-secondary">Diğer</span> }
+                            </td>
                             <td>@(i.Apartment?.BlockOrBuildingName ?? "-")</td>
                             <td><strong>@(i.Apartment?.ApartmentNumber ?? "-")</strong></td>
                             <td>@(i.Apartment?.OwnerName ?? "-")</td>
-                            <td>@i.Amount.ToString("N2") ₺</td>
-                            <td><small>@i.PaymentStartDate.ToString("dd.MM")-@i.PaymentEndDate.ToString("dd.MM.yyyy")</small></td>
+                            <td>
+                                @{
+                                    var remaining = i.Amount - paid;
+                                }
+                                @if (paid > 0 && remaining > 0)
+                                {
+                                    <span>@(paid.ToString("N2") + " / " + i.Amount.ToString("N2") + " ₺")</span>
+                                    <br /><small class="text-warning">Kalan: @(remaining.ToString("N2") + " ₺")</small>
+                                }
+                                else
+                                {
+                                    @(i.Amount.ToString("N2") + " ₺")
+                                }
+                            </td>
+                            <td>
+                                <small>@i.PaymentStartDate.ToString("dd.MM")-@i.PaymentEndDate.ToString("dd.MM.yyyy")</small>
+                                @if (i.Type == SiteYonetim.Domain.Entities.IncomeType.ExtraCollection && !string.IsNullOrEmpty(i.Description))
+                                {
+                                    <br /><span class="text-muted small">@i.Description</span>
+                                }
+                            </td>
                             <td>
                                 @if (i.Status == IncomeStatus.Paid)
                                 { <span class="badge bg-success">Ödendi</span> }
+                                else if (i.Status == IncomeStatus.PartiallyPaid)
+                                { <span class="badge bg-info">Kısmi</span> }
                                 else
                                 { <span class="badge bg-warning text-dark">Bekliyor</span> }
                             </td>
                             <td>
-                                @if (i.Status != IncomeStatus.Paid)
+                                @if (remaining > 0)
                                 {
                                     <a asp-area="App" asp-controller="Incomes" asp-action="Collect" asp-route-id="@i.Id" class="btn btn-sm btn-success">Tahsil Et</a>
+                                }
+                                @if (canDelete)
+                                {
+                                    <form asp-area="App" asp-controller="Incomes" asp-action="Delete" method="post" class="d-inline" asp-route-id="@i.Id" asp-route-siteId="@siteId" asp-route-year="@year" asp-route-month="@month" onsubmit="return confirm('Bu gelir kaydını silmek istediğinize emin misiniz?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil"><i class="bi bi-trash"></i></button>
+                                    </form>
                                 }
                             </td>
                         </tr>
@@ -70,6 +149,18 @@
             </table>
         </div>
     </div>
+    <div class="mt-2">
+        <button type="submit" form="deleteBulkForm" class="btn btn-outline-danger btn-sm" id="btnDeleteBulkSubmit" disabled onclick="return document.querySelectorAll('.income-check:checked').length > 0 && confirm('Seçili gelir kayıtlarını silmek istediğinize emin misiniz?');"><i class="bi bi-trash me-1"></i> Seçileni Sil</button>
+    </div>
+    </form>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger mt-2">@TempData["Error"]</div>
+    }
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success mt-2">@TempData["Message"]</div>
+    }
 }
 else
 {
@@ -77,4 +168,22 @@ else
         Bu ay için henüz aidat kaydı yok. <strong>"Bu Ay Aidat Oluştur"</strong> ile tüm dairelere aylık aidat oluşturabilirsiniz.
         Site ve dairelerde varsayılan aidat tutarını (Site düzenle: Varsayılan aylık aidat, Daire düzenle: Aylık aidat) tanımlayın.
     </div>
+}
+@section Scripts {
+<script>
+document.getElementById('selectAll')?.addEventListener('change', function() {
+    document.querySelectorAll('.income-check').forEach(function(cb) { cb.checked = this.checked; }.bind(this));
+    updateDeleteBtn();
+});
+document.querySelectorAll('.income-check').forEach(function(cb) {
+    cb.addEventListener('change', updateDeleteBtn);
+});
+function updateDeleteBtn() {
+    var n = document.querySelectorAll('.income-check:checked').length;
+    var btn = document.getElementById('btnDeleteBulkSubmit');
+    if (btn) btn.disabled = n === 0;
+    var selectAll = document.getElementById('selectAll');
+    if (selectAll) selectAll.checked = n > 0 && n === document.querySelectorAll('.income-check').length;
+}
+</script>
 }

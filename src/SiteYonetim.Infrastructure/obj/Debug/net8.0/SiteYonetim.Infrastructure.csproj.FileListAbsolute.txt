@@ -32,3 +32,4 @@ C:\Users\HoLyDreaM\.cursor\SiteYonetim\src\SiteYonetim.Infrastructure\obj\Debug\
 C:\Users\HoLyDreaM\.cursor\SiteYonetim\src\SiteYonetim.Infrastructure\obj\Debug\net8.0\SiteYonetim.Infrastructure.pdb
 C:\Users\HoLyDreaM\.cursor\SiteYonetim\src\SiteYonetim.Infrastructure\obj\Debug\net8.0\SiteYonetim.Infrastructure.genruntimeconfig.cache
 C:\Users\HoLyDreaM\.cursor\SiteYonetim\src\SiteYonetim.Infrastructure\obj\Debug\net8.0\ref\SiteYonetim.Infrastructure.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.Infrastructure\obj\Debug\net8.0\SiteYonetim.Infrastructure.sourcelink.json

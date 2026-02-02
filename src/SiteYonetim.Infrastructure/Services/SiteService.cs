@@ -51,6 +51,11 @@ public class SiteService : ISiteService
         existing.DefaultMonthlyDues = site.DefaultMonthlyDues;
         existing.DefaultPaymentStartDay = site.DefaultPaymentStartDay;
         existing.DefaultPaymentEndDay = site.DefaultPaymentEndDay;
+        existing.SupportNotificationEmail = site.SupportNotificationEmail;
+        existing.SupportSmtpHost = site.SupportSmtpHost;
+        existing.SupportSmtpPort = site.SupportSmtpPort;
+        existing.SupportSmtpUsername = site.SupportSmtpUsername;
+        existing.SupportSmtpPassword = site.SupportSmtpPassword;
         await _db.SaveChangesAsync(ct);
         return existing;
     }

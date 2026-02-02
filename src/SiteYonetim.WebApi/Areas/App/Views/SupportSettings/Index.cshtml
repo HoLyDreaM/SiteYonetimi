@@ -1,0 +1,54 @@
+@model SiteYonetim.Domain.Entities.Site
+@{
+    ViewData["Title"] = "Destek Kayıt Ayarları";
+    var siteId = (Guid)ViewBag.SiteId;
+    var siteName = ViewBag.SiteName as string ?? "";
+    var success = ViewBag.Success as bool? ?? false;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Destek Kayıt Ayarları - @siteName</h1>
+    <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+</div>
+@if (success)
+{
+    <div class="alert alert-success">Ayarlar kaydedildi.</div>
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <p class="text-muted">Destek kaydı oluşturulduğunda belirlediğiniz e-posta adresine bildirim gönderilir. Her site kendi SMTP ayarlarını girebilir.</p>
+        <form asp-action="Index" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="SiteId" value="@siteId" />
+            <div class="mb-3">
+                <label for="SupportNotificationEmail" class="form-label">Bildirim E-posta Adresi</label>
+                <input type="email" name="SupportNotificationEmail" id="SupportNotificationEmail" class="form-control" value="@Model.SupportNotificationEmail" placeholder="ornek@site.com" />
+                <span class="form-text">Destek talebi oluşturulunca bu adrese e-posta gönderilir.</span>
+            </div>
+            <hr />
+            <h6>E-posta Gönderim (SMTP) Ayarları</h6>
+            <p class="text-muted small">Boş bırakılırsa appsettings.json'daki varsayılan ayarlar kullanılır.</p>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label for="SupportSmtpHost" class="form-label">SMTP Sunucusu</label>
+                    <input type="text" name="SupportSmtpHost" id="SupportSmtpHost" class="form-control" value="@Model.SupportSmtpHost" placeholder="smtp.gmail.com" />
+                </div>
+                <div class="col-md-6">
+                    <label for="SupportSmtpPort" class="form-label">Port</label>
+                    <input type="number" name="SupportSmtpPort" id="SupportSmtpPort" class="form-control" value="@Model.SupportSmtpPort" placeholder="587" />
+                </div>
+                <div class="col-md-6">
+                    <label for="SupportSmtpUsername" class="form-label">Kullanıcı Adı / E-posta</label>
+                    <input type="text" name="SupportSmtpUsername" id="SupportSmtpUsername" class="form-control" value="@Model.SupportSmtpUsername" placeholder="user@gmail.com" />
+                </div>
+                <div class="col-md-6">
+                    <label for="SupportSmtpPassword" class="form-label">Şifre</label>
+                    <input type="password" name="SupportSmtpPassword" id="SupportSmtpPassword" class="form-control" placeholder="Değiştirmek için yeni şifre girin" autocomplete="new-password" />
+                    <span class="form-text">Gmail için uygulama şifresi kullanın.</span>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">Kaydet</button>
+            </div>
+        </form>
+    </div>
+</div>

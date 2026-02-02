@@ -42,6 +42,9 @@ public class ApartmentService : IApartmentService
         existing.OwnerName = apartment.OwnerName;
         existing.OwnerPhone = apartment.OwnerPhone;
         existing.OwnerEmail = apartment.OwnerEmail;
+        existing.OccupancyType = apartment.OccupancyType;
+        existing.TenantName = apartment.TenantName;
+        existing.TenantPhone = apartment.TenantPhone;
         await _db.SaveChangesAsync(ct);
         return existing;
     }

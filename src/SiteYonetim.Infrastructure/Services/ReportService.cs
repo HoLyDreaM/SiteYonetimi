@@ -16,13 +16,17 @@ public class ReportService : IReportService
         var start = new DateTime(year, month, 1);
         var end = start.AddMonths(1).AddDays(-1);
 
-        var totalIncome = await _db.Incomes
-            .Where(x => x.SiteId == siteId && x.Year == year && x.Month == month && !x.IsDeleted && x.Status == IncomeStatus.Paid)
+        var incomesInPeriod = await _db.Incomes
+            .Where(x => x.SiteId == siteId && x.Year == year && x.Month == month && !x.IsDeleted)
+            .Select(x => x.Id)
+            .ToListAsync(ct);
+        var totalIncome = await _db.Payments
+            .Where(x => x.IncomeId != null && incomesInPeriod.Contains(x.IncomeId!.Value) && !x.IsDeleted)
             .SumAsync(x => x.Amount, ct);
-
-        var pendingIncome = await _db.Incomes
-            .Where(x => x.SiteId == siteId && x.Year == year && x.Month == month && !x.IsDeleted && x.Status != IncomeStatus.Paid)
+        var totalIncomeAmount = await _db.Incomes
+            .Where(x => x.SiteId == siteId && x.Year == year && x.Month == month && !x.IsDeleted)
             .SumAsync(x => x.Amount, ct);
+        var pendingIncome = totalIncomeAmount - totalIncome;
 
         // 1) ExcludeFromReport=true olan gider türleri (Aidat vb.)
         var excludedByFlag = await _db.ExpenseTypes
@@ -68,6 +72,92 @@ public class ReportService : IReportService
         };
     }
 
+    public async Task<MonthlyReportDetailDto> GetMonthlyReportDetailAsync(Guid siteId, int year, int month, CancellationToken ct = default)
+    {
+        var summary = await GetMonthlyReportAsync(siteId, year, month, ct);
+
+        var start = new DateTime(year, month, 1);
+        var end = start.AddMonths(1).AddDays(-1);
+
+        var incomes = await _db.Incomes
+            .Include(x => x.Apartment)
+            .Where(x => x.SiteId == siteId && x.Year == year && x.Month == month && !x.IsDeleted)
+            .OrderBy(x => x.Apartment.BlockOrBuildingName).ThenBy(x => x.Apartment.ApartmentNumber)
+            .ToListAsync(ct);
+
+        var incomeIds = incomes.Select(x => x.Id).ToList();
+        var paymentsByIncome = await _db.Payments
+            .Where(x => x.IncomeId != null && incomeIds.Contains(x.IncomeId!.Value) && !x.IsDeleted)
+            .GroupBy(x => x.IncomeId!.Value)
+            .ToDictionaryAsync(g => g.Key, g => g.Sum(x => x.Amount), ct);
+
+        var incomeTypeNames = new Dictionary<int, string>
+        {
+            [0] = "Aidat",
+            [1] = "Diğer",
+            [2] = "Özel Toplama"
+        };
+
+        var incomeItems = incomes.Select(i => new MonthlyReportIncomeItemDto
+        {
+            BlockOrBuildingName = i.Apartment.BlockOrBuildingName,
+            ApartmentNumber = i.Apartment.ApartmentNumber,
+            OwnerName = i.Apartment.OwnerName,
+            TypeName = incomeTypeNames.GetValueOrDefault((int)i.Type, "Diğer"),
+            Description = i.Description,
+            Amount = i.Amount,
+            PaidAmount = paymentsByIncome.TryGetValue(i.Id, out var paid) ? paid : 0,
+            DueDate = i.DueDate
+        }).ToList();
+
+        var excludedByFlag = await _db.ExpenseTypes
+            .Where(et => et.SiteId == siteId && !et.IsDeleted && et.ExcludeFromReport)
+            .Select(et => et.Id)
+            .ToListAsync(ct);
+
+        var expensesInPeriod = await _db.Expenses
+            .Include(x => x.ExpenseType)
+            .Where(x => x.SiteId == siteId && !x.IsDeleted)
+            .Where(x => (x.InvoiceDate ?? x.ExpenseDate) >= start && (x.InvoiceDate ?? x.ExpenseDate) <= end)
+            .ToListAsync(ct);
+
+        var typeTotals = expensesInPeriod
+            .GroupBy(x => x.ExpenseTypeId)
+            .Select(g => new { ExpenseTypeId = g.Key, Total = g.Sum(x => x.Amount) })
+            .ToList();
+
+        var excludedByAmount = typeTotals
+            .Where(x => x.ExpenseTypeId != Guid.Empty && Math.Abs(x.Total - summary.PendingIncome) < 0.01m)
+            .Select(x => x.ExpenseTypeId)
+            .ToList();
+
+        var allExcluded = excludedByFlag.Union(excludedByAmount).Distinct().ToList();
+
+        var expenseItems = expensesInPeriod
+            .Where(x => !allExcluded.Contains(x.ExpenseTypeId))
+            .OrderBy(x => x.ExpenseType?.Name).ThenBy(x => x.ExpenseDate)
+            .Select(e => new MonthlyReportExpenseItemDto
+            {
+                ExpenseTypeName = e.ExpenseType?.Name ?? "",
+                Description = e.Description,
+                Amount = e.Amount,
+                ExpenseDate = e.InvoiceDate ?? e.ExpenseDate,
+                InvoiceNumber = e.InvoiceNumber
+            })
+            .ToList();
+
+        return new MonthlyReportDetailDto
+        {
+            Year = year,
+            Month = month,
+            TotalIncome = summary.TotalIncome,
+            PendingIncome = summary.PendingIncome,
+            TotalExpense = summary.TotalExpense,
+            IncomeItems = incomeItems,
+            ExpenseItems = expenseItems
+        };
+    }
+
     public async Task<YearlyReportDto> GetYearlyReportAsync(Guid siteId, int year, CancellationToken ct = default)
     {
         var byMonth = new List<MonthlyReportDto>();
@@ -84,6 +174,24 @@ public class ReportService : IReportService
         };
     }
 
+    public async Task<YearlyReportDetailDto> GetYearlyReportDetailAsync(Guid siteId, int year, CancellationToken ct = default)
+    {
+        var byMonthDetail = new List<MonthlyReportDetailDto>();
+        for (var m = 1; m <= 12; m++)
+            byMonthDetail.Add(await GetMonthlyReportDetailAsync(siteId, year, m, ct));
+
+        return new YearlyReportDetailDto
+        {
+            Year = year,
+            TotalIncome = byMonthDetail.Sum(x => x.TotalIncome),
+            PendingIncome = byMonthDetail.Sum(x => x.PendingIncome),
+            TotalExpense = byMonthDetail.Sum(x => x.TotalExpense),
+            ByMonth = byMonthDetail.Cast<MonthlyReportDto>().ToList(),
+            ByMonthDetail = byMonthDetail
+        };
+    }
+
+    /// <summary>Sadece aidat ve ek para toplama borçlarını getirir. Gider (elektrik vb.) borçları dahil değildir.</summary>
     public async Task<IReadOnlyList<DebtorDto>> GetDebtorsAsync(Guid siteId, CancellationToken ct = default)
     {
         var apartments = await _db.Apartments
@@ -94,23 +202,19 @@ public class ReportService : IReportService
         var result = new List<DebtorDto>();
         foreach (var apt in apartments)
         {
-            var unpaidShares = await _db.ExpenseShares
-                .Where(x => x.ApartmentId == apt.Id && !x.IsDeleted && x.Status != ExpenseShareStatus.Paid && x.Status != ExpenseShareStatus.Cancelled)
-                .ToListAsync(ct);
-            var unpaidShare = unpaidShares.Sum(x => x.Amount + (x.LateFeeAmount ?? 0) - x.PaidAmount);
-
             var unpaidIncomes = await _db.Incomes
-                .Where(x => x.ApartmentId == apt.Id && !x.IsDeleted && x.Status != IncomeStatus.Paid)
+                .Where(x => x.ApartmentId == apt.Id && !x.IsDeleted)
                 .ToListAsync(ct);
-            var unpaidIncome = unpaidIncomes.Sum(x => x.Amount);
+            var unpaidIncome = 0m;
+            foreach (var inc in unpaidIncomes)
+            {
+                var paid = await _db.Payments.Where(p => p.IncomeId == inc.Id && !p.IsDeleted).SumAsync(x => x.Amount, ct);
+                unpaidIncome += Math.Max(0, inc.Amount - paid);
+            }
 
-            if (unpaidShare <= 0 && unpaidIncome <= 0) continue;
+            if (unpaidIncome <= 0) continue;
 
-            var debtDates = new List<DateTime>();
-            foreach (var s in unpaidShares.Where(x => x.DueDate.HasValue))
-                debtDates.Add(s.DueDate!.Value);
-            foreach (var i in unpaidIncomes)
-                debtDates.Add(i.DueDate);
+            var debtDates = unpaidIncomes.Select(i => i.DueDate).ToList();
             var oldestDebt = debtDates.Count > 0 ? debtDates.Min() : (DateTime?)null;
             var today = DateTime.Today;
             var daysOverdue = oldestDebt.HasValue && oldestDebt.Value < today ? (int)(today - oldestDebt.Value).TotalDays : (int?)null;
@@ -122,7 +226,7 @@ public class ReportService : IReportService
                 ApartmentNumber = apt.ApartmentNumber,
                 OwnerName = apt.OwnerName,
                 OwnerPhone = apt.OwnerPhone,
-                UnpaidExpenseShare = unpaidShare,
+                UnpaidExpenseShare = 0,
                 UnpaidIncome = unpaidIncome,
                 OldestDebtDate = oldestDebt,
                 DaysOverdue = daysOverdue

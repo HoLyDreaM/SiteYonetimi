@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SiteYonetim.Domain.Entities;
 using SiteYonetim.Domain.Interfaces;
@@ -7,21 +5,23 @@ using SiteYonetim.Domain.Interfaces;
 namespace SiteYonetim.WebApi.Controllers;
 
 /// <summary>
-/// Destek kaydı formu - Üyelik (giriş) gerekir. URL: /Destek?siteId=xxx veya /DestekKaydi?siteId=xxx
-/// Alanlar: İsim soyisim (otomatik), Blok No, Kat No, Konu başlığı, İstek/Öneri, Açıklama, Resim
+/// Destek kaydı formu - Üyelik gerekmez. URL'de siteId ile herkes destek oluşturabilir.
+/// URL: /Destek?siteId=xxx veya /DestekKaydi?siteId=xxx
+/// Alanlar: İsim soyisim, E-posta, Blok No, Kat No, Konu başlığı, İstek/Öneri, Açıklama, Resim
 /// </summary>
-[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
 public class DestekController : Controller
 {
     private readonly ISiteService _siteService;
     private readonly ISupportTicketService _ticketService;
     private readonly IWebHostEnvironment _env;
+    private readonly IEmailService _emailService;
 
-    public DestekController(ISiteService siteService, ISupportTicketService ticketService, IWebHostEnvironment env)
+    public DestekController(ISiteService siteService, ISupportTicketService ticketService, IWebHostEnvironment env, IEmailService emailService)
     {
         _siteService = siteService;
         _ticketService = ticketService;
         _env = env;
+        _emailService = emailService;
     }
 
     [HttpGet]
@@ -29,8 +29,6 @@ public class DestekController : Controller
     [Route("DestekKaydi")]
     public async Task<IActionResult> Create(Guid? siteId, CancellationToken ct = default)
     {
-        if (!(User.Identity?.IsAuthenticated ?? false))
-            return RedirectToAction("Login", "Account", new { returnUrl = Request.Path + Request.QueryString });
         if (!siteId.HasValue)
         {
             ViewBag.Message = "Bu sayfaya site yönetiminden alacağınız link ile ulaşın. (Örn: .../Destek?siteId=...)";
@@ -42,8 +40,9 @@ public class DestekController : Controller
             ViewBag.Message = "Geçersiz site.";
             return View("NoSite");
         }
-        var name = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "";
-        var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "";
+        var name = (User.Identity?.IsAuthenticated ?? false) ? User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "" : "";
+        var email = (User.Identity?.IsAuthenticated ?? false) ? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "" : "";
+        ViewBag.IsAuthenticated = User.Identity?.IsAuthenticated ?? false;
         ViewBag.SiteId = siteId;
         ViewBag.SiteName = site.Name;
         return View(new DestekInputModel { SiteId = siteId.Value, ContactName = name, ContactEmail = email });
@@ -55,8 +54,6 @@ public class DestekController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(DestekInputModel model, IFormFile? Resim, CancellationToken ct = default)
     {
-        if (!(User.Identity?.IsAuthenticated ?? false))
-            return RedirectToAction("Login", "Account", new { returnUrl = $"/Destek?siteId={model.SiteId}" });
         var site = await _siteService.GetByIdAsync(model.SiteId, ct);
         if (site == null) { ModelState.AddModelError("", "Geçersiz site."); return View(model); }
         ViewBag.SiteId = model.SiteId;
@@ -83,6 +80,7 @@ public class DestekController : Controller
             SiteId = model.SiteId,
             CreatedByUserId = createdByUserId,
             ContactName = model.ContactName,
+            ContactEmail = model.ContactEmail,
             ContactPhone = model.ContactPhone,
             BlockNumber = model.BlockNumber,
             FloorNumber = model.FloorNumber,
@@ -94,6 +92,20 @@ public class DestekController : Controller
             IsDeleted = false
         };
         await _ticketService.CreateAsync(ticket, ct);
+
+        if (!string.IsNullOrWhiteSpace(site.SupportNotificationEmail))
+        {
+            var body = $@"
+<h3>Yeni Destek Kaydı</h3>
+<p><strong>Site:</strong> {site.Name}</p>
+<p><strong>Konu:</strong> {ticket.Subject}</p>
+<p><strong>Gönderen:</strong> {ticket.ContactName} ({ticket.ContactEmail ?? ticket.ContactPhone ?? "-"})</p>
+<p><strong>Mesaj:</strong></p>
+<p>{ticket.Message}</p>
+<p><em>Kayıt no: {ticket.Id}</em></p>";
+            await _emailService.SendWithSiteSmtpAsync(site.SupportNotificationEmail, $"[Destek] {ticket.Subject}", body,
+                site.SupportSmtpHost, site.SupportSmtpPort, site.SupportSmtpUsername, site.SupportSmtpPassword, ct);
+        }
 
         if (Resim != null && Resim.Length > 0)
         {

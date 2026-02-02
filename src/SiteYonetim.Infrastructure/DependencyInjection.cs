@@ -33,6 +33,10 @@ public static class DependencyInjection
         services.AddScoped<IInvoiceExpenseAutoDeductionService, InvoiceExpenseAutoDeductionService>();
         services.AddScoped<ISupportTicketService, SupportTicketService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IQuotationService, QuotationService>();
+        services.AddScoped<IResidentContactService, ResidentContactService>();
+        services.AddScoped<IImportantPhoneService, ImportantPhoneService>();
+        services.AddScoped<IEmailService, EmailService>();
 
         services.AddHostedService<HostedServices.MonthlyDuesHostedService>();
         services.AddHostedService<HostedServices.InvoiceExpenseAutoDeductionHostedService>();

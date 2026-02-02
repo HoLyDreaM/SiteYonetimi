@@ -136,10 +136,16 @@ app.UseAuthorization();
 // API (JWT) - /api/* 
 app.MapControllers();
 
-// Web sitesi (Cookie) - varsayılan route
+// Web sitesi (Cookie) - /App/ olmadan App area erişimi (örn: /Dashboard, /Sites)
+app.MapControllerRoute(
+    name: "app_default",
+    pattern: "{controller=Dashboard}/{action=Index}/{id?}",
+    defaults: new { area = "App" });
+// Eski /App/ URL'leri için geriye dönük uyumluluk
 app.MapControllerRoute(
     name: "areas",
-    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+    pattern: "App/{controller=Dashboard}/{action=Index}/{id?}",
+    defaults: new { area = "App" });
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

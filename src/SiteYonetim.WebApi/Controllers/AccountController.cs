@@ -18,7 +18,7 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
-        ViewData["ReturnUrl"] = returnUrl ?? Url.Content("~/App/Dashboard");
+        ViewData["ReturnUrl"] = returnUrl ?? Url.Content("~/Dashboard");
         return View();
     }
 
@@ -51,7 +51,7 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(string email, string password, string? returnUrl, CancellationToken ct)
     {
-        ViewData["ReturnUrl"] = returnUrl ?? Url.Content("~/App/Dashboard");
+        ViewData["ReturnUrl"] = returnUrl ?? Url.Content("~/Dashboard");
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
             ModelState.AddModelError("", "E-posta ve şifre girin.");
@@ -83,8 +83,8 @@ public class AccountController : Controller
             new AuthenticationProperties { IsPersistent = true, ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8) });
 
         // Resident (sakin) sadece Destek sayfasına erişebilir; App paneline erişemez
-        var redirectTo = returnUrl ?? "/App/Dashboard";
-        if (role == UserRole.Resident && (string.IsNullOrEmpty(returnUrl) || redirectTo.StartsWith("/App", StringComparison.OrdinalIgnoreCase)))
+        var redirectTo = returnUrl ?? "/Dashboard";
+        if (role == UserRole.Resident && (string.IsNullOrEmpty(returnUrl) || redirectTo.StartsWith("/Dashboard", StringComparison.OrdinalIgnoreCase) || redirectTo.StartsWith("/App", StringComparison.OrdinalIgnoreCase)))
             redirectTo = "/Account/AccessDenied";
         return LocalRedirect(redirectTo);
     }

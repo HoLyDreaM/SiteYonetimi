@@ -20,3 +20,4 @@ C:\Users\HoLyDreaM\.cursor\SiteYonetim\src\SiteYonetim.Domain\obj\Debug\net8.0\S
 C:\Users\HoLyDreaM\.cursor\SiteYonetim\src\SiteYonetim.Domain\obj\Debug\net8.0\refint\SiteYonetim.Domain.dll
 C:\Users\HoLyDreaM\.cursor\SiteYonetim\src\SiteYonetim.Domain\obj\Debug\net8.0\SiteYonetim.Domain.pdb
 C:\Users\HoLyDreaM\.cursor\SiteYonetim\src\SiteYonetim.Domain\obj\Debug\net8.0\ref\SiteYonetim.Domain.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.Domain\obj\Debug\net8.0\SiteYonetim.Domain.sourcelink.json

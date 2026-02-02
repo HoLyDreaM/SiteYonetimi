@@ -73,6 +73,19 @@ public class ApartmentsController : Controller
             ViewBag.SiteName = site.Name;
             return View(model);
         }
+        if (model.OccupancyType == ApartmentOccupancyType.TenantOccupied)
+        {
+            if (string.IsNullOrWhiteSpace(model.OwnerName))
+                ModelState.AddModelError("OwnerName", "Kiracı oturuyorsa ev sahibi adı zorunludur.");
+            if (string.IsNullOrWhiteSpace(model.TenantName))
+                ModelState.AddModelError("TenantName", "Kiracı adı zorunludur.");
+            if (!ModelState.IsValid)
+            {
+                ViewBag.SiteId = model.SiteId;
+                ViewBag.SiteName = site.Name;
+                return View(model);
+            }
+        }
         model.IsDeleted = false;
         await _apartmentService.CreateAsync(model, ct);
         return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId });
@@ -92,5 +105,13 @@ public class ApartmentsController : Controller
         if (id != model.Id) return BadRequest();
         await _apartmentService.UpdateAsync(model, ct);
         return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id, [FromQuery] Guid siteId, CancellationToken ct = default)
+    {
+        await _apartmentService.DeleteAsync(id, ct);
+        return RedirectToAction(nameof(Index), new { area = "App", siteId });
     }
 }

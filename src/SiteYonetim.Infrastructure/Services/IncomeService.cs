@@ -83,14 +83,104 @@ public class IncomeService : IIncomeService
         return income;
     }
 
-    public async Task MarkAsPaidAsync(Guid incomeId, Guid paymentId, CancellationToken ct = default)
+    public async Task CreateExtraCollectionAsync(Guid siteId, int year, int month, decimal totalAmount, string description, CancellationToken ct = default)
+    {
+        var apartments = await _db.Apartments.Where(x => x.SiteId == siteId && !x.IsDeleted).ToListAsync(ct);
+        if (apartments.Count == 0) return;
+
+        var totalShareRate = apartments.Sum(x => x.ShareRate);
+        if (totalShareRate <= 0) return;
+
+        var site = await _db.Sites.FirstOrDefaultAsync(x => x.Id == siteId && !x.IsDeleted, ct);
+        if (site == null) return;
+
+        var dueDate = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+        var siteStartDay = site.DefaultPaymentStartDay is >= 1 and <= 28 ? site.DefaultPaymentStartDay : 1;
+        var siteEndDay = site.DefaultPaymentEndDay is >= 1 and <= 28 ? site.DefaultPaymentEndDay : 20;
+        var paymentStart = new DateTime(year, month, Math.Min(siteStartDay, DateTime.DaysInMonth(year, month)));
+        var paymentEnd = new DateTime(year, month, Math.Min(siteEndDay, DateTime.DaysInMonth(year, month)));
+
+        var existingAptIds = await _db.Incomes
+            .Where(x => x.SiteId == siteId && x.Year == year && x.Month == month && x.Type == IncomeType.ExtraCollection && !x.IsDeleted)
+            .Select(x => x.ApartmentId)
+            .ToListAsync(ct);
+
+        foreach (var apt in apartments)
+        {
+            if (existingAptIds.Contains(apt.Id)) continue;
+            var amount = Math.Round(totalAmount * (apt.ShareRate / totalShareRate), 2);
+            if (amount <= 0) continue;
+
+            var startDay = apt.PaymentStartDay is >= 1 and <= 28 ? apt.PaymentStartDay.Value : siteStartDay;
+            var endDay = apt.PaymentEndDay is >= 1 and <= 28 ? apt.PaymentEndDay.Value : siteEndDay;
+            var aptStart = new DateTime(year, month, Math.Min(startDay, DateTime.DaysInMonth(year, month)));
+            var aptEnd = new DateTime(year, month, Math.Min(endDay, DateTime.DaysInMonth(year, month)));
+
+            _db.Incomes.Add(new Income
+            {
+                SiteId = siteId,
+                ApartmentId = apt.Id,
+                Year = year,
+                Month = month,
+                Amount = amount,
+                Type = IncomeType.ExtraCollection,
+                Status = IncomeStatus.Unpaid,
+                DueDate = dueDate,
+                PaymentStartDate = aptStart,
+                PaymentEndDate = aptEnd,
+                Description = description,
+                IsDeleted = false
+            });
+        }
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<decimal> GetPaidAmountAsync(Guid incomeId, CancellationToken ct = default)
+    {
+        return await _db.Payments
+            .Where(x => x.IncomeId == incomeId && !x.IsDeleted)
+            .SumAsync(x => x.Amount, ct);
+    }
+
+    public async Task MarkAsPaidAsync(Guid incomeId, Guid paymentId, decimal paidAmount, CancellationToken ct = default)
     {
         var income = await _db.Incomes.FirstOrDefaultAsync(x => x.Id == incomeId && !x.IsDeleted, ct);
         if (income != null)
         {
+            var totalPaid = await GetPaidAmountAsync(incomeId, ct);
             income.PaymentId = paymentId;
-            income.Status = IncomeStatus.Paid;
+            income.Status = totalPaid >= income.Amount ? IncomeStatus.Paid : (totalPaid > 0 ? IncomeStatus.PartiallyPaid : IncomeStatus.Unpaid);
             await _db.SaveChangesAsync(ct);
         }
+    }
+
+    public async Task<bool> DeleteAsync(Guid incomeId, CancellationToken ct = default)
+    {
+        var paid = await GetPaidAmountAsync(incomeId, ct);
+        if (paid > 0) return false; // Tahsilat yapılmış gelir silinemez
+        var income = await _db.Incomes.FirstOrDefaultAsync(x => x.Id == incomeId && !x.IsDeleted, ct);
+        if (income == null) return false;
+        income.IsDeleted = true;
+        income.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
+        return true;
+    }
+
+    public async Task<int> DeleteBulkAsync(IEnumerable<Guid> incomeIds, CancellationToken ct = default)
+    {
+        var ids = incomeIds.ToList();
+        if (ids.Count == 0) return 0;
+        var incomes = await _db.Incomes.Where(x => ids.Contains(x.Id) && !x.IsDeleted).ToListAsync(ct);
+        var deleted = 0;
+        foreach (var inc in incomes)
+        {
+            var paid = await GetPaidAmountAsync(inc.Id, ct);
+            if (paid > 0) continue;
+            inc.IsDeleted = true;
+            inc.UpdatedAt = DateTime.UtcNow;
+            deleted++;
+        }
+        await _db.SaveChangesAsync(ct);
+        return deleted;
     }
 }

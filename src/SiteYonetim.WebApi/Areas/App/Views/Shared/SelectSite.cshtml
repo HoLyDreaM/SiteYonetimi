@@ -2,6 +2,8 @@
     ViewData["Title"] = ViewBag.PageTitle ?? "Site Seçin";
     var sites = ViewBag.Sites as IReadOnlyList<SiteYonetim.Domain.Entities.Site> ?? new List<SiteYonetim.Domain.Entities.Site>();
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var extraParams = "";
+    if (ViewBag.Year != null && ViewBag.Month != null) { extraParams = $"&year={ViewBag.Year}&month={ViewBag.Month}"; }
 }
 <div class="card border-0 shadow-sm">
     <div class="card-body text-center py-5">
@@ -10,7 +12,7 @@
         <div class="list-group list-group-flush mx-auto" style="max-width: 400px;">
             @foreach (var s in sites)
             {
-                <a href="/App/@currentController?siteId=@s.Id" class="list-group-item list-group-item-action">@s.Name</a>
+                <a href="/@currentController?siteId=@s.Id@Html.Raw(extraParams)" class="list-group-item list-group-item-action">@s.Name</a>
             }
         </div>
         @if (sites.Count == 0)

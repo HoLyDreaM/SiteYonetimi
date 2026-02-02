@@ -1,0 +1,35 @@
+@model SiteYonetim.Domain.Entities.ImportantPhone
+@{
+    ViewData["Title"] = "Önemli Telefon Düzenle";
+    var siteId = ViewBag.SiteId as Guid? ?? Model.SiteId;
+}
+<h1 class="h3 mb-4">Önemli Telefon Düzenle</h1>
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+<form asp-area="App" asp-controller="ImportantPhones" asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="SiteId" />
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Name" class="form-label">İsim / Başlık *</label>
+                    <input asp-for="Name" class="form-control" placeholder="Örn: Acil, Yönetim, Güvenlik" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Phone" class="form-label">Telefon Numarası *</label>
+                    <input asp-for="Phone" type="tel" class="form-control" placeholder="05XX XXX XX XX" />
+                    <span asp-validation-for="Phone" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="ExtraInfo" class="form-label">Ek Bilgi</label>
+                    <textarea asp-for="ExtraInfo" class="form-control" rows="2" placeholder="Açıklama, notlar vb."></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+            <button type="submit" class="btn btn-primary">Güncelle</button>
+            <a asp-action="Index" asp-route-siteId="@siteId" class="btn btn-secondary">İptal</a>
+        </div>
+    </div>
+</form>

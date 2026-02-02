@@ -9,7 +9,7 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         if (User.Identity?.IsAuthenticated == true)
-            return RedirectToAction("Index", "Dashboard", new { area = "App" });
+            return Redirect("/Dashboard");
         return RedirectToAction("Login", "Account");
     }
 }

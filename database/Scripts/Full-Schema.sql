@@ -469,23 +469,79 @@ IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Expens
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'IsApproved')
     ALTER TABLE dbo.Users ADD IsApproved BIT NOT NULL DEFAULT 1;
 
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Sites') AND name = 'SupportNotificationEmail')
+    ALTER TABLE dbo.Sites ADD SupportNotificationEmail NVARCHAR(256) NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Sites') AND name = 'SupportSmtpHost')
+    ALTER TABLE dbo.Sites ADD SupportSmtpHost NVARCHAR(200) NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Sites') AND name = 'SupportSmtpPort')
+    ALTER TABLE dbo.Sites ADD SupportSmtpPort INT NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Sites') AND name = 'SupportSmtpUsername')
+    ALTER TABLE dbo.Sites ADD SupportSmtpUsername NVARCHAR(256) NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Sites') AND name = 'SupportSmtpPassword')
+    ALTER TABLE dbo.Sites ADD SupportSmtpPassword NVARCHAR(500) NULL;
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Apartments') AND name = 'OccupancyType')
+    ALTER TABLE dbo.Apartments ADD OccupancyType INT NOT NULL DEFAULT 0;
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Apartments') AND name = 'TenantName')
+    ALTER TABLE dbo.Apartments ADD TenantName NVARCHAR(200) NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Apartments') AND name = 'TenantPhone')
+    ALTER TABLE dbo.Apartments ADD TenantPhone NVARCHAR(50) NULL;
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.SupportTickets') AND name = 'ContactEmail')
+    ALTER TABLE dbo.SupportTickets ADD ContactEmail NVARCHAR(256) NULL;
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Quotations')
+CREATE TABLE dbo.Quotations (
+    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    SiteId UNIQUEIDENTIFIER NOT NULL,
+    CompanyName NVARCHAR(200) NOT NULL,
+    QuotationDate DATE NOT NULL,
+    FilePath NVARCHAR(500) NULL,
+    MonthlyFee DECIMAL(18,2) NULL,
+    YearlyFee DECIMAL(18,2) NULL,
+    Description NVARCHAR(MAX) NULL,
+    CreatedAt DATETIME2(2) NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2(2) NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_Quotations_Site FOREIGN KEY (SiteId) REFERENCES dbo.Sites(Id)
+);
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ResidentContacts')
+CREATE TABLE dbo.ResidentContacts (
+    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    SiteId UNIQUEIDENTIFIER NOT NULL,
+    ApartmentId UNIQUEIDENTIFIER NULL,
+    Name NVARCHAR(200) NOT NULL,
+    Phone NVARCHAR(50) NOT NULL,
+    ContactType INT NOT NULL DEFAULT 0,
+    Notes NVARCHAR(500) NULL,
+    CreatedAt DATETIME2(2) NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2(2) NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_ResidentContacts_Site FOREIGN KEY (SiteId) REFERENCES dbo.Sites(Id),
+    CONSTRAINT FK_ResidentContacts_Apartment FOREIGN KEY (ApartmentId) REFERENCES dbo.Apartments(Id)
+);
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ImportantPhones')
+CREATE TABLE dbo.ImportantPhones (
+    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    SiteId UNIQUEIDENTIFIER NOT NULL,
+    Name NVARCHAR(200) NOT NULL,
+    Phone NVARCHAR(50) NOT NULL,
+    ExtraInfo NVARCHAR(500) NULL,
+    CreatedAt DATETIME2(2) NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2(2) NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_ImportantPhones_Site FOREIGN KEY (SiteId) REFERENCES dbo.Sites(Id)
+);
+
 -- BankAccounts CurrentBalance/OpeningBalance (zaten tablo tanımında)
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.BankAccounts') AND name = 'CurrentBalance')
     ALTER TABLE dbo.BankAccounts ADD CurrentBalance DECIMAL(18,2) NOT NULL DEFAULT 0;
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.BankAccounts') AND name = 'OpeningBalance')
     ALTER TABLE dbo.BankAccounts ADD OpeningBalance DECIMAL(18,2) NOT NULL DEFAULT 0;
 
--- Meters Type NVARCHAR (eski INT ise dönüştür)
-IF EXISTS (SELECT 1 FROM sys.columns c JOIN sys.types t ON c.user_type_id = t.user_type_id
-    WHERE c.object_id = OBJECT_ID('dbo.Meters') AND c.name = 'Type' AND t.name IN ('int','smallint','bigint'))
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Meters') AND name = 'TypeNew')
-        ALTER TABLE dbo.Meters ADD TypeNew NVARCHAR(50) NULL;
-    UPDATE dbo.Meters SET TypeNew = CASE Type WHEN 0 THEN N'Su' WHEN 1 THEN N'Elektrik' WHEN 2 THEN N'Doğalgaz' WHEN 3 THEN N'Isıtma' ELSE N'Diğer' END;
-    ALTER TABLE dbo.Meters DROP COLUMN Type;
-    EXEC sp_rename 'dbo.Meters.TypeNew', 'Type', 'COLUMN';
-    ALTER TABLE dbo.Meters ALTER COLUMN Type NVARCHAR(50) NOT NULL;
-END
+-- Meters tablosu zaten Type NVARCHAR ile oluşturuluyor (satır 157). Eski INT migration kaldırıldı.
 
 -- ==================== İNDEKSLER ====================
 
@@ -508,9 +564,8 @@ IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Incomes_Site_Year_Mont
 
 -- ==================== VIEW ve PROSEDÜRLER ====================
 
-IF OBJECT_ID('dbo.vw_SiteSummary','V') IS NOT NULL DROP VIEW dbo.vw_SiteSummary;
 GO
-CREATE VIEW dbo.vw_SiteSummary AS
+CREATE OR ALTER VIEW dbo.vw_SiteSummary AS
 SELECT s.Id AS SiteId, s.Name AS SiteName,
     (SELECT COUNT(*) FROM dbo.Apartments a WHERE a.SiteId = s.Id AND a.IsDeleted = 0) AS ApartmentCount,
     (SELECT ISNULL(SUM(es.Amount - es.PaidAmount), 0) FROM dbo.ExpenseShares es

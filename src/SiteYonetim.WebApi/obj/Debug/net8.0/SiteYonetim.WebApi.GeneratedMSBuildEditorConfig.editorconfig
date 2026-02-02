@@ -80,8 +80,24 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXEV4cGVuc2VUeXBlc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/ImportantPhones/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXEltcG9ydGFudFBob25lc1xDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/ImportantPhones/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXEltcG9ydGFudFBob25lc1xFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/ImportantPhones/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXEltcG9ydGFudFBob25lc1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/Incomes/Collect.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXEluY29tZXNcQ29sbGVjdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/Incomes/CreateExtraCollection.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXEluY29tZXNcQ3JlYXRlRXh0cmFDb2xsZWN0aW9uLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/Incomes/Index.cshtml]
@@ -100,6 +116,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFBheW1lbnRzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/Quotations/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFF1b3RhdGlvbnNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/Quotations/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFF1b3RhdGlvbnNcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/Quotations/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFF1b3RhdGlvbnNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/Reports/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFJlcG9ydHNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -112,12 +140,28 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFJlcG9ydHNcWWVhcmx5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/ResidentContacts/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFJlc2lkZW50Q29udGFjdHNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/ResidentContacts/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFJlc2lkZW50Q29udGFjdHNcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/ResidentContacts/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFJlc2lkZW50Q29udGFjdHNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/Shared/SelectSite.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFNoYXJlZFxTZWxlY3RTaXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFNoYXJlZFxfTGF5b3V0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/SiteResidents/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFNpdGVSZXNpZGVudHNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/Sites/Create.cshtml]
@@ -130,6 +174,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/Sites/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFNpdGVzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/SupportSettings/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQXBwXFZpZXdzXFN1cHBvcnRTZXR0aW5nc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/HoLyDreaM/.cursor-tutor/SiteYonetim/src/SiteYonetim.WebApi/Areas/App/Views/SupportTickets/Detail.cshtml]

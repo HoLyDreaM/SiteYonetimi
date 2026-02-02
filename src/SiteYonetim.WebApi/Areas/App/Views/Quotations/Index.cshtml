@@ -1,0 +1,63 @@
+@model IReadOnlyList<SiteYonetim.Domain.Entities.Quotation>
+@{
+    ViewData["Title"] = "Teklifler";
+    var siteId = (Guid)ViewBag.SiteId;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Teklifler</h1>
+    <div>
+        <a asp-area="App" asp-controller="Quotations" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Teklif</a>
+        <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+    </div>
+</div>
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Firma</th>
+                        <th>Teklif Tarihi</th>
+                        <th>Aylık Ücret</th>
+                        <th>Yıllık Ücret</th>
+                        <th>Dosya</th>
+                        <th width="180"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var q in Model)
+                    {
+                        <tr>
+                            <td><strong>@q.CompanyName</strong></td>
+                            <td>@q.QuotationDate.ToString("dd.MM.yyyy")</td>
+                            <td>@(q.MonthlyFee.HasValue ? q.MonthlyFee.Value.ToString("N2") + " ₺" : "-")</td>
+                            <td>@(q.YearlyFee.HasValue ? q.YearlyFee.Value.ToString("N2") + " ₺" : "-")</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(q.FilePath))
+                                {
+                                    <a href="@q.FilePath" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-file-earmark me-1"></i>Görüntüle</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-area="App" asp-controller="Quotations" asp-action="Edit" asp-route-id="@q.Id" asp-route-siteId="@siteId" class="btn btn-sm btn-outline-primary">Düzenle</a>
+                                <form asp-area="App" asp-controller="Quotations" asp-action="Delete" asp-route-id="@q.Id" asp-route-siteId="@siteId" method="post" class="d-inline" onsubmit="return confirm('Bu teklifi silmek istediğinize emin misiniz?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">Henüz teklif eklenmemiş. <a asp-area="App" asp-controller="Quotations" asp-action="Create" asp-route-siteId="@siteId">İlk teklifi ekleyin</a>.</div>
+}

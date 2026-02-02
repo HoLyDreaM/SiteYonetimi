@@ -11,7 +11,7 @@
 @if (totalDebt > 0)
 {
     <div class="alert alert-warning mb-3">
-        <strong>Toplam tahsil edilmemiş borç:</strong> @totalDebt.ToString("N2") ₺
+        <strong>Toplam tahsil edilmemiş aidat/ek toplama borcu:</strong> @totalDebt.ToString("N2") ₺
     </div>
 }
 @if (Model != null && Model.Count > 0)
@@ -27,9 +27,7 @@
                         <th>Telefon</th>
                         <th>Borç Tarihi</th>
                         <th>Gecikme</th>
-                        <th>Gider Borcu</th>
-                        <th>Aidat Borcu</th>
-                        <th>Toplam Borç</th>
+                        <th>Aidat / Ek Toplama Borcu</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -42,9 +40,7 @@
                             <td>@(d.OwnerPhone ?? "-")</td>
                             <td>@(d.OldestDebtDate?.ToString("dd.MM.yyyy") ?? "-")</td>
                             <td>@(d.DaysOverdue.HasValue ? $"{d.DaysOverdue} gün gecikmiş" : "-")</td>
-                            <td>@d.UnpaidExpenseShare.ToString("N2") ₺</td>
-                            <td>@d.UnpaidIncome.ToString("N2") ₺</td>
-                            <td><strong class="text-danger">@d.TotalDebt.ToString("N2") ₺</strong></td>
+                            <td><strong class="text-danger">@d.UnpaidIncome.ToString("N2") ₺</strong></td>
                         </tr>
                     }
                 </tbody>

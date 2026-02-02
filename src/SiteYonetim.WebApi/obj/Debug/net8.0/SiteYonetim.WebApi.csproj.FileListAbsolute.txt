@@ -297,3 +297,14 @@ C:\Users\HoLyDreaM\.cursor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\r
 C:\Users\HoLyDreaM\.cursor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\SiteYonetim.WebApi.pdb
 C:\Users\HoLyDreaM\.cursor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\SiteYonetim.WebApi.genruntimeconfig.cache
 C:\Users\HoLyDreaM\.cursor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\ref\SiteYonetim.WebApi.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\SiteYonetim.WebApi.sourcelink.json
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\MailKit.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\MimeKit.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\ClosedXML.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\ExcelNumberFormat.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\Irony.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\SixLabors.Fonts.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\System.IO.Packaging.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\XLParser.dll

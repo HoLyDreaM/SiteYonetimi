@@ -28,7 +28,9 @@ public class Income : BaseEntity
 public enum IncomeType
 {
     Aidat = 0,
-    Other = 1
+    Other = 1,
+    /// <summary>Özel toplama - Yıllık toplantı kararı, fon vb. tüm dairelere yansıtılan ek para</summary>
+    ExtraCollection = 2
 }
 
 public enum IncomeStatus

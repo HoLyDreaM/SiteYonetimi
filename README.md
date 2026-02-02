@@ -1,4 +1,11 @@
 # Site Yönetim Sistemi
+
+Apartman ve site yöneticilerinin günlük işlemlerini dijital ortamda yönetmelerini sağlayan kapsamlı bir web uygulamasıdır. Site tanımlama, daire yönetimi, gider takibi, aidat tahsilatı, borç takibi, raporlama ve destek talepleri gibi tüm yönetim işlevlerini tek bir platformda sunar.
+
+**Hedef Kullanıcılar:** Site yöneticileri, apartman yönetim şirketleri, kat malikleri dernekleri
+
+---
+
 ## İçindekiler
 
 1. [Genel Bakış](#genel-bakış)
@@ -12,14 +19,13 @@
 9. [Kullanım Kılavuzu](#kullanım-kılavuzu)
 10. [API Referansı](#api-referansı)
 11. [Teknolojiler](#teknolojiler)
+12. [Sorun Giderme](#sorun-giderme)
 
 ---
 
 ## Genel Bakış
 
-Site Yönetim Sistemi, apartman ve site yöneticilerinin günlük işlemlerini dijital ortamda yönetmelerini sağlayan bir web uygulamasıdır. Site tanımlama, daire yönetimi, gider takibi, aidat tahsilatı, borç takibi ve raporlama gibi temel yönetim işlevlerini tek bir platformda sunar.
-
-**Hedef Kullanıcılar:** Site yöneticileri, apartman yönetim şirketleri, kat malikleri dernekleri
+Site Yönetim Sistemi, .NET 8 ve ASP.NET Core MVC ile geliştirilmiş, SQL Server veritabanı kullanan tam özellikli bir yönetim panelidir. JWT Bearer ve Cookie tabanlı kimlik doğrulama destekler. Çoklu site yapısı sayesinde tek bir hesaptan birden fazla site yönetilebilir.
 
 ---
 
@@ -30,39 +36,36 @@ Site Yönetim Sistemi, apartman ve site yöneticilerinin günlük işlemlerini d
 - Vergi bilgileri (vergi dairesi, vergi numarası)
 - Gecikme zammı ayarları (oran, uygulama günü)
 - Çok bloklu site desteği
+- Varsayılan aylık aidat tutarı
+- Aidat ödeme dönemi (başlangıç-bitiş günü, 1–28 arası)
 
 ### Daire Yönetimi
-- Daire ekleme/düzenleme
-- Blok ve kat bilgisi
+- Daire ekleme, düzenleme ve **silme**
+- Blok/bina ve kat bilgisi
 - Pay oranı (aidat dağılımı için)
-- Malik bilgileri (ad, telefon, e-posta)
+- **Kim oturuyor?** seçeneği:
+  - **Ev Sahibi Oturuyor:** Malik adı, telefon
+  - **Kiracı Oturuyor:** Ev sahibi adı, ev sahibi telefonu, kiracı adı, kiracı telefonu (zorunlu)
+- Daire bazlı aylık aidat tutarı (boş bırakılırsa Site varsayılanı × pay oranı kullanılır)
 - Daire bazlı aidat ödeme dönemi (başlangıç-bitiş günü)
+
+### Gelirler (Aidat)
+- Site/daire bazlı aylık aidat tanımlama
+- Her ayın 1'inde otomatik aidat oluşturma (HostedService)
+- **Tahsil edilen** ve **bekleyen** gelirler ayrı kartlarda gösterilir
+- **Kısmi tahsilat** desteği (bir aidatın bir kısmını tahsil edip kalanını sonraya bırakma)
+- Aidat tahsilat kaydı
+- **Tahsilat yapılmamış aidatları tek tek veya toplu silme**
+- Ek para toplama (Özel Toplama) kaydı
 
 ### Gider Yönetimi
 - Gider türleri (Elektrik, Su, Aidat vb.)
-- Gider kaydı oluşturma
-- Giderleri dairelere dağıtma (eşit pay veya pay oranına göre)
-- Gider düzenleme ve silme
-- Fatura numarası ve vade tarihi takibi
+- Gider kaydı oluşturma, düzenleme, silme
+- Fatura numarası, fatura tarihi ve vade tarihi takibi
+- Giderleri rapordan hariç tutma seçeneği (ExcludeFromReport)
 
-### Gider Paylaşımı (Borç)
-- Daire bazlı borç listesi
-- Gecikme zammı uygulama
-- Borç durumu takibi (Bekleyen, Kısmen Ödendi, Ödendi)
-
-### Gelir (Aidat)
-- Site/daire bazlı aylık aidat tanımlama
-- Her ayın 1'inde otomatik aidat oluşturma (HostedService)
-- Aidat tahsilat kaydı
-- Gelir tablosu ve raporlama
-
-### Sayaç Yönetimi
-- Su, elektrik, doğalgaz sayaçları
-- Sayaç okuma girişi
-- Sayaç geçmişi takibi
-
-### Tahsilat ve Ödeme
-- Ödeme kaydı (nakit, havale, kredi kartı)
+### Tahsilatlar ve Ödemeler
+- Ödeme kaydı (nakit, havale, kredi kartı vb.)
 - Makbuz oluşturma
 - Banka hesabına bağlama
 
@@ -73,30 +76,70 @@ Site Yönetim Sistemi, apartman ve site yöneticilerinin günlük işlemlerini d
 - Başlangıç bakiyesi (OpeningBalance) desteği
 
 ### Raporlar
-- Aylık rapor (gelir, gider, bakiye)
-- Yıllık rapor
-- Aidat türlerini rapordan hariç tutma seçeneği
+
+#### Aylık Rapor
+- **Başlık formatı:** `Yıl Ay - Site İsmi` (örn: `2025 Şubat - Site Yönetimi`)
+- Tahsil edilen, bekleyen gelir, toplam gider, bakiye özet kartları
+- **Gelirler kalem kalem** (Blok, Daire, Ev Sahibi, Tür, Tutar, Tahsil Edilen, Kalan, Vade)
+- **Giderler kalem kalem** (Gider Türü, Açıklama, Tarih, Fatura No, Tutar)
+- **Excel İndir:** Tüm detaylar ₺ simgesiyle Excel dosyasına aktarılır
+- **Yazdır:** Sol menü gizlenir, rapor başlığı ve özet kartlar yan yana yazdırılır
+
+#### Yıllık Rapor
+- **Başlık formatı:** `Yıl - Site İsmi` (örn: `2025 - Site Yönetimi`)
+- Yıllık özet kartları (Tahsil Edilen, Bekleyen, Toplam Gider, Bakiye)
+- Aylık özet tablosu (her ay için tahsil, bekleyen, gider, bakiye)
+- **Detayları göster** checkbox’ı: Ekranda her ayın gelir ve giderlerini kalem kalem açıp kapatma
+- **Yazdırma:** Her zaman detaylı (checkbox’tan bağımsız)
+- **Excel İndir:** Her ay için gelir ve gider detayları dahil tam rapor
 
 ### Borçlular
-- Tahsil edilmemiş gider ve aidat borcu olan daireler
-- Borç tutarı özeti
+- **Sadece aidat ve ek para toplama borçları** gösterilir (gider dağıtımı borçları dahil değildir)
+- Borçlu daire listesi, tutar, en eski vade, gecikme günü
+
+### Site Sakinleri
+- Dairelerde oturan kişilerin (ev sahibi veya kiracı) listesi
+- İsim, kat, daire, telefon, tip (Ev Sahibi / Kiracı) bilgileri
+- Sadece görüntüleme amaçlı
 
 ### Destek Talepleri
-- Daire sakininden yöneticiye destek talebi
-- Öneri/şikayet formu
-- Blok, kat, iletişim bilgileri
+- Site sakinlerinden yöneticiye destek talebi
+- **Giriş gerektirmeyen** form: `/Destek?siteId=xxx` veya `/DestekKaydi?siteId=xxx`
+- Blok, daire, iletişim bilgileri, konu, açıklama
 - Dosya eki desteği
+- **Site bazlı SMTP ayarları:** Her site kendi bildirim e-postası ve SMTP ayarlarını tanımlayabilir
+- Destek kaydı oluşturulunca yapılandırılmış e-posta adresine bildirim gönderilir
 
 ### Öneri / Şikayet Formu (Public)
-- Giriş gerektirmeyen URL: `/Feedback/Create?siteId=...` veya `/OneriSikayet?siteId=...`
+- Giriş gerektirmeyen URL: `/Feedback/Create?siteId=xxx` veya `/OneriSikayet?siteId=xxx`
 - Blok No, Daire No, İsim Soyisim, Telefon, Konu, Açıklama alanları
 
+### Panel (Dashboard)
+- Sitelerim özeti
+- **Destek URL’si:** Her site için `https://.../Destek?siteId=xxx` adresi ve **Kopyala** butonu
+- Son siteler listesi, her sitenin Destek URL’si ve kopyalama butonu
+
+### Sayaç Yönetimi
+- Su, elektrik, doğalgaz sayaçları
+- Sayaç okuma girişi
+- Sayaç geçmişi takibi
+
+### Teklifler
+- Site teklif kayıtları (şirket adı, tarih, aylık/yıllık ücret, açıklama)
+
+### Önemli Telefonlar
+- Site bazlı acil ve önemli telefon listesi
+
 ### Kimlik Doğrulama
-- JWT Bearer token
-- Kayıt (Register)
-- Giriş (Login)
+- JWT Bearer token (API)
+- Cookie tabanlı web oturumu (panel)
+- Kayıt (Register), Giriş (Login)
 - Token yenileme (Refresh Token)
-- Cookie tabanlı web oturumu
+- Rol tabanlı yetkilendirme (Admin, Manager, Resident)
+
+### URL Yapısı
+- **Ana panel URL’leri:** `/Dashboard`, `/Sites`, `/Apartments`, `/Incomes` vb. (`/App/` öneki yok)
+- **Geriye dönük uyumluluk:** `/App/Dashboard`, `/App/Sites` vb. eski URL’ler hâlâ çalışır
 
 ### Diğer
 - Anketler (tablolar hazır, geliştirme aşamasında)
@@ -107,9 +150,12 @@ Site Yönetim Sistemi, apartman ve site yöneticilerinin günlük işlemlerini d
 
 ## Gereksinimler
 
-- **.NET 8 SDK** — [İndir](https://dotnet.microsoft.com/download/dotnet/8.0)
-- **MS-SQL Server** — 2019 veya üzeri (LocalDB, Express veya tam sürüm)
-- **SQL Server Management Studio** (opsiyonel, manuel veritabanı kurulumu için)
+| Gereksinim | Sürüm / Not |
+|------------|-------------|
+| .NET SDK | 8.0 — [İndir](https://dotnet.microsoft.com/download/dotnet/8.0) |
+| MS-SQL Server | 2019 veya üzeri (LocalDB, Express veya tam sürüm) |
+| SQL Server Management Studio | Opsiyonel (manuel veritabanı kurulumu için) |
+| PowerShell | Veritabanı otomatik kurulum scripti için |
 
 ---
 
@@ -119,26 +165,32 @@ Site Yönetim Sistemi, apartman ve site yöneticilerinin günlük işlemlerini d
 SiteYonetim/
 ├── src/
 │   ├── SiteYonetim.Domain/           # Entity'ler, interface'ler, domain modelleri
-│   ├── SiteYonetim.Infrastructure/   # EF Core DbContext, servis implementasyonları, veri erişimi
-│   ├── SiteYonetim.WebApi/           # ASP.NET Core Web API, MVC controller'lar, view'lar
-│   │   ├── Areas/App/                 # Web panel (MVC)
+│   │   ├── Entities/                 # Apartment, Site, Income, Expense, vb.
+│   │   └── Interfaces/               # IReportService, IIncomeService, vb.
+│   ├── SiteYonetim.Infrastructure/   # EF Core DbContext, servis implementasyonları
+│   │   ├── Data/                     # SiteYonetimDbContext
+│   │   ├── Services/                 # ReportService, AuthService, vb.
+│   │   └── HostedServices/          # MonthlyDuesHostedService, vb.
+│   ├── SiteYonetim.WebApi/           # ASP.NET Core Web API + MVC
+│   │   ├── Areas/App/                # Web panel (MVC)
 │   │   │   ├── Controllers/
-│   │   │   ├── Views/
-│   │   │   └── Filters/
-│   │   └── Controllers/              # REST API controller'lar
+│   │   │   └── Views/
+│   │   ├── Controllers/              # REST API, Account, Destek, Feedback
+│   │   └── Views/                   # Login, Register, Destek formu
 │   └── SiteYonetim.Tests/            # Birim testleri
 ├── database/
 │   ├── Scripts/
-│   │   └── Full-Schema.sql           # Tek dosyada tüm veritabanı şeması
-│   └── Setup-Database.ps1            # Otomatik veritabanı kurulum scripti
+│   │   └── Full-Schema.sql          # Tek dosyada tüm veritabanı şeması
+│   ├── Full-Schema.sql              # (Scripts ile aynı içerik)
+│   └── Setup-Database.ps1           # Otomatik veritabanı kurulum scripti
 ├── SiteYonetim.sln
 └── README.md
 ```
 
 ### Katmanlar
 - **Domain:** İş kuralları, entity'ler, servis arayüzleri
-- **Infrastructure:** Veritabanı erişimi, harici servis entegrasyonları
-- **WebApi:** HTTP API, MVC sayfaları, kimlik doğrulama
+- **Infrastructure:** Veritabanı erişimi, e-posta, JWT, HostedService'ler
+- **WebApi:** HTTP API, MVC sayfaları, kimlik doğrulama, filtreler
 
 ---
 
@@ -167,7 +219,7 @@ dotnet build
 
 ## Veritabanı Kurulumu
 
-Veritabanı tabloları oluşturulmadan uygulama çalışmaz. "Invalid object name 'UserSites'" gibi hatalar veritabanı kurulumunun yapılmadığını gösterir.
+Veritabanı tabloları oluşturulmadan uygulama çalışmaz. `Invalid object name 'UserSites'` gibi hatalar veritabanı kurulumunun yapılmadığını gösterir.
 
 ### Yöntem 1: Otomatik Kurulum (PowerShell)
 
@@ -201,15 +253,17 @@ sqlcmd -S . -d master -i database/Scripts/Full-Schema.sql
 
 ### Veritabanı Detayları
 
-- **Veritabanı adı:** SiteYonetim
-- **Collation:** Turkish_CI_AS
-- **Script özelliği:** `IF NOT EXISTS` kullanıldığı için mevcut veritabanına tekrar çalıştırılabilir (idempotent)
+| Özellik | Değer |
+|---------|-------|
+| Veritabanı adı | SiteYonetim |
+| Collation | Turkish_CI_AS |
+| Script özelliği | `IF NOT EXISTS` kullanıldığı için mevcut veritabanına tekrar çalıştırılabilir (idempotent) |
 
 ---
 
 ## Uygulama Ayarları
 
-`src/SiteYonetim.WebApi/appsettings.json` dosyasını düzenleyin:
+`src/SiteYonetim.WebApi/appsettings.json` dosyasını düzenleyin.
 
 ### Connection String
 
@@ -246,6 +300,10 @@ sqlcmd -S . -d master -i database/Scripts/Full-Schema.sql
 
 **Önemli:** Üretim ortamında `Secret` değerini mutlaka güçlü ve benzersiz bir anahtarla değiştirin.
 
+### E-posta (Opsiyonel)
+
+Genel e-posta ayarları `appsettings.json` içinde tanımlanabilir. Destek bildirimleri için **her site kendi SMTP ayarlarını** Destek Kayıt Ayarları sayfasından yapılandırır.
+
 ---
 
 ## Çalıştırma
@@ -255,15 +313,18 @@ cd SiteYonetim
 dotnet run --project src/SiteYonetim.WebApi
 ```
 
-Veya Visual Studio / Rider ile F5 ile çalıştırın.
+Veya Visual Studio / Rider ile **F5** ile çalıştırın.
 
 ### Erişim Adresleri
 
 | Adres | Açıklama |
 |-------|----------|
-| `https://localhost:7xxx` | Web paneli (giriş sayfası, dashboard) |
+| `https://localhost:7xxx` | Web paneli (giriş sayfası, ana sayfa) |
+| `https://localhost:7xxx/Dashboard` | Panel ana sayfa (giriş sonrası) |
+| `https://localhost:7xxx/Sites` | Siteler |
+| `https://localhost:7xxx/Destek?siteId=xxx` | Destek kaydı formu (giriş gerekmez) |
+| `https://localhost:7xxx/OneriSikayet?siteId=xxx` | Öneri/Şikayet formu (giriş gerekmez) |
 | `https://localhost:7xxx/swagger` | Swagger UI (API dokümantasyonu) |
-| `https://localhost:7xxx/App/Dashboard` | Panel ana sayfa (giriş sonrası) |
 
 Port numarası (7xxx) `launchSettings.json` veya çalışma ortamına göre değişir.
 
@@ -273,43 +334,65 @@ Port numarası (7xxx) `launchSettings.json` veya çalışma ortamına göre değ
 
 ### İlk Kurulum Adımları
 
-1. **Kayıt:** Swagger'dan `POST /api/auth/register` veya web arayüzünden kayıt olun
+1. **Kayıt:** Web arayüzünden veya Swagger `POST /api/auth/register` ile kayıt olun
 2. **Giriş:** E-posta ve şifre ile giriş yapın
 3. **Site Ekle:** Sol menüden **Siteler** → **Yeni Site** ile ilk sitenizi ekleyin
-4. **Daire Ekle:** **Daireler** menüsünden daireleri tanımlayın
+4. **Daire Ekle:** **Daireler** menüsünden daireleri tanımlayın (Ev Sahibi/Kiracı seçeneğini belirleyin)
 5. **Gider Türü Ekle:** **Gider Türleri** menüsünden (Aidat, Elektrik, Su vb.) ekleyin
 6. **Gider Ekle:** **Giderler** menüsünden gider kaydı oluşturun
-7. **Dağıt:** Gideri dairelere dağıtın (Borçlar oluşur)
-8. **Tahsilat:** **Tahsilatlar** menüsünden ödeme alın
+7. **Destek Ayarları:** **Destek Kayıt Ayarları** ile site bazlı SMTP ve bildirim e-postası tanımlayın
+8. **Tahsilat:** **Gelirler** sayfasından aidat oluşturup **Tahsilatlar** menüsünden ödeme alın
 
 ### Menü Yapısı
 
 | Menü | Açıklama |
 |------|----------|
-| Panel | Dashboard, site özeti |
-| Siteler | Site listesi, yeni site ekleme |
-| Daireler | Daire listesi, ekleme/düzenleme |
-| Gelirler (Aidat) | Aylık aidat listesi, tahsilat |
+| Panel | Dashboard, siteler özeti, Destek URL’leri |
+| Siteler | Site listesi, yeni site ekleme, düzenleme |
+| Daireler | Daire listesi, ekleme, düzenleme, silme |
+| Gelirler | Aylık aidat listesi, tahsilat, kısmi tahsilat, aidat silme |
 | Gider Türleri | Gider türü tanımları |
-| Giderler | Gider kayıtları, düzenleme, silme, dağıtım |
-| Borçlar | Daire borçları, gecikme zammı |
+| Giderler | Gider kayıtları, düzenleme, silme |
 | Tahsilatlar | Ödeme kayıtları |
 | Banka Hesapları | Banka hesapları, bakiye |
+| Borçlular | Aidat/ek toplama borçlu daire listesi |
+| Teklifler | Site teklif kayıtları |
+| Site Sakinleri | Dairelerde oturan kişiler (ev sahibi/kiracı) listesi |
+| Önemli Telefonlar | Acil ve önemli telefon listesi |
+| Destek Kayıtları | Destek talepleri listesi |
+| Destek Kayıt Ayarları | Site bazlı SMTP ve bildirim e-postası |
 | Sayaçlar | Sayaç tanımları, okuma girişi |
-| Raporlar | Aylık/yıllık raporlar |
-| Borçlular | Borçlu daire listesi |
-| Destek Kayıtları | Destek talepleri |
-| Üye Yönetimi | Kullanıcı yönetimi |
+| Raporlar | Aylık ve yıllık raporlar (Excel, yazdırma) |
+
+### Destek URL’si Kullanımı
+
+1. **Panel** sayfasında **Sitelerim** veya **Son Siteler** bölümünde her site için Destek URL’si görünür
+2. `https://siteniz.com/Destek?siteId=xxx` formatındaki linki site sakinlerine paylaşın
+3. **Kopyala** butonu ile URL’yi panoya kopyalayın
+4. Site sakinleri bu linke tıklayarak giriş yapmadan destek talebi oluşturabilir
+
+### Raporlar Kullanımı
+
+**Aylık Rapor:**
+- Yıl ve ay seçip **Görüntüle** ile raporu açın
+- **Excel İndir** ile `.xlsx` dosyası indirin
+- **Yazdır** ile tarayıcı yazdırma penceresini açın (sol menü gizlenir)
+
+**Yıllık Rapor:**
+- Yıl seçip **Görüntüle** ile raporu açın
+- **Detayları göster** checkbox’ı ile ekranda aylık detayları açıp kapatın
+- **Excel İndir** her zaman detaylı çıktı verir
+- **Yazdır** her zaman detaylı çıktı verir
 
 ### Çoklu Site
 
-Kullanıcılar birden fazla siteye atanabilir. Menüden site seçimi yapılarak ilgili siteye geçilir. Tek site varsa otomatik olarak o site seçilir.
+Kullanıcılar birden fazla siteye atanabilir. Menüden site seçimi yapılarak ilgili siteye geçilir. Tek site varsa otomatik olarak o site seçilir. URL’lerde `?siteId=xxx` parametresi kullanılır.
 
 ---
 
 ## API Referansı
 
-Tüm API'ler (auth hariç) `Authorization: Bearer {token}` header'ı gerektirir.
+Tüm API’ler (auth hariç) `Authorization: Bearer {token}` header’ı gerektirir.
 
 ### Kimlik Doğrulama
 
@@ -348,14 +431,6 @@ Tüm API'ler (auth hariç) `Authorization: Bearer {token}` header'ı gerektirir.
 | POST | /api/expenses | Yeni gider |
 | PUT | /api/expenses/{id} | Gider güncelle |
 | DELETE | /api/expenses/{id} | Gider sil |
-| POST | /api/expenses/{id}/distribute | Gideri dairelere dağıt |
-
-### Borçlar (ExpenseShares)
-
-| Metod | Endpoint | Açıklama |
-|-------|----------|----------|
-| GET | /api/expenseshares/site/{siteId} | Site borç listesi |
-| POST | /api/expenseshares/site/{siteId}/apply-late-fees | Gecikme zammı uygula |
 
 ### Tahsilatlar
 
@@ -382,10 +457,15 @@ Tüm API'ler (auth hariç) `Authorization: Bearer {token}` header'ı gerektirir.
 | Entity Framework Core | 8.0 | ORM, SQL Server |
 | MS-SQL Server | 2019+ | Veritabanı |
 | JWT Bearer | - | API kimlik doğrulama |
-| BCrypt | - | Şifre hash |
+| System.IdentityModel.Tokens.Jwt | 8.15.0 | JWT işlemleri (güvenlik güncellemesi) |
+| Microsoft.IdentityModel.Tokens | 8.15.0 | Token doğrulama |
+| BCrypt.Net-Next | 4.0.3 | Şifre hash |
+| MailKit | 4.3.0 | E-posta gönderimi |
+| ClosedXML | - | Excel export |
 | Swagger/OpenAPI | 3.0 | API dokümantasyonu |
 | Bootstrap | 5.3 | Web arayüzü |
 | Bootstrap Icons | 1.11 | İkonlar |
+| jQuery | 3.7 | Form işlemleri |
 
 ---
 
@@ -396,11 +476,14 @@ Veritabanı kurulumu yapılmamıştır. [Veritabanı Kurulumu](#veritabanı-kuru
 
 ### Bağlantı hatası
 - SQL Server servisinin çalıştığından emin olun
-- Connection string'deki Server, Database, User, Password değerlerini kontrol edin
+- Connection string’deki Server, Database, User, Password değerlerini kontrol edin
 - Firewall ayarlarını kontrol edin (uzak sunucu için)
 
 ### Port çakışması
 `Properties/launchSettings.json` içinde farklı bir port tanımlayın.
+
+### NU1902 güvenlik uyarısı (JWT paketleri)
+`System.IdentityModel.Tokens.Jwt` ve `Microsoft.IdentityModel.Tokens` paketleri 8.15.0 veya üzeri sürüme güncellenmiştir. Eski sürümlerde bilinen güvenlik açıkları bulunmaktadır.
 
 ---
 

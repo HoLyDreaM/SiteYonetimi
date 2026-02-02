@@ -1,0 +1,42 @@
+@model SiteYonetim.WebApi.Areas.App.Controllers.CreateExtraCollectionModel
+@{
+    ViewData["Title"] = "Ek Para Toplama";
+    var siteId = ViewBag.SiteId as Guid? ?? Model.SiteId;
+    var year = ViewBag.Year as int? ?? Model.Year;
+    var month = ViewBag.Month as int? ?? Model.Month;
+    var siteName = ViewBag.SiteName as string ?? "";
+    var aptCount = ViewBag.ApartmentCount as int? ?? 0;
+    var monthNames = new[] { "", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
+}
+<h1 class="h3 mb-4">Ek Para Toplama - @siteName</h1>
+<p class="text-muted">Yıllık toplantı kararı, fon oluşturma vb. için tüm dairelere pay oranına göre dağıtılacak ek gelir.</p>
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+<form asp-area="App" asp-controller="Incomes" asp-action="CreateExtraCollection" method="post">
+    <input type="hidden" asp-for="SiteId" />
+    <input type="hidden" asp-for="Year" />
+    <input type="hidden" asp-for="Month" />
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12">
+                    <p class="mb-0"><strong>Dönem:</strong> @year @monthNames[month] · <strong>Daire sayısı:</strong> @aptCount</p>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="TotalAmount" class="form-label">Toplam Toplanacak Tutar (₺) *</label>
+                    <input asp-for="TotalAmount" type="number" step="0.01" class="form-control" placeholder="Örn: 10000" />
+                    <span asp-validation-for="TotalAmount" class="text-danger small"></span>
+                    <span class="form-text">Tutar dairelere pay oranına göre dağıtılacak.</span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label">Açıklama *</label>
+                    <input asp-for="Description" class="form-control" placeholder="Örn: 2024 Yıllık Toplantı - Acil Fon" />
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+            <button type="submit" class="btn btn-primary">Oluştur</button>
+            <a asp-action="Index" asp-route-siteId="@siteId" asp-route-year="@year" asp-route-month="@month" class="btn btn-secondary">İptal</a>
+        </div>
+    </div>
+</form>

@@ -1,12 +1,1 @@
-{
-  "Version": 1,
-  "Hash": "q1yjia9nWCL6LI9t7nrvznczwKm36rjXArtdGRQM6FE=",
-  "Source": "SiteYonetim.WebApi",
-  "BasePath": "_content/SiteYonetim.WebApi",
-  "Mode": "Default",
-  "ManifestType": "Build",
-  "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
-}
+{"Version":1,"Hash":"q1yjia9nWCL6LI9t7nrvznczwKm36rjXArtdGRQM6FE=","Source":"SiteYonetim.WebApi","BasePath":"_content/SiteYonetim.WebApi","Mode":"Default","ManifestType":"Build","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[],"Assets":[],"Endpoints":[]}

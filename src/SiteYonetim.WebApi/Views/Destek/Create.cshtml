@@ -17,12 +17,6 @@
 </head>
 <body class="bg-light">
     <div class="container py-5">
-        <div class="d-flex justify-content-end mb-2">
-            <form asp-action="Logout" asp-controller="Account" method="post" class="d-inline">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-box-arrow-right me-1"></i>Çıkış</button>
-            </form>
-        </div>
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="card shadow border-0">
@@ -41,8 +35,15 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label">İsim Soyisim *</label>
-                                        <input name="ContactName" class="form-control" value="@Model.ContactName" required readonly />
-                                        <span class="form-text">Üyelik bilginizden alınır</span>
+                                        <input name="ContactName" class="form-control" value="@Model.ContactName" required placeholder="Adınız Soyadınız" />
+                                        @if (ViewBag.IsAuthenticated == true)
+                                        {
+                                            <span class="form-text">Üyelik bilginizden alınır</span>
+                                        }
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">E-posta @(ViewBag.IsAuthenticated != true ? "*" : "")</label>
+                                        <input name="ContactEmail" type="email" class="form-control" value="@Model.ContactEmail" placeholder="iletisim@ornek.com" @(ViewBag.IsAuthenticated != true ? "required" : "") />
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Telefon</label>

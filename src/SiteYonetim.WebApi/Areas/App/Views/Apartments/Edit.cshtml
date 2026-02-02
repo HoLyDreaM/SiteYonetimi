@@ -41,17 +41,30 @@
                     <input asp-for="PaymentEndDay" type="number" min="1" max="28" class="form-control" placeholder="Örn: 20" />
                     <span class="form-text">Örn: 20 = ayın 20'si. Aralık: 01.02-20.02 gibi.</span>
                 </div>
+                <div class="col-12">
+                    <label asp-for="OccupancyType" class="form-label">Kim Oturuyor?</label>
+                    <select asp-for="OccupancyType" class="form-select" id="occupancyType">
+                        <option value="0">Ev sahibi (malik) oturuyor</option>
+                        <option value="1">Kiracı oturuyor</option>
+                    </select>
+                </div>
+                <div class="col-12"><hr class="my-2" /><h6>Ev Sahibi (Malik) Bilgileri</h6></div>
                 <div class="col-md-6">
-                    <label asp-for="OwnerName" class="form-label">Malik Adı</label>
+                    <label asp-for="OwnerName" class="form-label">Ev Sahibi Adı</label>
                     <input asp-for="OwnerName" class="form-control" />
                 </div>
                 <div class="col-md-6">
-                    <label asp-for="OwnerPhone" class="form-label">Telefon</label>
+                    <label asp-for="OwnerPhone" class="form-label">Ev Sahibi Telefon</label>
                     <input asp-for="OwnerPhone" class="form-control" />
                 </div>
-                <div class="col-12">
-                    <label asp-for="OwnerEmail" class="form-label">E-posta</label>
-                    <input asp-for="OwnerEmail" type="email" class="form-control" />
+                <div class="col-12 kiracı-alanlar"><hr class="my-2" /><h6>Kiracı Bilgileri</h6></div>
+                <div class="col-md-6 kiracı-alanlar">
+                    <label asp-for="TenantName" class="form-label">Kiracı Adı</label>
+                    <input asp-for="TenantName" class="form-control" />
+                </div>
+                <div class="col-md-6 kiracı-alanlar">
+                    <label asp-for="TenantPhone" class="form-label">Kiracı Telefon</label>
+                    <input asp-for="TenantPhone" class="form-control" />
                 </div>
             </div>
         </div>
@@ -61,3 +74,12 @@
         </div>
     </div>
 </form>
+@section Scripts {
+<script>
+document.getElementById('occupancyType').addEventListener('change', function() {
+    var kiracı = this.value === '1';
+    document.querySelectorAll('.kiracı-alanlar').forEach(function(el) { el.style.display = kiracı ? 'block' : 'none'; });
+});
+document.getElementById('occupancyType').dispatchEvent(new Event('change'));
+</script>
+}

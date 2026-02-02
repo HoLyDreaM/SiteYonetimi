@@ -12,6 +12,7 @@ public class SupportTicket : BaseEntity
     public Guid? CreatedByUserId { get; set; }
     /// <summary>İletişim adı (Blok/Daire seçilmeden formdan gelen)</summary>
     public string? ContactName { get; set; }
+    public string? ContactEmail { get; set; }
     public string? ContactPhone { get; set; }
     /// <summary>Blok numarası (formdan)</summary>
     public string? BlockNumber { get; set; }

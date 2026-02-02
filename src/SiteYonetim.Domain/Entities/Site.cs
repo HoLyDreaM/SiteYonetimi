@@ -20,6 +20,16 @@ public class Site : BaseEntity
     public int DefaultPaymentStartDay { get; set; } = 1;
     /// <summary>Aidat ödeme dönemi bitiş günü (1-28, örn: 20 = ayın 20'si)</summary>
     public int DefaultPaymentEndDay { get; set; } = 20;
+    /// <summary>Destek kaydı oluşturulunca bildirim gönderilecek e-posta adresi</summary>
+    public string? SupportNotificationEmail { get; set; }
+    /// <summary>Destek bildirimi için SMTP sunucusu (örn: smtp.gmail.com)</summary>
+    public string? SupportSmtpHost { get; set; }
+    /// <summary>SMTP port (örn: 587)</summary>
+    public int? SupportSmtpPort { get; set; }
+    /// <summary>SMTP kullanıcı adı / e-posta</summary>
+    public string? SupportSmtpUsername { get; set; }
+    /// <summary>SMTP şifre (şifrelenmiş saklanmalı - basit metin)</summary>
+    public string? SupportSmtpPassword { get; set; }
 
     public ICollection<Building> Buildings { get; set; } = new List<Building>();
     public ICollection<Apartment> Apartments { get; set; } = new List<Apartment>();
