@@ -1,0 +1,58 @@
+@model IReadOnlyList<SiteYonetim.Domain.Entities.ExpenseShare>
+@{
+    ViewData["Title"] = "Borçlar";
+    var siteId = (Guid)ViewBag.SiteId;
+    var status = ViewBag.Status as int?;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Borçlar</h1>
+    <div>
+        <a asp-action="Index" asp-route-siteId="@siteId" class="btn btn-outline-secondary @(status == null ? "active" : "")">Tümü</a>
+        <a asp-action="Index" asp-route-siteId="@siteId" asp-route-status="0" class="btn btn-outline-warning @(status == 0 ? "active" : "")">Bekleyen</a>
+        <form asp-action="ApplyLateFees" method="post" class="d-inline">
+            <input type="hidden" name="siteId" value="@siteId" />
+            <button type="submit" class="btn btn-warning">Gecikme Zammı Uygula</button>
+        </form>
+        <a asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+    </div>
+</div>
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Daire</th>
+                        <th>Gider Türü</th>
+                        <th>Vade</th>
+                        <th>Tutar</th>
+                        <th>Zam</th>
+                        <th>Ödenen</th>
+                        <th>Kalan</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td><strong>@(s.Apartment?.BlockOrBuildingName) @(s.Apartment?.ApartmentNumber)</strong></td>
+                            <td>@(s.Expense?.ExpenseType?.Name ?? "-")</td>
+                            <td>@(s.DueDate?.ToString("dd.MM.yyyy") ?? "-")</td>
+                            <td>@s.Amount.ToString("N2") ₺</td>
+                            <td>@(s.LateFeeAmount?.ToString("N2") ?? "-") ₺</td>
+                            <td>@s.PaidAmount.ToString("N2") ₺</td>
+                            <td><strong>@s.Balance.ToString("N2") ₺</strong></td>
+                            <td>@s.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">Bu site için borç kaydı yok veya seçilen filtreye uygun kayıt bulunamadı.</div>
+}

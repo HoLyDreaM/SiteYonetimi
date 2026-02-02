@@ -1,0 +1,45 @@
+@model SiteYonetim.Domain.Entities.SupportTicket
+@{
+    ViewData["Title"] = "Destek Kaydı Detay";
+    var topicNames = new Dictionary<SiteYonetim.Domain.Entities.TicketTopicType, string> {
+        { SiteYonetim.Domain.Entities.TicketTopicType.Suggestion, "Öneri" },
+        { SiteYonetim.Domain.Entities.TicketTopicType.Complaint, "Şikayet" },
+        { SiteYonetim.Domain.Entities.TicketTopicType.Request, "İstek" }
+    };
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Destek Kaydı</h1>
+    <a asp-area="App" asp-controller="SupportTickets" asp-action="Index" asp-route-siteId="@Model.SiteId" class="btn btn-outline-secondary">Geri</a>
+</div>
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Tarih</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+            <dt class="col-sm-3">İsim Soyisim</dt>
+            <dd class="col-sm-9">@(Model.ContactName ?? "-")</dd>
+            <dt class="col-sm-3">Telefon</dt>
+            <dd class="col-sm-9">@(Model.ContactPhone ?? "-")</dd>
+            <dt class="col-sm-3">Blok Numarası</dt>
+            <dd class="col-sm-9">@(Model.BlockNumber ?? Model.Apartment?.BlockOrBuildingName ?? "-")</dd>
+            <dt class="col-sm-3">Kat Numarası</dt>
+            <dd class="col-sm-9">@(Model.FloorNumber?.ToString() ?? Model.Apartment?.Floor?.ToString() ?? "-")</dd>
+            <dt class="col-sm-3">Konu Başlığı</dt>
+            <dd class="col-sm-9">@Model.Subject</dd>
+            <dt class="col-sm-3">Tür</dt>
+            <dd class="col-sm-9">@(topicNames.GetValueOrDefault(Model.TopicType, Model.TopicType.ToString()))</dd>
+            <dt class="col-sm-3">Açıklama</dt>
+            <dd class="col-sm-9">@Model.Message</dd>
+            @if (Model.Attachments?.Any() == true)
+            {
+                <dt class="col-sm-3">Resim</dt>
+                <dd class="col-sm-9">
+                    @foreach (var a in Model.Attachments)
+                    {
+                        <a href="@a.FilePath" target="_blank" class="me-2"><img src="@a.FilePath" alt="@a.FileName" style="max-height:150px;" class="img-thumbnail" /></a>
+                    }
+                </dd>
+            }
+        </dl>
+    </div>
+</div>

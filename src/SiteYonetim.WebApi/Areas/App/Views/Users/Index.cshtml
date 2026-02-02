@@ -1,0 +1,77 @@
+@model IReadOnlyList<SiteYonetim.Domain.Entities.User>
+@{
+    ViewData["Title"] = "Üye Yönetimi";
+    var pendingOnly = ViewBag.PendingOnly as bool? ?? false;
+    var roleNames = new Dictionary<SiteYonetim.Domain.Entities.UserRole, string> {
+        { SiteYonetim.Domain.Entities.UserRole.SuperAdmin, "Süper Admin" },
+        { SiteYonetim.Domain.Entities.UserRole.SiteManager, "Site Yöneticisi" },
+        { SiteYonetim.Domain.Entities.UserRole.Accountant, "Muhasebeci" },
+        { SiteYonetim.Domain.Entities.UserRole.Resident, "Sakin" }
+    };
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Üye Yönetimi</h1>
+    <div>
+        @if (pendingOnly)
+        {
+            <a asp-area="App" asp-controller="Users" asp-action="Index" class="btn btn-outline-secondary">Tüm Üyeler</a>
+        }
+        else
+        {
+            <a asp-area="App" asp-controller="Users" asp-action="Index" asp-route-pendingOnly="true" class="btn btn-warning">Onay Bekleyenler (@Model.Count(u => !u.IsApproved))</a>
+        }
+    </div>
+</div>
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>E-posta</th>
+                        <th>Rol</th>
+                        <th>Onay</th>
+                        <th>Kayıt Tarihi</th>
+                        <th width="120"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model)
+                    {
+                        <tr>
+                            <td><strong>@u.FullName</strong></td>
+                            <td>@u.Email</td>
+                            <td>@(roleNames.GetValueOrDefault(u.Role, u.Role.ToString()))</td>
+                            <td>
+                                @if (u.IsApproved)
+                                { <span class="badge bg-success">Onaylı</span> }
+                                else
+                                { <span class="badge bg-warning text-dark">Bekliyor</span> }
+                            </td>
+                            <td><small>@u.CreatedAt.ToString("dd.MM.yyyy")</small></td>
+                            <td>
+                                @if (!u.IsApproved)
+                                {
+                                    <form asp-action="Approve" method="post" class="d-inline" asp-route-id="@u.Id">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-success">Onayla</button>
+                                    </form>
+                                }
+                                <form asp-action="Delete" method="post" class="d-inline" asp-route-id="@u.Id" onsubmit="return confirm('Bu üyeyi silmek istediğinize emin misiniz?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">@(pendingOnly ? "Onay bekleyen üye yok." : "Henüz üye kaydı yok.")</div>
+}

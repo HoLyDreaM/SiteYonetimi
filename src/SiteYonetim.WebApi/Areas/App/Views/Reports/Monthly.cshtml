@@ -1,0 +1,46 @@
+@model SiteYonetim.Domain.Interfaces.MonthlyReportDto
+@{
+    ViewData["Title"] = "Aylık Rapor";
+    var siteId = (Guid)ViewBag.SiteId;
+    var siteName = ViewBag.SiteName as string ?? "";
+    var year = (int)ViewBag.Year;
+    var monthName = ViewBag.MonthName as string ?? "";
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Aylık Rapor - @siteName (@year - @monthName)</h1>
+    <a asp-area="App" asp-controller="Reports" asp-action="Index" asp-route-siteId="@siteId" class="btn btn-outline-secondary">Geri</a>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-1">Tahsil Edilen</h6>
+                <h4 class="card-title mb-0">@Model.TotalIncome.ToString("N2") ₺</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-secondary text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-1">Bekleyen (Aidat)</h6>
+                <h4 class="card-title mb-0">@Model.PendingIncome.ToString("N2") ₺</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-danger text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-1">Toplam Gider</h6>
+                <h4 class="card-title mb-0">@Model.TotalExpense.ToString("N2") ₺</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 @(Model.Balance >= 0 ? "bg-primary" : "bg-warning") text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-1">Bakiye ((Tahsil+Bekleyen)-Gider)</h6>
+                <h4 class="card-title mb-0">@Model.Balance.ToString("N2") ₺</h4>
+            </div>
+        </div>
+    </div>
+</div>

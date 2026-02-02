@@ -1,0 +1,47 @@
+@model SiteYonetim.WebApi.Areas.App.Controllers.CollectIncomeModel
+@{
+    ViewData["Title"] = "Aidat Tahsil Et";
+    var income = ViewBag.Income as SiteYonetim.Domain.Entities.Income;
+    var banks = ViewBag.BankAccounts as IReadOnlyList<SiteYonetim.Domain.Entities.BankAccount> ?? new List<SiteYonetim.Domain.Entities.BankAccount>();
+}
+@if (income != null)
+{
+    <h1 class="h3 mb-4">Aidat Tahsil Et - @(income.Apartment?.BlockOrBuildingName) @(income.Apartment?.ApartmentNumber)</h1>
+    <div class="alert alert-info mb-3">
+        <strong>@(income.Apartment?.OwnerName)</strong> - @income.Amount.ToString("N2") ₺ (@income.Year/@income.Month.ToString("D2"))
+        <br /><small>Ödeme dönemi: @income.PaymentStartDate.ToString("dd.MM.yyyy") - @income.PaymentEndDate.ToString("dd.MM.yyyy")</small>
+    </div>
+    <form asp-area="App" asp-controller="Incomes" asp-action="Collect" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="IncomeId" value="@Model.IncomeId" />
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tutar (₺) *</label>
+                        <input name="Amount" type="number" step="0.01" class="form-control" value="@Model.Amount" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Ödeme Tarihi *</label>
+                        <input name="PaymentDate" type="date" class="form-control" value="@Model.PaymentDate.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Banka Hesabı (opsiyonel)</label>
+                        <select name="BankAccountId" class="form-select">
+                            <option value="">-- Seçin --</option>
+                            @foreach (var b in banks)
+                            {
+                                <option value="@b.Id">@b.BankName - @b.AccountNumber</option>
+                            }
+                        </select>
+                        <span class="form-text">Seçilirse tahsilat banka bakiyesine eklenir.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <button type="submit" class="btn btn-success"><i class="bi bi-cash-coin me-1"></i>Tahsil Et</button>
+                <a asp-area="App" asp-controller="Incomes" asp-action="Index" asp-route-siteId="@income.SiteId" asp-route-year="@income.Year" asp-route-month="@income.Month" class="btn btn-secondary">İptal</a>
+            </div>
+        </div>
+    </form>
+}

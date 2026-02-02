@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = ViewBag.PageTitle ?? "Site Seçin";
+    var sites = ViewBag.Sites as IReadOnlyList<SiteYonetim.Domain.Entities.Site> ?? new List<SiteYonetim.Domain.Entities.Site>();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-body text-center py-5">
+        <h5 class="card-title">Site Seçin</h5>
+        <p class="text-muted">Devam etmek için aşağıdan bir site seçin.</p>
+        <div class="list-group list-group-flush mx-auto" style="max-width: 400px;">
+            @foreach (var s in sites)
+            {
+                <a href="/App/@currentController?siteId=@s.Id" class="list-group-item list-group-item-action">@s.Name</a>
+            }
+        </div>
+        @if (sites.Count == 0)
+        {
+            <p class="text-muted mt-3">Henüz site eklenmemiş. <a asp-area="App" asp-controller="Sites" asp-action="Create">İlk sitenizi ekleyin</a>.</p>
+        }
+    </div>
+</div>

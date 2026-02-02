@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Giriş Yap";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Site Yönetim</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+</head>
+<body class="bg-light d-flex align-items-center min-vh-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <i class="bi bi-building text-primary" style="font-size: 3rem;"></i>
+                            <h4 class="mt-2">Site Yönetim</h4>
+                            <p class="text-muted">@(ViewData["ReturnUrl"]?.ToString()?.Contains("Destek") == true ? "Destek kaydı oluşturmak için giriş yapın." : "Hesabınıza giriş yapın")</p>
+                        </div>
+                        <form method="post" asp-action="Login" asp-controller="Account">
+                            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                            <div asp-validation-summary="All" class="text-danger small mb-2"></div>
+                            <div class="mb-3">
+                                <label class="form-label">E-posta</label>
+                                <input type="email" name="email" class="form-control form-control-lg" placeholder="ornek@email.com" required autofocus />
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Şifre</label>
+                                <input type="password" name="password" class="form-control form-control-lg" required />
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Giriş Yap</button>
+                        </form>
+                        <p class="text-center text-muted small mt-4 mb-0">Hesabınız yok mu? <a asp-action="Register">Kayıt olun</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

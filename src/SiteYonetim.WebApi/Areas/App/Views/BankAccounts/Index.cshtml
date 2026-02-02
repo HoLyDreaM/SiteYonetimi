@@ -1,0 +1,56 @@
+@model List<(SiteYonetim.Domain.Entities.BankAccount Account, decimal Balance)>
+@{
+    ViewData["Title"] = "Banka Hesapları";
+    var siteId = (Guid)ViewBag.SiteId;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Banka Hesapları</h1>
+    <div>
+        <a asp-area="App" asp-controller="BankAccounts" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Hesap</a>
+        <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+    </div>
+</div>
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Banka</th>
+                        <th>Şube</th>
+                        <th>Hesap No</th>
+                        <th>IBAN</th>
+                        <th>Güncel Bakiye</th>
+                        <th width="180"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var b = item.Account;
+                        var bal = item.Balance;
+                        <tr>
+                            <td><strong>@b.BankName</strong></td>
+                            <td>@b.BranchName</td>
+                            <td>@b.AccountNumber</td>
+                            <td class="small">@b.IBAN</td>
+                            <td><strong class="@(bal >= 0 ? "text-success" : "text-danger")">@bal.ToString("N2") ₺</strong></td>
+                            <td>
+                                <a asp-area="App" asp-controller="BankAccounts" asp-action="Edit" asp-route-id="@b.Id" asp-route-siteId="@siteId" class="btn btn-sm btn-outline-primary">Düzenle</a>
+                                <form asp-area="App" asp-controller="BankAccounts" asp-action="Delete" method="post" class="d-inline" asp-route-id="@b.Id" asp-route-siteId="@siteId" onsubmit="return confirm('Bu banka hesabını silmek istediğinize emin misiniz?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">Henüz banka hesabı eklenmemiş. <a asp-area="App" asp-controller="BankAccounts" asp-action="Create" asp-route-siteId="@siteId">Yeni hesap ekleyin</a> ve güncel bakiyeyi girin. Tahsilatlar ve giderler bu bakiyeyi güncelleyecektir.</div>
+}

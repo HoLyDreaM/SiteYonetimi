@@ -1,0 +1,56 @@
+@model SiteYonetim.Domain.Entities.Site
+@{
+    ViewData["Title"] = "Yeni Site";
+}
+<h1 class="h3 mb-4">Yeni Site Ekle</h1>
+<form asp-area="App" asp-controller="Sites" asp-action="Create" method="post">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="Name" class="form-label">Site Adı *</label>
+                    <input asp-for="Name" class="form-control" placeholder="Örn: Güneş Sitesi" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Address" class="form-label">Adres</label>
+                    <input asp-for="Address" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="City" class="form-label">Şehir</label>
+                    <input asp-for="City" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="District" class="form-label">İlçe</label>
+                    <input asp-for="District" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="TaxOffice" class="form-label">Vergi Dairesi</label>
+                    <input asp-for="TaxOffice" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="TaxNumber" class="form-label">Vergi No</label>
+                    <input asp-for="TaxNumber" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="LateFeeRate" class="form-label">Gecikme Zammı (%)</label>
+                    <input asp-for="LateFeeRate" type="number" step="0.01" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="LateFeeDay" class="form-label">Zam Uygulama (Gün)</label>
+                    <input asp-for="LateFeeDay" type="number" class="form-control" />
+                </div>
+                <div class="col-12">
+                    <div class="form-check">
+                        <input asp-for="HasMultipleBlocks" class="form-check-input" />
+                        <label asp-for="HasMultipleBlocks" class="form-check-label">Birden fazla blok var</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-secondary">İptal</a>
+        </div>
+    </div>
+</form>

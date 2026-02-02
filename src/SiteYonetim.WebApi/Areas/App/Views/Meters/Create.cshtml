@@ -1,0 +1,36 @@
+@model SiteYonetim.Domain.Entities.Meter
+@{
+    ViewData["Title"] = "Yeni Sayaç";
+    var siteId = (Guid)ViewBag.SiteId;
+}
+<h1 class="h3 mb-4">Yeni Sayaç</h1>
+<form asp-area="App" asp-controller="Meters" asp-action="Create" method="post">
+    <input type="hidden" asp-for="SiteId" />
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="Name" class="form-label">Sayaç Adı *</label>
+                    <input asp-for="Name" class="form-control" placeholder="Örn: Ana Su Sayaç" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Type" class="form-label">Tür</label>
+                    <input asp-for="Type" class="form-control" placeholder="Örn: Su, Elektrik, Doğalgaz" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Unit" class="form-label">Birim</label>
+                    <input asp-for="Unit" class="form-control" placeholder="m³, kWh" />
+                </div>
+                <div class="col-12">
+                    <label asp-for="SerialNumber" class="form-label">Seri No</label>
+                    <input asp-for="SerialNumber" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a asp-action="Index" asp-route-siteId="@siteId" class="btn btn-secondary">İptal</a>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,54 @@
+@model IReadOnlyList<SiteYonetim.Domain.Entities.SupportTicket>
+@{
+    ViewData["Title"] = "Destek Kayıtları";
+    var siteId = (Guid)ViewBag.SiteId;
+    var topicNames = new Dictionary<SiteYonetim.Domain.Entities.TicketTopicType, string> {
+        { SiteYonetim.Domain.Entities.TicketTopicType.Suggestion, "Öneri" },
+        { SiteYonetim.Domain.Entities.TicketTopicType.Complaint, "Şikayet" },
+        { SiteYonetim.Domain.Entities.TicketTopicType.Request, "İstek" }
+    };
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Destek Kayıtları (en yeniden eskiye)</h1>
+    <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+</div>
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Tarih</th>
+                        <th>İsim</th>
+                        <th>Blok</th>
+                        <th>Kat</th>
+                        <th>Konu</th>
+                        <th>Tür</th>
+                        <th>Durum</th>
+                        <th width="80"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model)
+                    {
+                        <tr>
+                            <td><small>@t.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small></td>
+                            <td>@(t.ContactName ?? "-")</td>
+                            <td>@(t.BlockNumber ?? t.Apartment?.BlockOrBuildingName ?? "-")</td>
+                            <td>@(t.FloorNumber?.ToString() ?? t.Apartment?.Floor?.ToString() ?? "-")</td>
+                            <td>@(t.Subject?.Length > 40 ? t.Subject.Substring(0, 40) + "..." : t.Subject)</td>
+                            <td><span class="badge bg-secondary">@(topicNames.GetValueOrDefault(t.TopicType, t.TopicType.ToString()))</span></td>
+                            <td>@t.Status</td>
+                            <td><a asp-area="App" asp-controller="SupportTickets" asp-action="Detail" asp-route-id="@t.Id" class="btn btn-sm btn-outline-primary">Detay</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">Henüz destek kaydı yok.</div>
+}

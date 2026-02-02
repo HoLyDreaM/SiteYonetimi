@@ -1,0 +1,74 @@
+@model SiteYonetim.Domain.Interfaces.YearlyReportDto
+@{
+    ViewData["Title"] = "Yıllık Rapor";
+    var siteId = (Guid)ViewBag.SiteId;
+    var siteName = ViewBag.SiteName as string ?? "";
+    var year = (int)ViewBag.Year;
+    var monthNames = new[] { "", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Yıllık Rapor - @siteName (@year)</h1>
+    <a asp-area="App" asp-controller="Reports" asp-action="Index" asp-route-siteId="@siteId" class="btn btn-outline-secondary">Geri</a>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-1">Tahsil Edilen</h6>
+                <h4 class="card-title mb-0">@Model.TotalIncome.ToString("N2") ₺</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-secondary text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-1">Bekleyen (Aidat)</h6>
+                <h4 class="card-title mb-0">@Model.PendingIncome.ToString("N2") ₺</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-danger text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-1">Yıllık Toplam Gider</h6>
+                <h4 class="card-title mb-0">@Model.TotalExpense.ToString("N2") ₺</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 @(Model.Balance >= 0 ? "bg-primary" : "bg-warning") text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-1">Yıllık Bakiye</h6>
+                <h4 class="card-title mb-0">@Model.Balance.ToString("N2") ₺</h4>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent"><strong>Aylık Özet</strong></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Ay</th>
+                    <th>Tahsil</th>
+                    <th>Bekleyen</th>
+                    <th>Gider</th>
+                    <th>Bakiye</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model.ByMonth)
+                {
+                    <tr>
+                        <td>@monthNames[m.Month]</td>
+                        <td>@m.TotalIncome.ToString("N2") ₺</td>
+                        <td>@m.PendingIncome.ToString("N2") ₺</td>
+                        <td>@m.TotalExpense.ToString("N2") ₺</td>
+                        <td>@m.Balance.ToString("N2") ₺</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

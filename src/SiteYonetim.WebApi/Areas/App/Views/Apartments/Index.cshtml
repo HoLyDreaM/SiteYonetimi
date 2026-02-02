@@ -1,0 +1,48 @@
+@model IReadOnlyList<SiteYonetim.Domain.Entities.Apartment>
+@{
+    ViewData["Title"] = "Daireler";
+    var siteId = (Guid)ViewBag.SiteId;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Daireler</h1>
+    <div>
+        <a asp-area="App" asp-controller="Apartments" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Daire</a>
+        <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+    </div>
+</div>
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Blok / Bina</th>
+                        <th>Daire No</th>
+                        <th>Kat</th>
+                        <th>Pay Oranı</th>
+                        <th>Malik</th>
+                        <th width="100"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model)
+                    {
+                        <tr>
+                            <td>@a.BlockOrBuildingName</td>
+                            <td><strong>@a.ApartmentNumber</strong></td>
+                            <td>@(a.Floor?.ToString() ?? "-")</td>
+                            <td>@a.ShareRate</td>
+                            <td>@(a.OwnerName ?? "-")</td>
+                            <td><a asp-area="App" asp-controller="Apartments" asp-action="Edit" asp-route-id="@a.Id" class="btn btn-sm btn-outline-primary">Düzenle</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">Bu sitede henüz daire eklenmemiş. <a asp-area="App" asp-controller="Apartments" asp-action="Create" asp-route-siteId="@siteId">Yeni daire ekleyin</a>.</div>
+}

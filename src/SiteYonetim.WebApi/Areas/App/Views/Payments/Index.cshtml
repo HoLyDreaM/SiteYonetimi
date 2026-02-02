@@ -1,0 +1,46 @@
+@model IReadOnlyList<SiteYonetim.Domain.Entities.Payment>
+@{
+    ViewData["Title"] = "Tahsilatlar";
+    var siteId = (Guid)ViewBag.SiteId;
+    var from = ViewBag.From as DateTime?;
+    var to = ViewBag.To as DateTime?;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Tahsilatlar</h1>
+    <a asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+</div>
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Tarih</th>
+                        <th>Daire</th>
+                        <th>Tutar</th>
+                        <th>Yöntem</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td>@p.PaymentDate.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td><strong>@(p.Apartment?.BlockOrBuildingName) @(p.Apartment?.ApartmentNumber)</strong></td>
+                            <td><strong>@p.Amount.ToString("N2") ₺</strong></td>
+                            <td>@p.Method</td>
+                            <td>@(p.Description ?? "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <p class="text-muted small mt-2">Toplam: @Model.Count kayıt</p>
+}
+else
+{
+    <div class="alert alert-info">Bu dönemde tahsilat kaydı yok.</div>
+}

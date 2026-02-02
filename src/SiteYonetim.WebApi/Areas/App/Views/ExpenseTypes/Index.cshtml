@@ -1,0 +1,47 @@
+@model IReadOnlyList<SiteYonetim.Domain.Entities.ExpenseType>
+@{
+    ViewData["Title"] = "Gider Türleri";
+    var siteId = (Guid)ViewBag.SiteId;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Gider Türleri</h1>
+    <div>
+        <a asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Tür</a>
+        <a asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+    </div>
+</div>
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ad</th>
+                        <th width="150"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model)
+                    {
+                        <tr>
+                            <td><strong>@t.Name</strong></td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@t.Id" asp-route-siteId="@siteId" class="btn btn-sm btn-outline-primary">Düzenle</a>
+                                <form asp-area="App" asp-controller="ExpenseTypes" asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Bu gider türünü silmek istediğinize emin misiniz?');">
+                                    <input type="hidden" name="id" value="@t.Id" />
+                                    <input type="hidden" name="siteId" value="@siteId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">Henüz gider türü eklenmemiş. <a asp-action="Create" asp-route-siteId="@siteId">İlk gider türünü ekleyin</a> (Aidat, Elektrik, Su vb.).</div>
+}

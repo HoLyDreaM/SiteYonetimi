@@ -1,0 +1,81 @@
+@model IReadOnlyList<SiteYonetim.Domain.Entities.Expense>
+@{
+    ViewData["Title"] = "Giderler";
+    var siteId = (Guid)ViewBag.SiteId;
+    var siteName = ViewBag.SiteName as string ?? "";
+    var expenseTypes = ViewBag.ExpenseTypes as IReadOnlyList<SiteYonetim.Domain.Entities.ExpenseType> ?? new List<SiteYonetim.Domain.Entities.ExpenseType>();
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Giderler @(string.IsNullOrEmpty(siteName) ? "" : $"- {siteName}")</h1>
+    <div>
+        <a asp-area="App" asp-controller="Expenses" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Gider</a>
+        <a asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+    </div>
+</div>
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Fatura Tarihi</th>
+                        <th>Tür</th>
+                        <th>Açıklama</th>
+                        <th>Tutar</th>
+                        <th>Durum</th>
+                        <th width="200"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model)
+                    {
+                        var faturaTarihi = e.InvoiceDate ?? e.ExpenseDate;
+                        var durumMetni = faturaTarihi.Date <= DateTime.Today ? "Ödendi" : "Bekleniyor";
+                        <tr>
+                            <td>@faturaTarihi.ToString("dd.MM.yyyy")</td>
+                            <td>@(e.ExpenseType?.Name ?? "-")</td>
+                            <td>@e.Description</td>
+                            <td><strong>@e.Amount.ToString("N2") ₺</strong></td>
+                            <td>@durumMetni</td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@e.Id" asp-route-siteId="@siteId" class="btn btn-sm btn-outline-primary">Düzenle</a>
+                                <form asp-area="App" asp-controller="Expenses" asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Bu gideri silmek istediğinize emin misiniz?');">
+                                    <input type="hidden" name="id" value="@e.Id" />
+                                    <input type="hidden" name="siteId" value="@siteId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent">
+            <h5 class="mb-0">Gider Türleri</h5>
+        </div>
+        <div class="card-body">
+            @if (expenseTypes.Count > 0)
+            {
+                <p class="text-muted">Bu sitede tanımlı gider türleri. Gider eklemek için aşağıdaki türlerden birini kullanın.</p>
+                <ul class="list-group list-group-flush mb-3">
+                    @foreach (var t in expenseTypes)
+                    {
+                        <li class="list-group-item">@t.Name</li>
+                    }
+                </ul>
+                <a asp-area="App" asp-controller="Expenses" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Gider Ekle</a>
+            }
+            else
+            {
+                <p class="text-muted">Henüz gider türü eklenmemiş. Önce gider türü ekleyin, sonra gider kaydı oluşturabilirsiniz.</p>
+                <a asp-area="App" asp-controller="ExpenseTypes" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary">Gider Türü Ekle</a>
+            }
+        </div>
+    </div>
+}

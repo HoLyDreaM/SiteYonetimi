@@ -1,0 +1,64 @@
+@{
+    ViewData["Title"] = "Raporlar";
+    var siteId = (Guid)ViewBag.SiteId;
+    var currentYear = DateTime.Today.Year;
+    var currentMonth = DateTime.Today.Month;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Raporlar</h1>
+    <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+</div>
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-calendar-month me-2"></i>Aylık Rapor</h5>
+                <p class="card-text text-muted small">Seçilen aya ait gelir, gider ve bakiye özeti.</p>
+                <form asp-action="Monthly" method="get" class="row g-2">
+                    <input type="hidden" name="siteId" value="@siteId" />
+                    <div class="col-5">
+                        <select name="year" class="form-select">
+                            @for (var y = currentYear; y >= currentYear - 5; y--)
+                            {
+                                <option value="@y" selected="@(y == currentYear)">@y</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-5">
+                        <select name="month" class="form-select">
+                            @for (var m = 1; m <= 12; m++)
+                            {
+                                <option value="@m" selected="@(m == currentMonth)">@m - @(new DateTime(2000, m, 1).ToString("MMMM", new System.Globalization.CultureInfo("tr-TR")))</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <button type="submit" class="btn btn-primary w-100">Görüntüle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-calendar3 me-2"></i>Yıllık Rapor</h5>
+                <p class="card-text text-muted small">Seçilen yıla ait aylık gelir/gider özeti.</p>
+                <form asp-action="Yearly" method="get" class="row g-2">
+                    <input type="hidden" name="siteId" value="@siteId" />
+                    <div class="col-8">
+                        <select name="year" class="form-select">
+                            @for (var y = currentYear; y >= currentYear - 5; y--)
+                            {
+                                <option value="@y" selected="@(y == currentYear)">@y</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <button type="submit" class="btn btn-primary w-100">Görüntüle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

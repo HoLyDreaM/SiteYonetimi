@@ -1,0 +1,29 @@
+@model SiteYonetim.Domain.Entities.ExpenseType
+@{
+    ViewData["Title"] = "Yeni Gider Türü";
+    var siteId = ViewBag.SiteId as Guid? ?? Model.SiteId;
+}
+<h1 class="h3 mb-4">Yeni Gider Türü</h1>
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+<form asp-area="App" asp-controller="ExpenseTypes" asp-action="Create" method="post">
+    <input type="hidden" asp-for="SiteId" />
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="Name" class="form-label">Gider Türü Adı *</label>
+                    <input asp-for="Name" class="form-control" placeholder="Örn: Aidat, Elektrik, Su" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label">Açıklama</label>
+                    <input asp-for="Description" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a asp-action="Index" asp-route-siteId="@siteId" class="btn btn-secondary">İptal</a>
+        </div>
+    </div>
+</form>

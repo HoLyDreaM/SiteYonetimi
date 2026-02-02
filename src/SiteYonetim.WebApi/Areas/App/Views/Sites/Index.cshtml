@@ -1,0 +1,48 @@
+@model IReadOnlyList<SiteYonetim.Domain.Entities.Site>
+@{
+    ViewData["Title"] = "Siteler";
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Siteler</h1>
+    <a asp-area="App" asp-controller="Sites" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Site</a>
+</div>
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Site Adı</th>
+                        <th>Adres</th>
+                        <th>Şehir</th>
+                        <th>Gecikme Zammı</th>
+                        <th width="180"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td><strong>@s.Name</strong></td>
+                            <td>@(s.Address ?? "-")</td>
+                            <td>@(s.City ?? "-")</td>
+                            <td>@(s.LateFeeRate.HasValue ? "%" + s.LateFeeRate : "-")</td>
+                            <td>
+                                <a asp-area="App" asp-controller="Apartments" asp-action="Index" asp-route-siteId="@s.Id" class="btn btn-sm btn-outline-success me-1">Daireler</a>
+                                <a asp-area="App" asp-controller="Sites" asp-action="Edit" asp-route-id="@s.Id" class="btn btn-sm btn-outline-primary">Düzenle</a>
+                                <form asp-area="App" asp-controller="Sites" asp-action="Delete" asp-route-id="@s.Id" method="post" class="d-inline" onsubmit="return confirm('Bu siteyi silmek istediğinize emin misiniz?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">Henüz site eklenmemiş. <a asp-area="App" asp-controller="Sites" asp-action="Create">Yeni site ekleyin</a>.</div>
+}

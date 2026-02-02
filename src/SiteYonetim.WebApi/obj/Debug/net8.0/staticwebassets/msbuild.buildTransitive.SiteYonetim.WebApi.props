@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\SiteYonetim.WebApi.props" />
+</Project>

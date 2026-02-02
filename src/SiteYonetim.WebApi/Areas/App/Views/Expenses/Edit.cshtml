@@ -1,0 +1,56 @@
+@model SiteYonetim.Domain.Entities.Expense
+@{
+    ViewData["Title"] = "Gider Düzenle";
+    var siteId = (Guid)ViewBag.SiteId;
+    var types = ViewBag.ExpenseTypes as IReadOnlyList<SiteYonetim.Domain.Entities.ExpenseType> ?? new List<SiteYonetim.Domain.Entities.ExpenseType>();
+}
+<h1 class="h3 mb-4">Gider Düzenle</h1>
+@if (!ViewData.ModelState.IsValid)
+{
+    <div asp-validation-summary="All" class="alert alert-danger text-dark mb-3" role="alert"></div>
+}
+<form asp-area="App" asp-controller="Expenses" asp-action="Edit" asp-route-id="@Model.Id" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="SiteId" />
+    <input type="hidden" asp-for="Status" />
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="ExpenseTypeId" class="form-label">Gider Türü *</label>
+                    <select asp-for="ExpenseTypeId" class="form-select" required>
+                        <option value="">Seçin</option>
+                        @foreach (var t in types)
+                        {
+                            <option value="@t.Id">@t.Name</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ExpenseTypeId" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label">Açıklama *</label>
+                    <input asp-for="Description" class="form-control" required />
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Amount" class="form-label">Tutar (₺) *</label>
+                    <input asp-for="Amount" type="number" step="0.01" min="0.01" class="form-control" required />
+                    <span asp-validation-for="Amount" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="InvoiceDate" class="form-label">Fatura Tarihi *</label>
+                    <input asp-for="InvoiceDate" type="date" class="form-control" required />
+                    <span asp-validation-for="InvoiceDate" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="InvoiceNumber" class="form-label">Fatura No (opsiyonel)</label>
+                    <input asp-for="InvoiceNumber" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+            <button type="submit" class="btn btn-primary">Güncelle</button>
+            <a asp-action="Index" asp-route-siteId="@siteId" class="btn btn-secondary">İptal</a>
+        </div>
+    </div>
+</form>
