@@ -1,9 +1,4 @@
 # Site Yönetim Sistemi
-
-[Biyos.net](https://www.biyos.net/) benzeri apartman, site ve rezidans yönetim yazılımı. .NET 8, C#, MS-SQL Server ve ASP.NET Core ile geliştirilmiştir.
-
----
-
 ## İçindekiler
 
 1. [Genel Bakış](#genel-bakış)
