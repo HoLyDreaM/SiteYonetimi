@@ -35,10 +35,8 @@ public class ExpensesController : Controller
             return View("SelectSite");
         }
         var list = await _expenseService.GetBySiteIdAsync(siteId.Value, null, null, ct);
-        var types = await _expenseTypeService.GetBySiteIdAsync(siteId.Value, ct);
         var site = await _siteService.GetByIdAsync(siteId.Value, ct);
         ViewBag.SiteId = siteId;
-        ViewBag.ExpenseTypes = types;
         ViewBag.SiteName = site?.Name ?? "";
         return View(list);
     }

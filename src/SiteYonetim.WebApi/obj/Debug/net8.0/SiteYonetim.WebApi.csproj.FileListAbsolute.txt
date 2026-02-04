@@ -308,3 +308,4 @@ C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\ne
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\SixLabors.Fonts.dll
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\System.IO.Packaging.dll
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\XLParser.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
