@@ -60,7 +60,7 @@ CREATE TABLE dbo.Apartments (
     IsDeleted BIT NOT NULL DEFAULT 0,
     CONSTRAINT FK_Apartments_Site FOREIGN KEY (SiteId) REFERENCES dbo.Sites(Id),
     CONSTRAINT FK_Apartments_Building FOREIGN KEY (BuildingId) REFERENCES dbo.Buildings(Id),
-    CONSTRAINT UQ_Apartments_Site_Number UNIQUE (SiteId, ApartmentNumber)
+    CONSTRAINT UQ_Apartments_Site_Block_Number UNIQUE (SiteId, BlockOrBuildingName, ApartmentNumber)
 );
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Users')
@@ -544,6 +544,14 @@ IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.BankAc
     ALTER TABLE dbo.BankAccounts ADD OpeningBalance DECIMAL(18,2) NOT NULL DEFAULT 0;
 
 -- Meters tablosu zaten Type NVARCHAR ile oluşturuluyor. Eski INT migration kaldırıldı.
+
+-- ==================== APARTMENTS UNIQUE CONSTRAINT MİGRATION ====================
+-- Eski: (SiteId, ApartmentNumber) - B Blok'ta A Blok ile aynı daire no kullanılamıyordu
+-- Yeni: (SiteId, BlockOrBuildingName, ApartmentNumber) - A Blok 1, B Blok 1 ayrı kaydedilebilir
+IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UQ_Apartments_Site_Number' AND object_id = OBJECT_ID('dbo.Apartments'))
+    ALTER TABLE dbo.Apartments DROP CONSTRAINT UQ_Apartments_Site_Number;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UQ_Apartments_Site_Block_Number' AND object_id = OBJECT_ID('dbo.Apartments'))
+    ALTER TABLE dbo.Apartments ADD CONSTRAINT UQ_Apartments_Site_Block_Number UNIQUE (SiteId, BlockOrBuildingName, ApartmentNumber);
 
 -- ==================== İNDEKSLER ====================
 

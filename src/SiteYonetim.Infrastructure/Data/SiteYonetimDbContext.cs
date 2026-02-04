@@ -49,10 +49,10 @@ public class SiteYonetimDbContext : DbContext
             e.Property(x => x.District).HasMaxLength(100);
         });
 
-        // Apartment
+        // Apartment - Blok adı dahil unique: A Blok 1 ile B Blok 1 ayrı kaydedilebilir
         modelBuilder.Entity<Apartment>(e =>
         {
-            e.HasIndex(x => new { x.SiteId, x.ApartmentNumber }).IsUnique();
+            e.HasIndex(x => new { x.SiteId, x.BlockOrBuildingName, x.ApartmentNumber }).IsUnique();
             e.HasIndex(x => x.SiteId);
             e.Property(x => x.ApartmentNumber).HasMaxLength(50);
             e.Property(x => x.BlockOrBuildingName).HasMaxLength(100);
