@@ -103,6 +103,44 @@ public class AuthService : IAuthService
         return user != null && !user.IsApproved;
     }
 
+    public async Task<ChangePasswordResult> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken ct = default)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted, ct);
+        if (user == null) return ChangePasswordResult.UserNotFound;
+        if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash))
+            return ChangePasswordResult.WrongPassword;
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword, BCrypt.Net.BCrypt.GenerateSalt(12));
+        user.RefreshToken = null;
+        user.RefreshTokenExpiry = null;
+        await _db.SaveChangesAsync(ct);
+        return ChangePasswordResult.Success;
+    }
+
+    public async Task<ChangeEmailResult> ChangeEmailAsync(Guid userId, string newEmail, string password, CancellationToken ct = default)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted, ct);
+        if (user == null) return ChangeEmailResult.UserNotFound;
+        if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            return ChangeEmailResult.WrongPassword;
+        var email = newEmail.Trim();
+        if (await _db.Users.AnyAsync(x => x.Email == email && x.Id != userId && !x.IsDeleted, ct))
+            return ChangeEmailResult.EmailAlreadyExists;
+        user.Email = email;
+        user.RefreshToken = null;
+        user.RefreshTokenExpiry = null;
+        await _db.SaveChangesAsync(ct);
+        return ChangeEmailResult.Success;
+    }
+
+    public async Task<bool> UpdateProfileAsync(Guid userId, string fullName, CancellationToken ct = default)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted, ct);
+        if (user == null) return false;
+        user.FullName = fullName.Trim();
+        await _db.SaveChangesAsync(ct);
+        return true;
+    }
+
     private (string accessToken, DateTime expiresAt) GenerateAccessToken(User user, List<Guid> siteIds)
     {
         var expiresAt = DateTime.UtcNow.AddMinutes(_jwt.AccessTokenMinutes);

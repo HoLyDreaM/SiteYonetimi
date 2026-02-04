@@ -1,0 +1,122 @@
+@{
+    ViewData["Title"] = "Hesap Ayarları";
+    var email = ViewBag.Email as string ?? "";
+    var fullName = ViewBag.FullName as string ?? "";
+    var passwordSuccess = TempData["PasswordSuccess"] as string;
+    var passwordError = TempData["PasswordError"] as string;
+    var emailSuccess = TempData["EmailSuccess"] as string;
+    var emailError = TempData["EmailError"] as string;
+    var profileSuccess = TempData["ProfileSuccess"] as string;
+    var profileError = TempData["ProfileError"] as string;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Hesap Ayarları</h1>
+</div>
+
+@if (passwordSuccess != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">@passwordSuccess
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (passwordError != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">@passwordError
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (emailSuccess != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">@emailSuccess
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (emailError != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">@emailError
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (profileSuccess != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">@profileSuccess
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (profileError != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">@profileError
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="bi bi-person me-2"></i>Profil Bilgileri</h5>
+            </div>
+            <div class="card-body">
+                <form asp-area="App" asp-controller="Profile" asp-action="UpdateProfile" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label for="fullName" class="form-label">Ad Soyad</label>
+                        <input type="text" name="fullName" id="fullName" class="form-control" value="@fullName" required maxlength="200" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Güncelle</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="bi bi-envelope me-2"></i>E-posta Değiştir</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">Mevcut e-posta: <strong>@email</strong></p>
+                <form asp-area="App" asp-controller="Profile" asp-action="ChangeEmail" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label for="newEmail" class="form-label">Yeni E-posta</label>
+                        <input type="email" name="newEmail" id="newEmail" class="form-control" placeholder="yeni@email.com" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailPassword" class="form-label">Mevcut Şifre</label>
+                        <input type="password" name="password" id="emailPassword" class="form-control" required autocomplete="current-password" />
+                        <span class="form-text">Güvenlik için mevcut şifrenizi girin.</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">E-posta Güncelle</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="bi bi-key me-2"></i>Şifre Değiştir</h5>
+            </div>
+            <div class="card-body">
+                <form asp-area="App" asp-controller="Profile" asp-action="ChangePassword" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Mevcut Şifre</label>
+                        <input type="password" name="currentPassword" id="currentPassword" class="form-control" required autocomplete="current-password" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">Yeni Şifre</label>
+                        <input type="password" name="newPassword" id="newPassword" class="form-control" required minlength="6" autocomplete="new-password" />
+                        <span class="form-text">En az 6 karakter olmalı.</span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Yeni Şifre (Tekrar)</label>
+                        <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" required minlength="6" autocomplete="new-password" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Şifre Güncelle</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

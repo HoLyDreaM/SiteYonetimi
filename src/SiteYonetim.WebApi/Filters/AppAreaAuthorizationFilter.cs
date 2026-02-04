@@ -24,8 +24,9 @@ public class AppAreaAuthorizationFilter : IAsyncAuthorizationFilter
         if (string.IsNullOrEmpty(roleClaim))
             return Task.CompletedTask;
 
-        // "Resident" veya "3" (enum değeri) ise App paneline erişim engelle
-        if (roleClaim == "Resident" || roleClaim == "3")
+        // "Resident" veya "3" (enum değeri) ise App paneline erişim engelle (Profil hariç)
+        var controller = context.RouteData.Values["controller"]?.ToString();
+        if ((roleClaim == "Resident" || roleClaim == "3") && controller != "Profile")
         {
             context.Result = new RedirectToActionResult("AccessDenied", "Account", new { area = "" });
         }

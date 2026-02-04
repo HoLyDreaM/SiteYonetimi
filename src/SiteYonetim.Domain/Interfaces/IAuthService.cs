@@ -6,7 +6,16 @@ public interface IAuthService
     Task<AuthResult?> RefreshTokenAsync(string refreshToken, CancellationToken ct = default);
     Task<(bool Success, bool IsFirstUser)> RegisterAsync(string email, string password, string fullName, CancellationToken ct = default);
     Task<bool> IsUserPendingApprovalAsync(string email, CancellationToken ct = default);
+    /// <summary>Şifre değiştirir. Mevcut şifre doğrulanmalı.</summary>
+    Task<ChangePasswordResult> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken ct = default);
+    /// <summary>E-posta değiştirir. Mevcut şifre doğrulanmalı.</summary>
+    Task<ChangeEmailResult> ChangeEmailAsync(Guid userId, string newEmail, string password, CancellationToken ct = default);
+    /// <summary>Ad soyad günceller.</summary>
+    Task<bool> UpdateProfileAsync(Guid userId, string fullName, CancellationToken ct = default);
 }
+
+public enum ChangePasswordResult { Success, WrongPassword, UserNotFound }
+public enum ChangeEmailResult { Success, WrongPassword, UserNotFound, EmailAlreadyExists }
 
 public class AuthResult
 {
