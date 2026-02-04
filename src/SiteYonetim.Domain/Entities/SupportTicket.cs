@@ -18,6 +18,8 @@ public class SupportTicket : BaseEntity
     public string? BlockNumber { get; set; }
     /// <summary>Kat numarası (formdan)</summary>
     public int? FloorNumber { get; set; }
+    /// <summary>Daire numarası (formdan)</summary>
+    public string? ApartmentNumber { get; set; }
     /// <summary>0=Öneri, 1=Şikayet, 2=İstek</summary>
     public TicketTopicType TopicType { get; set; } = TicketTopicType.Suggestion;
     public string Subject { get; set; } = string.Empty;

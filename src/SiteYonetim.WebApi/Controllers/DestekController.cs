@@ -84,6 +84,7 @@ public class DestekController : Controller
             ContactPhone = model.ContactPhone,
             BlockNumber = model.BlockNumber,
             FloorNumber = model.FloorNumber,
+            ApartmentNumber = model.ApartmentNumber,
             TopicType = model.TopicType switch { "Complaint" => TicketTopicType.Complaint, "Request" => TicketTopicType.Request, _ => TicketTopicType.Suggestion },
             Subject = model.Subject!,
             Message = model.Message!,
@@ -100,6 +101,7 @@ public class DestekController : Controller
 <p><strong>Site:</strong> {site.Name}</p>
 <p><strong>Konu:</strong> {ticket.Subject}</p>
 <p><strong>Gönderen:</strong> {ticket.ContactName} ({ticket.ContactEmail ?? ticket.ContactPhone ?? "-"})</p>
+<p><strong>Blok/Kat/Daire:</strong> {ticket.BlockNumber ?? "-"} / {ticket.FloorNumber?.ToString() ?? "-"} / {ticket.ApartmentNumber ?? "-"}</p>
 <p><strong>Mesaj:</strong></p>
 <p>{ticket.Message}</p>
 <p><em>Kayıt no: {ticket.Id}</em></p>";
@@ -138,6 +140,7 @@ public class DestekInputModel
     public string? ContactPhone { get; set; }
     public string? BlockNumber { get; set; }
     public int? FloorNumber { get; set; }
+    public string? ApartmentNumber { get; set; }
     public string? Subject { get; set; }
     public string TopicType { get; set; } = "Suggestion"; // Suggestion, Complaint, Request
     public string? Message { get; set; }

@@ -24,6 +24,8 @@
             <dd class="col-sm-9">@(Model.BlockNumber ?? Model.Apartment?.BlockOrBuildingName ?? "-")</dd>
             <dt class="col-sm-3">Kat Numarası</dt>
             <dd class="col-sm-9">@(Model.FloorNumber?.ToString() ?? Model.Apartment?.Floor?.ToString() ?? "-")</dd>
+            <dt class="col-sm-3">Daire Numarası</dt>
+            <dd class="col-sm-9">@(Model.ApartmentNumber ?? Model.Apartment?.ApartmentNumber ?? "-")</dd>
             <dt class="col-sm-3">Konu Başlığı</dt>
             <dd class="col-sm-9">@Model.Subject</dd>
             <dt class="col-sm-3">Tür</dt>

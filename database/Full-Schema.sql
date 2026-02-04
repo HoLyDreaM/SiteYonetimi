@@ -489,6 +489,8 @@ IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Apartm
 
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.SupportTickets') AND name = 'ContactEmail')
     ALTER TABLE dbo.SupportTickets ADD ContactEmail NVARCHAR(256) NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.SupportTickets') AND name = 'ApartmentNumber')
+    ALTER TABLE dbo.SupportTickets ADD ApartmentNumber NVARCHAR(50) NULL;
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Quotations')
 CREATE TABLE dbo.Quotations (

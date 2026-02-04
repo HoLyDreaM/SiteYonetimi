@@ -23,6 +23,7 @@
                         <th>İsim</th>
                         <th>Blok</th>
                         <th>Kat</th>
+                        <th>Daire</th>
                         <th>Konu</th>
                         <th>Tür</th>
                         <th>Durum</th>
@@ -37,6 +38,7 @@
                             <td>@(t.ContactName ?? "-")</td>
                             <td>@(t.BlockNumber ?? t.Apartment?.BlockOrBuildingName ?? "-")</td>
                             <td>@(t.FloorNumber?.ToString() ?? t.Apartment?.Floor?.ToString() ?? "-")</td>
+                            <td>@(t.ApartmentNumber ?? t.Apartment?.ApartmentNumber ?? "-")</td>
                             <td>@(t.Subject?.Length > 40 ? t.Subject.Substring(0, 40) + "..." : t.Subject)</td>
                             <td><span class="badge bg-secondary">@(topicNames.GetValueOrDefault(t.TopicType, t.TopicType.ToString()))</span></td>
                             <td>@t.Status</td>
