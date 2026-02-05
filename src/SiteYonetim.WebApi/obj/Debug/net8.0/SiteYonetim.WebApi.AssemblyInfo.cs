@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SiteYonetim.WebApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e6183a2abde368bea069e8fb1711903f9dceec9b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0bbcf5032a3e355c19469fb00d47974e7233a02d")]
 [assembly: System.Reflection.AssemblyProductAttribute("SiteYonetim.WebApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SiteYonetim.WebApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

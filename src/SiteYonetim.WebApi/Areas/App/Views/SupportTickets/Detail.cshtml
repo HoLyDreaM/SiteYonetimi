@@ -32,13 +32,17 @@
             <dd class="col-sm-9">@(topicNames.GetValueOrDefault(Model.TopicType, Model.TopicType.ToString()))</dd>
             <dt class="col-sm-3">Açıklama</dt>
             <dd class="col-sm-9">@Model.Message</dd>
-            @if (Model.Attachments?.Any() == true)
+            @{
+                var attachments = Model.Attachments?.Where(a => !a.IsDeleted).ToList() ?? new List<SiteYonetim.Domain.Entities.SupportTicketAttachment>();
+            }
+            @if (attachments.Any())
             {
                 <dt class="col-sm-3">Resim</dt>
                 <dd class="col-sm-9">
-                    @foreach (var a in Model.Attachments)
+                    @foreach (var a in attachments)
                     {
-                        <a href="@a.FilePath" target="_blank" class="me-2"><img src="@a.FilePath" alt="@a.FileName" style="max-height:150px;" class="img-thumbnail" /></a>
+                        var imgUrl = Url.Content("~" + a.FilePath);
+                        <a href="@imgUrl" target="_blank" class="me-2"><img src="@imgUrl" alt="@a.FileName" style="max-height:150px;" class="img-thumbnail" /></a>
                     }
                 </dd>
             }

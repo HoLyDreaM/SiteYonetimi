@@ -46,16 +46,45 @@ else
 }
 @section Scripts {
 <script>
+function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+    }
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    textarea.style.top = '0';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    try {
+        var ok = document.execCommand('copy');
+        document.body.removeChild(textarea);
+        return ok ? Promise.resolve() : Promise.reject(new Error('Kopyalama başarısız'));
+    } catch (e) {
+        document.body.removeChild(textarea);
+        return Promise.reject(e);
+    }
+}
 document.querySelectorAll('.btn-copy-url').forEach(function(btn) {
     btn.addEventListener('click', function() {
         var url = this.getAttribute('data-url');
-        if (url && navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(url).then(function() {
-                var orig = btn.textContent;
-                btn.textContent = 'Kopyalandı!';
-                setTimeout(function() { btn.textContent = orig; }, 1500);
-            });
-        }
+        if (!url) return;
+        var orig = btn.textContent;
+        copyToClipboard(url).then(function() {
+            btn.textContent = 'Kopyalandı!';
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-success');
+            setTimeout(function() {
+                btn.textContent = orig;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-secondary');
+            }, 1500);
+        }).catch(function() {
+            btn.textContent = 'Kopyalanamadı';
+            setTimeout(function() { btn.textContent = orig; }, 2000);
+        });
     });
 });
 </script>
