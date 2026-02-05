@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Yeni Gider";
     var siteId = (Guid)ViewBag.SiteId;
+    var year = (int)ViewBag.Year;
+    var month = (int)ViewBag.Month;
     var types = ViewBag.ExpenseTypes as IReadOnlyList<SiteYonetim.Domain.Entities.ExpenseType> ?? new List<SiteYonetim.Domain.Entities.ExpenseType>();
 }
 <h1 class="h3 mb-4">Yeni Gider</h1>
@@ -53,7 +55,7 @@
         </div>
         <div class="card-footer bg-transparent border-0">
             <button type="submit" class="btn btn-primary">Kaydet</button>
-            <a asp-action="Index" asp-route-siteId="@siteId" class="btn btn-secondary">İptal</a>
+            <a asp-action="Index" asp-route-siteId="@siteId" asp-route-year="@year" asp-route-month="@month" class="btn btn-secondary">İptal</a>
         </div>
     </div>
 </form>

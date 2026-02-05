@@ -24,7 +24,7 @@ public class ExpensesController : Controller
         _env = env;
     }
 
-    public async Task<IActionResult> Index(Guid? siteId, CancellationToken ct)
+    public async Task<IActionResult> Index(Guid? siteId, int? year, int? month, CancellationToken ct = default)
     {
         if (!siteId.HasValue)
         {
@@ -34,22 +34,32 @@ public class ExpensesController : Controller
             var sites = await _siteService.GetUserSitesAsync(userId, ct);
             ViewBag.Sites = sites;
             ViewBag.PageTitle = "Giderler - Site Seçin";
+            ViewBag.Year = DateTime.Today.Year;
+            ViewBag.Month = DateTime.Today.Month;
             return View("SelectSite");
         }
-        var list = await _expenseService.GetBySiteIdAsync(siteId.Value, null, null, ct);
+        var y = year ?? DateTime.Today.Year;
+        var m = month ?? DateTime.Today.Month;
+        var from = new DateTime(y, m, 1);
+        var to = from.AddMonths(1).AddDays(-1);
+        var list = await _expenseService.GetBySiteIdAsync(siteId.Value, from, to, ct);
         var site = await _siteService.GetByIdAsync(siteId.Value, ct);
         ViewBag.SiteId = siteId;
         ViewBag.SiteName = site?.Name ?? "";
+        ViewBag.Year = y;
+        ViewBag.Month = m;
         return View(list);
     }
 
-    public async Task<IActionResult> Edit(Guid id, Guid? siteId, CancellationToken ct)
+    public async Task<IActionResult> Edit(Guid id, Guid? siteId, int? year, int? month, CancellationToken ct)
     {
         var expense = await _expenseService.GetByIdAsync(id, includeAttachments: true, ct);
         if (expense == null) return NotFound();
         var types = await _expenseTypeService.GetBySiteIdAsync(expense.SiteId, ct);
         ViewBag.SiteId = expense.SiteId;
         ViewBag.ExpenseTypes = types;
+        ViewBag.Year = year ?? (expense.InvoiceDate ?? expense.ExpenseDate).Year;
+        ViewBag.Month = month ?? (expense.InvoiceDate ?? expense.ExpenseDate).Month;
         return View(expense);
     }
 
@@ -100,7 +110,8 @@ public class ExpensesController : Controller
                 }
             }
             await _autoDeductionService.ProcessDueExpensesAsync(ct);
-            return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId });
+            var invDate = model.InvoiceDate ?? model.ExpenseDate;
+            return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId, year = invDate.Year, month = invDate.Month });
         }
         catch (Exception ex)
         {
@@ -113,13 +124,15 @@ public class ExpensesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(Guid id, Guid siteId, CancellationToken ct)
+    public async Task<IActionResult> Delete(Guid id, Guid siteId, int? year, int? month, CancellationToken ct)
     {
         await _expenseService.DeleteAsync(id, ct);
-        return RedirectToAction(nameof(Index), new { area = "App", siteId });
+        var y = year ?? DateTime.Today.Year;
+        var m = month ?? DateTime.Today.Month;
+        return RedirectToAction(nameof(Index), new { area = "App", siteId, year = y, month = m });
     }
 
-    public async Task<IActionResult> Create(Guid siteId, CancellationToken ct)
+    public async Task<IActionResult> Create(Guid siteId, int? year, int? month, CancellationToken ct)
     {
         if (siteId == Guid.Empty)
         {
@@ -134,8 +147,12 @@ public class ExpensesController : Controller
         var types = await _expenseTypeService.GetBySiteIdAsync(siteId, ct);
         if (types.Count == 0)
             return RedirectToAction("Create", "ExpenseTypes", new { area = "App", siteId });
+        var y = year ?? DateTime.Today.Year;
+        var m = month ?? DateTime.Today.Month;
         ViewBag.SiteId = siteId;
         ViewBag.ExpenseTypes = types;
+        ViewBag.Year = y;
+        ViewBag.Month = m;
         return View(new Expense { SiteId = siteId, ExpenseDate = DateTime.Today, InvoiceDate = DateTime.Today });
     }
 
@@ -189,7 +206,8 @@ public class ExpensesController : Controller
                 }
             }
             await _autoDeductionService.ProcessDueExpensesAsync(ct);
-            return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId });
+            var invDate = model.InvoiceDate ?? model.ExpenseDate;
+            return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId, year = invDate.Year, month = invDate.Month });
         }
         catch (Exception ex)
         {

@@ -3,11 +3,29 @@
     ViewData["Title"] = "Giderler";
     var siteId = (Guid)ViewBag.SiteId;
     var siteName = ViewBag.SiteName as string ?? "";
+    var year = (int)ViewBag.Year;
+    var month = (int)ViewBag.Month;
+    var monthNames = new[] { "", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
 }
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Giderler @(string.IsNullOrEmpty(siteName) ? "" : $"- {siteName}")</h1>
-    <div>
-        <a asp-area="App" asp-controller="Expenses" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Gider</a>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h1 class="h3 mb-0">Giderler - @year @monthNames[month] @(string.IsNullOrEmpty(siteName) ? "" : $"- {siteName}")</h1>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <form asp-action="Index" method="get" class="d-flex gap-2 align-items-center">
+            <input type="hidden" name="siteId" value="@siteId" />
+            <select name="year" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                @for (var y = DateTime.Today.Year; y >= DateTime.Today.Year - 5; y--)
+                {
+                    <option value="@y" selected="@(y == year)">@y</option>
+                }
+            </select>
+            <select name="month" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                @for (var m = 1; m <= 12; m++)
+                {
+                    <option value="@m" selected="@(m == month)">@monthNames[m]</option>
+                }
+            </select>
+        </form>
+        <a asp-area="App" asp-controller="Expenses" asp-action="Create" asp-route-siteId="@siteId" asp-route-year="@year" asp-route-month="@month" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Gider</a>
         <a asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
     </div>
 </div>
@@ -38,10 +56,12 @@
                             <td><strong>@e.Amount.ToString("N2") ₺</strong></td>
                             <td>@durumMetni</td>
                             <td>
-                                <a asp-action="Edit" asp-route-id="@e.Id" asp-route-siteId="@siteId" class="btn btn-sm btn-outline-primary">Düzenle</a>
+                                <a asp-action="Edit" asp-route-id="@e.Id" asp-route-siteId="@siteId" asp-route-year="@year" asp-route-month="@month" class="btn btn-sm btn-outline-primary">Düzenle</a>
                                 <form asp-area="App" asp-controller="Expenses" asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Bu gideri silmek istediğinize emin misiniz?');">
                                     <input type="hidden" name="id" value="@e.Id" />
                                     <input type="hidden" name="siteId" value="@siteId" />
+                                    <input type="hidden" name="year" value="@year" />
+                                    <input type="hidden" name="month" value="@month" />
                                     <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
                                 </form>
                             </td>
@@ -57,7 +77,7 @@ else
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body text-center py-5">
             <p class="text-muted mb-3">Henüz gider kaydı yok. Yeni gider eklemek için butona tıklayın.</p>
-            <a asp-area="App" asp-controller="Expenses" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Gider Ekle</a>
+            <a asp-area="App" asp-controller="Expenses" asp-action="Create" asp-route-siteId="@siteId" asp-route-year="@year" asp-route-month="@month" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Gider Ekle</a>
         </div>
     </div>
 }
