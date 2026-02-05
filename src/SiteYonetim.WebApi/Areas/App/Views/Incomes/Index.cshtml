@@ -137,10 +137,7 @@
                                 }
                                 @if (canDelete)
                                 {
-                                    <form asp-area="App" asp-controller="Incomes" asp-action="Delete" method="post" class="d-inline" asp-route-id="@i.Id" asp-route-siteId="@siteId" asp-route-year="@year" asp-route-month="@month" onsubmit="return confirm('Bu gelir kaydını silmek istediğinize emin misiniz?');">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil"><i class="bi bi-trash"></i></button>
-                                    </form>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Sil" data-delete-id="@i.Id" data-site-id="@siteId" data-year="@year" data-month="@month"><i class="bi bi-trash"></i></button>
                                 }
                             </td>
                         </tr>
@@ -185,5 +182,21 @@ function updateDeleteBtn() {
     var selectAll = document.getElementById('selectAll');
     if (selectAll) selectAll.checked = n > 0 && n === document.querySelectorAll('.income-check').length;
 }
+document.querySelectorAll('button[data-delete-id]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        if (!confirm('Bu gelir kaydını silmek istediğinize emin misiniz?')) return;
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '@Url.Action("Delete", "Incomes", new { area = "App" })' + '?id=' + encodeURIComponent(btn.dataset.deleteId) + '&siteId=' + encodeURIComponent(btn.dataset.siteId) + '&year=' + encodeURIComponent(btn.dataset.year) + '&month=' + encodeURIComponent(btn.dataset.month);
+        form.style.display = 'none';
+        var token = document.querySelector('#deleteBulkForm input[name="__RequestVerificationToken"]');
+        if (token) {
+            var clone = token.cloneNode(true);
+            form.appendChild(clone);
+        }
+        document.body.appendChild(form);
+        form.submit();
+    });
+});
 </script>
 }

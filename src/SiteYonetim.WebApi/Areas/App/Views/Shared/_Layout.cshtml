@@ -26,6 +26,9 @@
             @{
                 var qSiteId = Context.Request.Query["siteId"].FirstOrDefault() ?? ViewBag.SiteId?.ToString() ?? "";
                 var siteQ = !string.IsNullOrEmpty(qSiteId) ? $"?siteId={qSiteId}" : "";
+                var qYear = ViewBag.Year != null ? ViewBag.Year.ToString() : Context.Request.Query["year"].FirstOrDefault();
+                var qMonth = ViewBag.Month != null ? ViewBag.Month.ToString() : Context.Request.Query["month"].FirstOrDefault();
+                var paymentsQ = siteQ + (!string.IsNullOrEmpty(qYear) && !string.IsNullOrEmpty(qMonth) ? (string.IsNullOrEmpty(siteQ) ? "?" : "&") + $"year={qYear}&month={qMonth}" : "");
             }
             <ul class="nav flex-column">
                 <li class="nav-item"><a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")" href="/Dashboard"><i class="bi bi-speedometer2 me-2"></i> Panel</a></li>
@@ -34,7 +37,7 @@
                 <li class="nav-item"><a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Incomes" ? "active" : "")" href="/Incomes@(siteQ)"><i class="bi bi-cash-coin me-2"></i> Gelirler</a></li>
                 <li class="nav-item"><a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ExpenseTypes" ? "active" : "")" href="/ExpenseTypes@(siteQ)"><i class="bi bi-tags me-2"></i> Gider Türleri</a></li>
                 <li class="nav-item"><a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Expenses" ? "active" : "")" href="/Expenses@(siteQ)"><i class="bi bi-cash-stack me-2"></i> Giderler</a></li>
-                <li class="nav-item"><a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Payments" ? "active" : "")" href="/Payments@(siteQ)"><i class="bi bi-wallet2 me-2"></i> Tahsilatlar</a></li>
+                <li class="nav-item"><a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Payments" ? "active" : "")" href="/Payments@(paymentsQ)"><i class="bi bi-wallet2 me-2"></i> Tahsilatlar</a></li>
                 <li class="nav-item"><a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "BankAccounts" ? "active" : "")" href="/BankAccounts@(siteQ)"><i class="bi bi-bank me-2"></i> Banka Hesapları</a></li>
                 <li class="nav-item"><a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Debtors" ? "active" : "")" href="/Debtors"><i class="bi bi-people me-2"></i> Borçlular</a></li>
                 <li class="nav-item"><a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Quotations" ? "active" : "")" href="/Quotations@(siteQ)"><i class="bi bi-file-earmark-text me-2"></i> Teklifler</a></li>

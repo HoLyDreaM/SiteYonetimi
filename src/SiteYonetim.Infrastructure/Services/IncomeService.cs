@@ -40,7 +40,7 @@ public class IncomeService : IIncomeService
         {
             var apartments = await _db.Apartments.Where(x => x.SiteId == site.Id && !x.IsDeleted).ToListAsync(ct);
             var existingKeys = await _db.Incomes
-                .Where(x => x.SiteId == site.Id && x.Year == year && x.Month == month && !x.IsDeleted)
+                .Where(x => x.SiteId == site.Id && x.Year == year && x.Month == month && x.Type == IncomeType.Aidat && !x.IsDeleted)
                 .Select(x => x.ApartmentId)
                 .ToListAsync(ct);
             var dueDate = new DateTime(year, month, 1).AddMonths(1).AddDays(-1); // Ay sonu

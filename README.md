@@ -77,11 +77,13 @@ Site Yönetim Sistemi, .NET 8 ve ASP.NET Core MVC ile geliştirilmiş, SQL Serve
 - Başlangıç bakiyesi (OpeningBalance) desteği
 - **Detay sayfası:** Banka, şube, hesap no, IBAN, güncel bakiye bilgilerinin altında tüm gelen ve giden ödemeler/tahsilatlar sayfalanmış listelenir
 
-### Ödemesi Gelen Giderler Bildirimi
+### Bildirimler (Çan İkonu)
 - **Bildirim simgesi** (çan ikonu) ile site anasayfasından itibaren tüm sayfalarda yer alır
-- Tıklanınca **dropdown** açılır; son 30 gün içinde bankadan ödenen (düşülen) giderler listelenir
-- Bildirim varsa simgede kırmızı badge ile sayı gösterilir
-- Her gider için detay linki ile Giderler sayfasına hızlı erişim
+- Tıklanınca **dropdown** açılır:
+  - **Ödemesi Gelen Giderler:** Son 30 gün içinde bankadan ödenen (düşülen) giderler listelenir
+  - **Süresi Geçen Aidatlar:** Ödeme süresi geçmiş ve tahsil edilmemiş/kısmi tahsil edilmiş aidatlar listelenir
+- Bildirim varsa simgede kırmızı badge ile toplam sayı gösterilir
+- Her gider için detay linki ile Giderler sayfasına, her aidat için tahsilat linki ile Gelirler sayfasına hızlı erişim
 
 ### Raporlar
 

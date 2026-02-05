@@ -2,12 +2,31 @@
 @{
     ViewData["Title"] = "Tahsilatlar";
     var siteId = (Guid)ViewBag.SiteId;
-    var from = ViewBag.From as DateTime?;
-    var to = ViewBag.To as DateTime?;
+    var year = (int)ViewBag.Year;
+    var month = (int)ViewBag.Month;
+    var siteName = ViewBag.SiteName as string ?? "";
+    var monthNames = new[] { "", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
 }
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Tahsilatlar</h1>
-    <a asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h1 class="h3 mb-0">Tahsilatlar - @year @monthNames[month] @(string.IsNullOrEmpty(siteName) ? "" : $"- {siteName}")</h1>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <form asp-action="Index" method="get" class="d-flex gap-2 align-items-center">
+            <input type="hidden" name="siteId" value="@siteId" />
+            <select name="year" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                @for (var y = DateTime.Today.Year; y >= DateTime.Today.Year - 5; y--)
+                {
+                    <option value="@y" selected="@(y == year)">@y</option>
+                }
+            </select>
+            <select name="month" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                @for (var m = 1; m <= 12; m++)
+                {
+                    <option value="@m" selected="@(m == month)">@monthNames[m]</option>
+                }
+            </select>
+        </form>
+        <a asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
+    </div>
 </div>
 @if (Model != null && Model.Count > 0)
 {
@@ -38,9 +57,9 @@
             </table>
         </div>
     </div>
-    <p class="text-muted small mt-2">Toplam: @Model.Count kayıt</p>
+    <p class="text-muted small mt-2">@year @monthNames[month]: Toplam @Model.Count tahsilat</p>
 }
 else
 {
-    <div class="alert alert-info">Bu dönemde tahsilat kaydı yok.</div>
+    <div class="alert alert-info">@year @monthNames[month] ayında tahsilat kaydı yok.</div>
 }

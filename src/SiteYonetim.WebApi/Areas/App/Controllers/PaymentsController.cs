@@ -18,7 +18,7 @@ public class PaymentsController : Controller
         _siteService = siteService;
     }
 
-    public async Task<IActionResult> Index(Guid? siteId, DateTime? from, DateTime? to, CancellationToken ct)
+    public async Task<IActionResult> Index(Guid? siteId, int? year, int? month, CancellationToken ct)
     {
         if (!siteId.HasValue)
         {
@@ -30,10 +30,15 @@ public class PaymentsController : Controller
             ViewBag.PageTitle = "Tahsilatlar - Site Seçin";
             return View("SelectSite");
         }
+        var y = year ?? DateTime.Today.Year;
+        var m = month ?? DateTime.Today.Month;
+        var from = new DateTime(y, m, 1);
+        var to = new DateTime(y, m, DateTime.DaysInMonth(y, m));
         var list = await _paymentService.GetBySiteIdAsync(siteId.Value, from, to, null, ct);
         ViewBag.SiteId = siteId;
-        ViewBag.From = from ?? new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        ViewBag.To = to ?? DateTime.Today;
+        ViewBag.Year = y;
+        ViewBag.Month = m;
+        ViewBag.SiteName = (await _siteService.GetByIdAsync(siteId.Value, ct))?.Name ?? "";
         return View(list);
     }
 }
