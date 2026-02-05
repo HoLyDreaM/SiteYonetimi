@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Daireler";
     var siteId = (Guid)ViewBag.SiteId;
+    var defaultDues = ViewBag.DefaultMonthlyDues as decimal?;
 }
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">Daireler</h1>
@@ -20,7 +21,7 @@
                         <th>Blok / Bina</th>
                         <th>Daire No</th>
                         <th>Kat</th>
-                        <th>Pay Oranı</th>
+                        <th>Aidat Bilgisi</th>
                         <th>Ev Sahibi / Kiracı</th>
                         <th width="100"></th>
                     </tr>
@@ -32,7 +33,12 @@
                             <td>@a.BlockOrBuildingName</td>
                             <td><strong>@a.ApartmentNumber</strong></td>
                             <td>@(a.Floor?.ToString() ?? "-")</td>
-                            <td>@a.ShareRate</td>
+                            <td>
+                                @{
+                                    var aidat = a.MonthlyDuesAmount ?? (defaultDues.HasValue ? defaultDues.Value * a.ShareRate : (decimal?)null);
+                                    @(aidat.HasValue ? $"{aidat.Value:N2} ₺" : "-")
+                                }
+                            </td>
                             <td>
                                 @if (a.OccupancyType == SiteYonetim.Domain.Entities.ApartmentOccupancyType.TenantOccupied)
                                 {

@@ -31,7 +31,9 @@ public class ApartmentsController : Controller
             return View("SelectSite");
         }
         var list = await _apartmentService.GetBySiteIdAsync(siteId.Value, ct);
+        var site = await _siteService.GetByIdAsync(siteId.Value, ct);
         ViewBag.SiteId = siteId;
+        ViewBag.DefaultMonthlyDues = site?.DefaultMonthlyDues;
         return View(list);
     }
 
