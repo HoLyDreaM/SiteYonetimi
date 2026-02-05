@@ -202,6 +202,18 @@ CREATE TABLE dbo.ExpenseShares (
     CONSTRAINT UQ_ExpenseShares_Expense_Apartment UNIQUE (ExpenseId, ApartmentId)
 );
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ExpenseAttachments')
+CREATE TABLE dbo.ExpenseAttachments (
+    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    ExpenseId UNIQUEIDENTIFIER NOT NULL,
+    FileName NVARCHAR(255) NOT NULL,
+    FilePath NVARCHAR(500) NOT NULL,
+    CreatedAt DATETIME2(2) NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2(2) NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_ExpenseAttachments_Expense FOREIGN KEY (ExpenseId) REFERENCES dbo.Expenses(Id)
+);
+
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'BankAccounts')
 CREATE TABLE dbo.BankAccounts (
     Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),

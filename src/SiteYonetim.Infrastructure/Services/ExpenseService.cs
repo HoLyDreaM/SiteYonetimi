@@ -14,10 +14,13 @@ public class ExpenseService : IExpenseService
         _db = db;
     }
 
-    public async Task<Expense?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
-        await _db.Expenses.AsNoTracking()
-            .Include(x => x.ExpenseType)
-            .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, ct);
+    public async Task<Expense?> GetByIdAsync(Guid id, bool includeAttachments = false, CancellationToken ct = default)
+    {
+        IQueryable<Expense> q = _db.Expenses.AsNoTracking().Include(x => x.ExpenseType);
+        if (includeAttachments)
+            q = q.Include(x => x.Attachments);
+        return await q.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, ct);
+    }
 
     public async Task<IReadOnlyList<Expense>> GetBySiteIdAsync(Guid siteId, DateTime? from = null, DateTime? to = null, CancellationToken ct = default)
     {
@@ -98,6 +101,12 @@ public class ExpenseService : IExpenseService
             e.IsDeleted = true;
             await _db.SaveChangesAsync(ct);
         }
+    }
+
+    public async Task AddAttachmentAsync(ExpenseAttachment attachment, CancellationToken ct = default)
+    {
+        _db.ExpenseAttachments.Add(attachment);
+        await _db.SaveChangesAsync(ct);
     }
 
 }

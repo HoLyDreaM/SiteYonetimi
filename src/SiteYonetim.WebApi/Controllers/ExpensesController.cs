@@ -26,7 +26,7 @@ public class ExpensesController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ExpenseDto>> GetById(Guid id, CancellationToken ct)
     {
-        var e = await _expenseService.GetByIdAsync(id, ct);
+        var e = await _expenseService.GetByIdAsync(id, includeAttachments: false, ct);
         if (e == null) return NotFound();
         return Ok(Map(e));
     }
@@ -53,7 +53,7 @@ public class ExpensesController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<ExpenseDto>> Update(Guid id, [FromBody] CreateExpenseRequest request, CancellationToken ct)
     {
-        var e = await _expenseService.GetByIdAsync(id, ct);
+        var e = await _expenseService.GetByIdAsync(id, includeAttachments: false, ct);
         if (e == null) return NotFound();
         e.ExpenseTypeId = request.ExpenseTypeId;
         e.Description = request.Description;

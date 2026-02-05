@@ -1,0 +1,90 @@
+@model SiteYonetim.Domain.Interfaces.BankAccountTransactionsPagedResult
+@{
+    ViewData["Title"] = "Banka Hesabı Detay";
+    var siteId = (Guid)ViewBag.SiteId;
+    var b = Model.Account;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Banka Hesabı Detay</h1>
+    <div>
+        <a asp-area="App" asp-controller="BankAccounts" asp-action="Edit" asp-route-id="@b.Id" asp-route-siteId="@siteId" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>Düzenle</a>
+        <a asp-area="App" asp-controller="BankAccounts" asp-action="Index" asp-route-siteId="@siteId" class="btn btn-outline-secondary">Geri</a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-3">Banka Bilgileri</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <p class="mb-1"><strong>Banka:</strong> @b.BankName</p>
+                <p class="mb-1"><strong>Şube:</strong> @b.BranchName</p>
+                <p class="mb-1"><strong>Hesap No:</strong> @b.AccountNumber</p>
+            </div>
+            <div class="col-md-6">
+                <p class="mb-1"><strong>IBAN:</strong> @b.IBAN</p>
+                <p class="mb-1"><strong>Güncel Bakiye:</strong> <span class="fs-5 @(Model.Balance >= 0 ? "text-success" : "text-danger")">@Model.Balance.ToString("N2") ₺</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Gelen ve Giden Ödemeler / Tahsilatlar</h5>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Items.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Açıklama</th>
+                            <th>Daire</th>
+                            <th class="text-end">Giren</th>
+                            <th class="text-end">Çıkan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>@item.Date.ToString("dd.MM.yyyy")</td>
+                                <td>@item.Description</td>
+                                <td>@(item.ApartmentInfo ?? "-")</td>
+                                <td class="text-end @(item.IsIncome ? "text-success" : "")">@(item.IsIncome ? item.Amount.ToString("N2") + " ₺" : "-")</td>
+                                <td class="text-end @(!item.IsIncome ? "text-danger" : "")">@(!item.IsIncome ? item.Amount.ToString("N2") + " ₺" : "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="p-3 border-top">
+                    <ul class="pagination pagination-sm mb-0 justify-content-center">
+                        <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                            <a class="page-link" asp-action="Detail" asp-route-id="@b.Id" asp-route-siteId="@siteId" asp-route-page="@(Model.Page - 1)" asp-route-pageSize="@Model.PageSize">Önceki</a>
+                        </li>
+                        @for (var i = 1; i <= Math.Min(Model.TotalPages, 10); i++)
+                        {
+                            <li class="page-item @(i == Model.Page ? "active" : "")">
+                                <a class="page-link" asp-action="Detail" asp-route-id="@b.Id" asp-route-siteId="@siteId" asp-route-page="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link" asp-action="Detail" asp-route-id="@b.Id" asp-route-siteId="@siteId" asp-route-page="@(Model.Page + 1)" asp-route-pageSize="@Model.PageSize">Sonraki</a>
+                        </li>
+                    </ul>
+                    <p class="text-center text-muted small mb-0">Sayfa @Model.Page / @Model.TotalPages (Toplam @Model.TotalCount kayıt)</p>
+                </nav>
+            }
+        }
+        else
+        {
+            <div class="p-4 text-center text-muted">Henüz hareket kaydı yok.</div>
+        }
+    </div>
+</div>

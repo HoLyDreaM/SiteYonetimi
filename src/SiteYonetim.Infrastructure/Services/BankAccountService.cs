@@ -196,4 +196,51 @@ public class BankAccountService : IBankAccountService
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task<BankAccountTransactionsPagedResult?> GetDetailWithTransactionsPagedAsync(Guid bankAccountId, int page = 1, int pageSize = 20, CancellationToken ct = default)
+    {
+        var bank = await _db.BankAccounts.AsNoTracking()
+            .FirstOrDefaultAsync(b => b.Id == bankAccountId && !b.IsDeleted, ct);
+        if (bank == null) return null;
+
+        var balance = await GetEffectiveBalanceAsync(bankAccountId, ct);
+
+        var query = _db.BankTransactions.AsNoTracking()
+            .Where(bt => bt.BankAccountId == bankAccountId && !bt.IsDeleted)
+            .OrderByDescending(bt => bt.TransactionDate);
+
+        var totalCount = await query.CountAsync(ct);
+        var transactions = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Include(bt => bt.Payment).ThenInclude(p => p!.Apartment)
+            .Include(bt => bt.Expense)
+            .ToListAsync(ct);
+
+        var items = transactions.Select(bt =>
+        {
+            var desc = bt.Description ?? "";
+            var aptInfo = bt.Payment?.Apartment != null
+                ? $"{bt.Payment.Apartment.BlockOrBuildingName} {bt.Payment.Apartment.ApartmentNumber}".Trim()
+                : null;
+            return new BankTransactionItemDto
+            {
+                Date = bt.TransactionDate,
+                Description = desc,
+                Amount = Math.Abs(bt.Amount),
+                IsIncome = bt.Amount > 0,
+                ApartmentInfo = aptInfo
+            };
+        }).ToList();
+
+        return new BankAccountTransactionsPagedResult
+        {
+            Account = bank,
+            Balance = balance,
+            Items = items,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
+    }
+
 }

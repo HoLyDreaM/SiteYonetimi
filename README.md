@@ -63,6 +63,7 @@ Site Yönetim Sistemi, .NET 8 ve ASP.NET Core MVC ile geliştirilmiş, SQL Serve
 - Gider kaydı oluşturma, düzenleme, silme
 - Fatura numarası, fatura tarihi ve vade tarihi takibi
 - Giderleri rapordan hariç tutma seçeneği (ExcludeFromReport)
+- **Fatura ek dosyası:** JPG veya PDF formatında fatura ekleme (oluşturma ve düzenleme sırasında)
 
 ### Tahsilatlar ve Ödemeler
 - Ödeme kaydı (nakit, havale, kredi kartı vb.)
@@ -70,12 +71,24 @@ Site Yönetim Sistemi, .NET 8 ve ASP.NET Core MVC ile geliştirilmiş, SQL Serve
 - Banka hesabına bağlama
 
 ### Banka Hesapları
-- Site banka hesapları
+- Site banka hesapları (**sadece bir banka hesabı** eklenebilir)
 - Güncel bakiye takibi
 - Tahsilatlar bakiyeyi artırır, gider ödemeleri azaltır
 - Başlangıç bakiyesi (OpeningBalance) desteği
+- **Detay sayfası:** Banka, şube, hesap no, IBAN, güncel bakiye bilgilerinin altında tüm gelen ve giden ödemeler/tahsilatlar sayfalanmış listelenir
+
+### Ödemesi Gelen Giderler Bildirimi
+- **Bildirim simgesi** (çan ikonu) ile site anasayfasından itibaren tüm sayfalarda yer alır
+- Tıklanınca **dropdown** açılır; son 30 gün içinde bankadan ödenen (düşülen) giderler listelenir
+- Bildirim varsa simgede kırmızı badge ile sayı gösterilir
+- Her gider için detay linki ile Giderler sayfasına hızlı erişim
 
 ### Raporlar
+
+#### Hazırün Cetveli
+- Toplantı katılım listesi sütunları: **Blok**, **No**, **Kat Maliki**, **İmza**, **Varsa Vekili**, **İmza**
+- **Çıktı Al / Yazdır** butonu ile toplantılardan hemen önce çıktı alınıp imzalatılabilir
+- Toplantı tarihi seçilebilir
 
 #### Aylık Rapor
 - **Başlık formatı:** `Yıl Ay - Site İsmi` (örn: `2025 Şubat - Site Yönetimi`)
@@ -114,6 +127,10 @@ Site Yönetim Sistemi, .NET 8 ve ASP.NET Core MVC ile geliştirilmiş, SQL Serve
 - Giriş gerektirmeyen URL: `/Feedback/Create?siteId=xxx` veya `/OneriSikayet?siteId=xxx`
 - Blok No, Daire No, İsim Soyisim, Telefon, Konu, Açıklama alanları
 
+### Üst Bar (Giriş Sonrası)
+- **Bildirim simgesi:** Ödemesi gelen giderler dropdown’u
+- **Profil:** Hesap bilgileri ve ayarlar sayfasına gider (Hesap Ayarları menüden kaldırılmıştır)
+
 ### Panel (Dashboard)
 - Sitelerim özeti
 - **Destek URL’si:** Her site için `https://.../Destek?siteId=xxx` adresi ve **Kopyala** butonu
@@ -126,6 +143,7 @@ Site Yönetim Sistemi, .NET 8 ve ASP.NET Core MVC ile geliştirilmiş, SQL Serve
 
 ### Teklifler
 - Site teklif kayıtları (şirket adı, tarih, aylık/yıllık ücret, açıklama)
+- **Otomatik klasör oluşturma:** Teklifler, Gider faturaları ve Destek kayıtları için gerekli upload klasörleri (`uploads/teklifler`, `uploads/giderler`, `uploads/destek`) uygulama başlangıcında otomatik oluşturulur
 
 ### Önemli Telefonlar
 - Site bazlı acil ve önemli telefon listesi
@@ -362,7 +380,9 @@ Port numarası (7xxx) `launchSettings.json` veya çalışma ortamına göre değ
 | Destek Kayıtları | Destek talepleri listesi |
 | Destek Kayıt Ayarları | Site bazlı SMTP ve bildirim e-postası |
 | Sayaçlar | Sayaç tanımları, okuma girişi |
-| Raporlar | Aylık ve yıllık raporlar (Excel, yazdırma) |
+| Raporlar | Aylık rapor, Yıllık rapor, Hazırün Cetveli (Blok, No, Kat Maliki, İmza, Varsa Vekili, İmza - çıktı/yazdırma) |
+
+*Not: Hesap Ayarları sol menüden kaldırılmıştır. Profil ve hesap ayarlarına üst bardaki **Profil** linkinden erişilir.*
 
 ### Destek URL’si Kullanımı
 
@@ -377,6 +397,12 @@ Port numarası (7xxx) `launchSettings.json` veya çalışma ortamına göre değ
 - Yıl ve ay seçip **Görüntüle** ile raporu açın
 - **Excel İndir** ile `.xlsx` dosyası indirin
 - **Yazdır** ile tarayıcı yazdırma penceresini açın (sol menü gizlenir)
+
+**Hazırün Cetveli:**
+- Raporlar sayfasından **Hazırün Cetveli** kartına tıklayın
+- Sütunlar: Blok, No, Kat Maliki, İmza, Varsa Vekili, İmza
+- Toplantı tarihini seçip **Güncelle** ile listeyi güncelleyin
+- **Çıktı Al / Yazdır** ile yeni pencerede yazdırma uyumlu sayfa açılır; toplantı öncesi çıktı alıp imzalatabilirsiniz
 
 **Yıllık Rapor:**
 - Yıl seçip **Görüntüle** ile raporu açın

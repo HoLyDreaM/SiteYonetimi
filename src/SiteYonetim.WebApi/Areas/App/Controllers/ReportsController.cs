@@ -275,4 +275,20 @@ public class ReportsController : Controller
         var fileName = $"YillikRapor_{siteName}_{year}.xlsx".Replace(" ", "_");
         return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
     }
+
+    public async Task<IActionResult> HazirunCetveli(Guid siteId, [FromQuery] DateTime? date, CancellationToken ct = default)
+    {
+        var report = await _reportService.GetHazirunCetveliAsync(siteId, date ?? DateTime.Today, ct);
+        var site = await _siteService.GetByIdAsync(siteId, ct);
+        ViewBag.SiteId = siteId;
+        ViewBag.SiteName = site?.Name ?? "";
+        return View(report);
+    }
+
+    public async Task<IActionResult> HazirunCetveliPrint(Guid siteId, [FromQuery] DateTime? date, CancellationToken ct = default)
+    {
+        var report = await _reportService.GetHazirunCetveliAsync(siteId, date ?? DateTime.Today, ct);
+        ViewBag.SiteId = siteId;
+        return View(report);
+    }
 }

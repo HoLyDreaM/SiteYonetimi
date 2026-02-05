@@ -1,0 +1,59 @@
+@model SiteYonetim.Domain.Interfaces.HazirunCetveliDto
+@{
+    Layout = null;
+    ViewData["Title"] = "Hazırün Cetveli - Çıktı";
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hazırün Cetveli - @Model.SiteName</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        @@media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .no-print { display: none !important; }
+            .table td, .table th { border: 1px solid #000 !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print p-3 bg-light border-bottom">
+        <button onclick="window.print()" class="btn btn-primary">Yazdır</button>
+        <button onclick="window.close()" class="btn btn-secondary">Kapat</button>
+    </div>
+    <div class="container p-4">
+        <h4 class="text-center mb-3">@Model.SiteName</h4>
+        <h5 class="text-center text-muted mb-3">HAZIRÜN CETVELİ</h5>
+        <p class="text-center mb-4">Toplantı Tarihi: @Model.Date.ToString("dd.MM.yyyy")</p>
+
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Blok</th>
+                    <th>No</th>
+                    <th>Kat Maliki</th>
+                    <th style="min-width: 100px;">İmza</th>
+                    <th>Varsa Vekili</th>
+                    <th style="min-width: 100px;">İmza</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>@item.BlockOrBuildingName</td>
+                        <td>@item.ApartmentNumber</td>
+                        <td>@item.KatMaliki</td>
+                        <td style="height: 45px;"></td>
+                        <td>@(item.VekilAdi ?? "")</td>
+                        <td style="height: 45px;"></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

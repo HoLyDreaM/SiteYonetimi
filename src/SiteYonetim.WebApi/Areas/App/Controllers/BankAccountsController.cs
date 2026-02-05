@@ -45,6 +45,9 @@ public class BankAccountsController : Controller
     {
         var site = await _siteService.GetByIdAsync(siteId, ct);
         if (site == null) return NotFound();
+        var existing = await _bankService.GetBySiteIdAsync(siteId, ct);
+        if (existing.Count > 0)
+            return RedirectToAction(nameof(Index), new { area = "App", siteId });
         ViewBag.SiteId = siteId;
         ViewBag.SiteName = site.Name;
         return View(new BankAccount { SiteId = siteId, Currency = "TRY", IsDeleted = false });
@@ -54,6 +57,9 @@ public class BankAccountsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(BankAccount model, CancellationToken ct = default)
     {
+        var existing = await _bankService.GetBySiteIdAsync(model.SiteId, ct);
+        if (existing.Count > 0)
+            return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId });
         if (string.IsNullOrWhiteSpace(model.BankName) || string.IsNullOrWhiteSpace(model.AccountNumber))
         {
             ModelState.AddModelError("", "Banka adı ve hesap numarası gerekli.");
@@ -97,5 +103,15 @@ public class BankAccountsController : Controller
     {
         await _bankService.ReconcileBalanceAsync(id, realBalance, ct);
         return RedirectToAction(nameof(Index), new { area = "App", siteId });
+    }
+
+    public async Task<IActionResult> Detail(Guid id, Guid siteId, int page = 1, int pageSize = 20, CancellationToken ct = default)
+    {
+        await _autoDeductionService.ProcessDueExpensesAsync(ct);
+        await _bankService.SyncBalancesForSiteAsync(siteId, ct);
+        var result = await _bankService.GetDetailWithTransactionsPagedAsync(id, page, pageSize, ct);
+        if (result == null) return NotFound();
+        ViewBag.SiteId = siteId;
+        return View(result);
     }
 }

@@ -9,7 +9,7 @@
 {
     <div asp-validation-summary="All" class="alert alert-danger text-dark mb-3" role="alert"></div>
 }
-<form asp-area="App" asp-controller="Expenses" asp-action="Create" method="post">
+<form asp-area="App" asp-controller="Expenses" asp-action="Create" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="SiteId" />
     <div class="card border-0 shadow-sm">
         <div class="card-body">
@@ -43,6 +43,11 @@
                 <div class="col-md-6">
                     <label asp-for="InvoiceNumber" class="form-label">Fatura No (opsiyonel)</label>
                     <input asp-for="InvoiceNumber" class="form-control" />
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Fatura Dosyası (JPG, PDF)</label>
+                    <input type="file" name="Fatura" class="form-control" accept=".jpg,.jpeg,.pdf" />
+                    <span class="form-text">JPG veya PDF formatında fatura ekleyebilirsiniz.</span>
                 </div>
             </div>
         </div>

@@ -16,6 +16,7 @@ public class SiteYonetimDbContext : DbContext
     public DbSet<ExpenseType> ExpenseTypes => Set<ExpenseType>();
     public DbSet<Expense> Expenses => Set<Expense>();
     public DbSet<ExpenseShare> ExpenseShares => Set<ExpenseShare>();
+    public DbSet<ExpenseAttachment> ExpenseAttachments => Set<ExpenseAttachment>();
     public DbSet<Meter> Meters => Set<Meter>();
     public DbSet<MeterReading> MeterReadings => Set<MeterReading>();
     public DbSet<Payment> Payments => Set<Payment>();

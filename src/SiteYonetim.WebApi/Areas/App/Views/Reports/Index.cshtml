@@ -9,7 +9,16 @@
     <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
 </div>
 <div class="row g-3">
-    <div class="col-md-6">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-people me-2"></i>Hazırün Cetveli</h5>
+                <p class="card-text text-muted small">Toplantı katılım listesi. Çıktı alıp imzalatmak için kullanın.</p>
+                <a asp-action="HazirunCetveli" asp-route-siteId="@siteId" class="btn btn-primary">Görüntüle</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
                 <h5 class="card-title"><i class="bi bi-calendar-month me-2"></i>Aylık Rapor</h5>
@@ -39,7 +48,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
                 <h5 class="card-title"><i class="bi bi-calendar3 me-2"></i>Yıllık Rapor</h5>

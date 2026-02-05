@@ -9,7 +9,7 @@
 {
     <div asp-validation-summary="All" class="alert alert-danger text-dark mb-3" role="alert"></div>
 }
-<form asp-area="App" asp-controller="Expenses" asp-action="Edit" asp-route-id="@Model.Id" method="post">
+<form asp-area="App" asp-controller="Expenses" asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="SiteId" />
     <input type="hidden" asp-for="Status" />
@@ -45,6 +45,21 @@
                 <div class="col-md-6">
                     <label asp-for="InvoiceNumber" class="form-label">Fatura No (opsiyonel)</label>
                     <input asp-for="InvoiceNumber" class="form-control" />
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Fatura Dosyası (JPG, PDF)</label>
+                    @if (Model.Attachments != null && Model.Attachments.Any(a => !a.IsDeleted))
+                    {
+                        <div class="mb-2">
+                            <strong>Mevcut dosyalar:</strong>
+                            @foreach (var att in Model.Attachments.Where(a => !a.IsDeleted))
+                            {
+                                <a href="@att.FilePath" target="_blank" class="d-block"><i class="bi bi-file-earmark me-1"></i>@att.FileName</a>
+                            }
+                        </div>
+                    }
+                    <input type="file" name="Fatura" class="form-control" accept=".jpg,.jpeg,.pdf" />
+                    <span class="form-text">Yeni dosya eklemek için seçin. JPG veya PDF.</span>
                 </div>
             </div>
         </div>

@@ -82,6 +82,13 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Teklifler, Gider faturaları, Destek kayıtları için upload klasörlerini otomatik oluştur
+var webRoot = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+foreach (var folder in new[] { "uploads", "uploads/teklifler", "uploads/destek", "uploads/giderler" })
+{
+    try { Directory.CreateDirectory(Path.Combine(webRoot, folder)); } catch { /* yoksa devam */ }
+}
+
 // Geliştirme ortamında veritabanı yoksa oluştur (LocalDB / SQL Server)
 if (app.Environment.IsDevelopment())
 {

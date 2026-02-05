@@ -13,13 +13,15 @@ public class ExpensesController : Controller
     private readonly IExpenseTypeService _expenseTypeService;
     private readonly ISiteService _siteService;
     private readonly IInvoiceExpenseAutoDeductionService _autoDeductionService;
+    private readonly IWebHostEnvironment _env;
 
-    public ExpensesController(IExpenseService expenseService, IExpenseTypeService expenseTypeService, ISiteService siteService, IInvoiceExpenseAutoDeductionService autoDeductionService)
+    public ExpensesController(IExpenseService expenseService, IExpenseTypeService expenseTypeService, ISiteService siteService, IInvoiceExpenseAutoDeductionService autoDeductionService, IWebHostEnvironment env)
     {
         _expenseService = expenseService;
         _expenseTypeService = expenseTypeService;
         _siteService = siteService;
         _autoDeductionService = autoDeductionService;
+        _env = env;
     }
 
     public async Task<IActionResult> Index(Guid? siteId, CancellationToken ct)
@@ -43,7 +45,7 @@ public class ExpensesController : Controller
 
     public async Task<IActionResult> Edit(Guid id, Guid? siteId, CancellationToken ct)
     {
-        var expense = await _expenseService.GetByIdAsync(id, ct);
+        var expense = await _expenseService.GetByIdAsync(id, includeAttachments: true, ct);
         if (expense == null) return NotFound();
         var types = await _expenseTypeService.GetBySiteIdAsync(expense.SiteId, ct);
         ViewBag.SiteId = expense.SiteId;
@@ -53,7 +55,7 @@ public class ExpensesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Guid id, [Bind("Id,SiteId,ExpenseTypeId,Description,Amount,InvoiceDate,InvoiceNumber,Notes,Status")] Expense model, CancellationToken ct)
+    public async Task<IActionResult> Edit(Guid id, [Bind("Id,SiteId,ExpenseTypeId,Description,Amount,InvoiceDate,InvoiceNumber,Notes,Status")] Expense model, IFormFile? Fatura, CancellationToken ct)
     {
         ModelState.Remove("Site");
         ModelState.Remove("ExpenseType");
@@ -77,6 +79,26 @@ public class ExpensesController : Controller
             model.ExpenseDate = model.InvoiceDate!.Value;
             model.DueDate = model.InvoiceDate.Value;
             await _expenseService.UpdateAsync(model, ct);
+            if (Fatura != null && Fatura.Length > 0)
+            {
+                var ext = (Path.GetExtension(Fatura.FileName) ?? "").ToLowerInvariant();
+                if (ext is ".jpg" or ".jpeg" or ".pdf")
+                {
+                    var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "giderler");
+                    Directory.CreateDirectory(uploadsDir);
+                    var fileName = $"{model.Id}_{Guid.NewGuid():N}{ext}";
+                    var filePath = Path.Combine(uploadsDir, fileName);
+                    await using (var stream = new FileStream(filePath, FileMode.Create))
+                        await Fatura.CopyToAsync(stream);
+                    await _expenseService.AddAttachmentAsync(new ExpenseAttachment
+                    {
+                        ExpenseId = model.Id,
+                        FileName = Fatura.FileName,
+                        FilePath = $"/uploads/giderler/{fileName}",
+                        IsDeleted = false
+                    }, ct);
+                }
+            }
             await _autoDeductionService.ProcessDueExpensesAsync(ct);
             return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId });
         }
@@ -119,7 +141,7 @@ public class ExpensesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("SiteId,ExpenseTypeId,Description,Amount,InvoiceDate,InvoiceNumber,Notes")] Expense model, CancellationToken ct)
+    public async Task<IActionResult> Create([Bind("SiteId,ExpenseTypeId,Description,Amount,InvoiceDate,InvoiceNumber,Notes")] Expense model, IFormFile? Fatura, CancellationToken ct)
     {
         ModelState.Remove("Site");
         ModelState.Remove("ExpenseType");
@@ -146,6 +168,26 @@ public class ExpensesController : Controller
             model.Status = ExpenseStatus.Draft;
             model.IsDeleted = false;
             await _expenseService.CreateAsync(model, ct);
+            if (Fatura != null && Fatura.Length > 0)
+            {
+                var ext = (Path.GetExtension(Fatura.FileName) ?? "").ToLowerInvariant();
+                if (ext is ".jpg" or ".jpeg" or ".pdf")
+                {
+                    var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "giderler");
+                    Directory.CreateDirectory(uploadsDir);
+                    var fileName = $"{model.Id}_{Guid.NewGuid():N}{ext}";
+                    var filePath = Path.Combine(uploadsDir, fileName);
+                    await using (var stream = new FileStream(filePath, FileMode.Create))
+                        await Fatura.CopyToAsync(stream);
+                    await _expenseService.AddAttachmentAsync(new ExpenseAttachment
+                    {
+                        ExpenseId = model.Id,
+                        FileName = Fatura.FileName,
+                        FilePath = $"/uploads/giderler/{fileName}",
+                        IsDeleted = false
+                    }, ct);
+                }
+            }
             await _autoDeductionService.ProcessDueExpensesAsync(ct);
             return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId });
         }

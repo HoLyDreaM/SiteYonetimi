@@ -85,4 +85,23 @@ public interface IReportService
     Task<YearlyReportDto> GetYearlyReportAsync(Guid siteId, int year, CancellationToken ct = default);
     Task<YearlyReportDetailDto> GetYearlyReportDetailAsync(Guid siteId, int year, CancellationToken ct = default);
     Task<IReadOnlyList<DebtorDto>> GetDebtorsAsync(Guid siteId, CancellationToken ct = default);
+    Task<HazirunCetveliDto> GetHazirunCetveliAsync(Guid siteId, DateTime? date = null, CancellationToken ct = default);
+}
+
+/// <summary>Hazırün cetveli - toplantı katılım listesi</summary>
+public class HazirunCetveliDto
+{
+    public string SiteName { get; set; } = string.Empty;
+    public DateTime Date { get; set; }
+    public IReadOnlyList<HazirunCetveliItemDto> Items { get; set; } = Array.Empty<HazirunCetveliItemDto>();
+}
+
+public class HazirunCetveliItemDto
+{
+    public string BlockOrBuildingName { get; set; } = string.Empty;
+    public string ApartmentNumber { get; set; } = string.Empty;
+    /// <summary>Kat maliki adı (ev sahibi)</summary>
+    public string KatMaliki { get; set; } = string.Empty;
+    /// <summary>Varsa vekil adı (toplantıda temsil eden kişi - manuel doldurulabilir)</summary>
+    public string? VekilAdi { get; set; }
 }

@@ -1,0 +1,55 @@
+@model SiteYonetim.Domain.Interfaces.HazirunCetveliDto
+@{
+    ViewData["Title"] = "Hazırün Cetveli";
+    var siteId = (Guid)ViewBag.SiteId;
+    var siteName = ViewBag.SiteName as string ?? "";
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Hazırün Cetveli</h1>
+    <div class="d-flex gap-2 align-items-center">
+        <form asp-action="HazirunCetveli" method="get" class="d-flex gap-2 align-items-center">
+            <input type="hidden" name="siteId" value="@siteId" />
+            <label class="form-label mb-0">Toplantı Tarihi:</label>
+            <input type="date" name="date" value="@Model.Date.ToString("yyyy-MM-dd")" class="form-control form-control-sm" style="width: auto;" />
+            <button type="submit" class="btn btn-outline-primary btn-sm">Güncelle</button>
+        </form>
+        <a asp-action="HazirunCetveliPrint" asp-route-siteId="@siteId" asp-route-date="@Model.Date.ToString("yyyy-MM-dd")" target="_blank" class="btn btn-primary"><i class="bi bi-printer me-1"></i>Çıktı Al / Yazdır</a>
+        <a asp-action="Index" asp-route-siteId="@siteId" class="btn btn-outline-secondary">Geri</a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <h4 class="text-center mb-4">@Model.SiteName</h4>
+        <h5 class="text-center text-muted mb-4">HAZIRÜN CETVELİ</h5>
+        <p class="text-center mb-4">Toplantı Tarihi: @Model.Date.ToString("dd.MM.yyyy")</p>
+
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Blok</th>
+                        <th>No</th>
+                        <th>Kat Maliki</th>
+                        <th style="min-width: 100px;">İmza</th>
+                        <th>Varsa Vekili</th>
+                        <th style="min-width: 100px;">İmza</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>@item.BlockOrBuildingName</td>
+                            <td>@item.ApartmentNumber</td>
+                            <td>@item.KatMaliki</td>
+                            <td class="p-3" style="height: 40px;"></td>
+                            <td>@(item.VekilAdi ?? "")</td>
+                            <td class="p-3" style="height: 40px;"></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -234,4 +234,29 @@ public class ReportService : IReportService
         }
         return result;
     }
+
+    public async Task<HazirunCetveliDto> GetHazirunCetveliAsync(Guid siteId, DateTime? date = null, CancellationToken ct = default)
+    {
+        var site = await _db.Sites.AsNoTracking().FirstOrDefaultAsync(s => s.Id == siteId && !s.IsDeleted, ct);
+        var apartments = await _db.Apartments
+            .AsNoTracking()
+            .Where(x => x.SiteId == siteId && !x.IsDeleted)
+            .OrderBy(x => x.BlockOrBuildingName).ThenBy(x => x.ApartmentNumber)
+            .ToListAsync(ct);
+
+        var items = apartments.Select(a => new HazirunCetveliItemDto
+        {
+            BlockOrBuildingName = a.BlockOrBuildingName ?? "",
+            ApartmentNumber = a.ApartmentNumber ?? "",
+            KatMaliki = a.OwnerName ?? "-",
+            VekilAdi = null
+        }).ToList();
+
+        return new HazirunCetveliDto
+        {
+            SiteName = site?.Name ?? "",
+            Date = date ?? DateTime.Today,
+            Items = items
+        };
+    }
 }

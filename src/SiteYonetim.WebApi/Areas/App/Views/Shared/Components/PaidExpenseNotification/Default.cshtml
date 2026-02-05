@@ -1,0 +1,45 @@
+@model IReadOnlyList<SiteYonetim.Domain.Interfaces.PaidExpenseNotificationDto>
+@{
+    var siteId = ViewData["SiteId"]?.ToString() ?? ViewContext.HttpContext.Request.Query["siteId"].FirstOrDefault() ?? "";
+    var items = Model ?? Array.Empty<SiteYonetim.Domain.Interfaces.PaidExpenseNotificationDto>();
+    var hasNotifications = items.Count > 0;
+}
+<div class="dropdown">
+    <button class="btn btn-link text-dark text-decoration-none p-2 position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Bildirimler">
+        <i class="bi bi-bell-fill fs-5"></i>
+        @if (hasNotifications)
+        {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">@items.Count</span>
+        }
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 320px; max-width: 400px;">
+        <li><h6 class="dropdown-header">Ödemesi Gelen Giderler</h6></li>
+        @if (hasNotifications)
+        {
+            @foreach (var item in items.Take(8))
+            {
+                <li>
+                    <a class="dropdown-item py-2" asp-area="App" asp-controller="Expenses" asp-action="Edit" asp-route-id="@item.ExpenseId" asp-route-siteId="@siteId">
+                        <strong>@item.ExpenseTypeName</strong>: @item.Description<br />
+                        <small class="text-muted">@item.Amount.ToString("N2") ₺ - @item.TransactionDate.ToString("dd.MM.yyyy")</small>
+                    </a>
+                </li>
+            }
+            @if (items.Count > 8)
+            {
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                    <a class="dropdown-item text-primary" asp-area="App" asp-controller="Expenses" asp-action="Index" asp-route-siteId="@siteId">Tümünü gör (@items.Count gider)</a>
+                </li>
+            }
+        }
+        else if (!string.IsNullOrEmpty(siteId))
+        {
+            <li><span class="dropdown-item text-muted">Son 30 günde ödenen gider yok.</span></li>
+        }
+        else
+        {
+            <li><span class="dropdown-item text-muted">Bildirimler için bir site seçin.</span></li>
+        }
+    </ul>
+</div>

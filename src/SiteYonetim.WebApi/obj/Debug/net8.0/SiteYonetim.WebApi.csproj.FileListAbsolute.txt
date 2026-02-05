@@ -302,10 +302,11 @@ C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\ne
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\SiteYone.E17062D0.Up2Date
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\SiteYonetim.WebApi.dll
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\refint\SiteYonetim.WebApi.dll
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\SiteYonetim.WebApi.pdb
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\SiteYonetim.WebApi.genruntimeconfig.cache
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\ref\SiteYonetim.WebApi.dll
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\SiteYonetim.WebApi.staticwebassets.runtime.json
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

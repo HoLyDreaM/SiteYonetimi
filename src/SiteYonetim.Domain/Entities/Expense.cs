@@ -21,6 +21,7 @@ public class Expense : BaseEntity
     public ExpenseType ExpenseType { get; set; } = null!;
     public MeterReading? MeterReading { get; set; }
     public ICollection<ExpenseShare> ExpenseShares { get; set; } = new List<ExpenseShare>();
+    public ICollection<ExpenseAttachment> Attachments { get; set; } = new List<ExpenseAttachment>();
 }
 
 public enum ExpenseStatus
