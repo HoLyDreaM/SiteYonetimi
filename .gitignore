@@ -6,3 +6,7 @@ obj/
 .vscode/
 .cursor/
 parameters.json
+
+# Uygulama ayarları (gizli bilgiler içerebilir)
+appsettings.json
+appsettings.Development.json
