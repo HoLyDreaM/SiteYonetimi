@@ -136,6 +136,8 @@ public class ReportsController : Controller
 
     public async Task<IActionResult> Yearly(Guid siteId, int year, CancellationToken ct = default)
     {
+        if (year < 2000 || year > 2100)
+            year = DateTime.Today.Year;
         var report = await _reportService.GetYearlyReportDetailAsync(siteId, year, ct);
         var site = await _siteService.GetByIdAsync(siteId, ct);
         ViewBag.SiteId = siteId;
@@ -146,6 +148,8 @@ public class ReportsController : Controller
 
     public async Task<IActionResult> YearlyExcel(Guid siteId, int year, CancellationToken ct = default)
     {
+        if (year < 2000 || year > 2100)
+            year = DateTime.Today.Year;
         var report = await _reportService.GetYearlyReportDetailAsync(siteId, year, ct);
         var site = await _siteService.GetByIdAsync(siteId, ct);
         var siteName = site?.Name ?? "Site";
@@ -159,7 +163,19 @@ public class ReportsController : Controller
         ws.Cell(2, 1).Value = "";
 
         var row = 3;
-        ws.Cell(row, 1).Value = "ÖZET";
+        ws.Cell(row, 1).Value = "KASA TOPLAM DEVIR";
+        ws.Cell(row, 1).Style.Font.Bold = true;
+        row++;
+        ws.Cell(row, 1).Value = "Önceki Yıllar Devir Bakiyesi (Açılış)";
+        ws.Cell(row, 2).Value = $"{report.OpeningBalance:N2} ₺";
+        row++;
+        ws.Cell(row, 1).Value = $"{year} Yılına Kadar Toplam Tahsilat";
+        ws.Cell(row, 2).Value = $"{report.CumulativeIncomeToDate:N2} ₺";
+        row++;
+        ws.Cell(row, 1).Value = $"{year} Yılına Kadar Toplam Gider";
+        ws.Cell(row, 2).Value = $"{report.CumulativeExpenseToDate:N2} ₺";
+        row += 2;
+        ws.Cell(row, 1).Value = "YILLIK ÖZET";
         ws.Cell(row, 1).Style.Font.Bold = true;
         row++;
         ws.Cell(row, 1).Value = "Tahsil Edilen";

@@ -54,6 +54,12 @@ public class YearlyReportDto
     public decimal TotalExpense { get; set; }
     public decimal Balance => (TotalIncome + PendingIncome) - TotalExpense;
     public IReadOnlyList<MonthlyReportDto> ByMonth { get; set; } = Array.Empty<MonthlyReportDto>();
+    /// <summary>Seçilen yıla kadar (dahil) toplam tahsilat - kasa devir</summary>
+    public decimal CumulativeIncomeToDate { get; set; }
+    /// <summary>Seçilen yıla kadar (dahil) toplam gider - kasa devir</summary>
+    public decimal CumulativeExpenseToDate { get; set; }
+    /// <summary>Seçilen yılın başındaki devir bakiyesi (önceki yılların toplam tahsil - gider)</summary>
+    public decimal OpeningBalance { get; set; }
 }
 
 /// <summary>Detaylı yıllık rapor (her ay için kalem kalem gelir/gider)</summary>

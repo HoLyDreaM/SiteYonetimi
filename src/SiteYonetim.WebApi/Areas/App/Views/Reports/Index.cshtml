@@ -3,6 +3,7 @@
     var siteId = (Guid)ViewBag.SiteId;
     var currentYear = DateTime.Today.Year;
     var currentMonth = DateTime.Today.Month;
+    var minYear = currentYear - 10;
 }
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">Raporlar</h1>
@@ -56,8 +57,8 @@
                 <form asp-action="Yearly" method="get" class="row g-2">
                     <input type="hidden" name="siteId" value="@siteId" />
                     <div class="col-8">
-                        <select name="year" class="form-select">
-                            @for (var y = currentYear; y >= currentYear - 5; y--)
+                        <select name="year" class="form-select" required>
+                            @for (var y = currentYear; y >= minYear; y--)
                             {
                                 <option value="@y" selected="@(y == currentYear)">@y</option>
                             }
