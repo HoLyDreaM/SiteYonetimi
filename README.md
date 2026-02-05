@@ -227,7 +227,27 @@ cd SiteYonetim
 dotnet restore
 ```
 
-### 3. Projeyi Derleme
+### 3. Uygulama Ayarlarını Oluşturma
+
+`appsettings.json` dosyaları güvenlik nedeniyle repoda yoktur. Önce örnek dosyaları kopyalayın:
+
+**Windows (PowerShell):**
+```powershell
+cd src/SiteYonetim.WebApi
+Copy-Item appsettings.example.json appsettings.json
+Copy-Item appsettings.Development.example.json appsettings.Development.json
+```
+
+**Linux / macOS:**
+```bash
+cd src/SiteYonetim.WebApi
+cp appsettings.example.json appsettings.json
+cp appsettings.Development.example.json appsettings.Development.json
+```
+
+Ardından [Uygulama Ayarları](#uygulama-ayarları) bölümüne göre connection string ve JWT ayarlarını düzenleyin.
+
+### 4. Projeyi Derleme
 
 ```bash
 dotnet build
@@ -280,6 +300,12 @@ sqlcmd -S . -d master -i database/Scripts/Full-Schema.sql
 ---
 
 ## Uygulama Ayarları
+
+> **İlk kurulum:** `appsettings.json` ve `appsettings.Development.json` dosyaları güvenlik nedeniyle repoda bulunmaz. Projeyi indirdikten sonra aşağıdaki adımları uygulayın:
+>
+> 1. `src/SiteYonetim.WebApi/appsettings.example.json` dosyasını kopyalayıp `appsettings.json` olarak kaydedin
+> 2. `src/SiteYonetim.WebApi/appsettings.Development.example.json` dosyasını kopyalayıp `appsettings.Development.json` olarak kaydedin
+> 3. Aşağıdaki ayarları kendi ortamınıza göre düzenleyin
 
 `src/SiteYonetim.WebApi/appsettings.json` dosyasını düzenleyin.
 
