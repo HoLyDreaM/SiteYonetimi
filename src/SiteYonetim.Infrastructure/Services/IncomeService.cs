@@ -154,6 +154,25 @@ public class IncomeService : IIncomeService
         }
     }
 
+    public async Task<bool> UpdateAsync(Guid incomeId, decimal amount, string? description, DateTime? paymentStartDate, DateTime? paymentEndDate, DateTime? dueDate, CancellationToken ct = default)
+    {
+        var paid = await GetPaidAmountAsync(incomeId, ct);
+        if (paid > 0) return false; // Tahsilat yapılmış gelir düzenlenemez
+        var income = await _db.Incomes.FirstOrDefaultAsync(x => x.Id == incomeId && !x.IsDeleted, ct);
+        if (income == null) return false;
+        income.Amount = amount;
+        if (paymentStartDate.HasValue) income.PaymentStartDate = paymentStartDate.Value;
+        if (paymentEndDate.HasValue) income.PaymentEndDate = paymentEndDate.Value;
+        if (dueDate.HasValue) income.DueDate = dueDate.Value;
+        if (income.Type == IncomeType.ExtraCollection)
+            income.Description = description;
+        else if (income.Type == IncomeType.Aidat)
+            income.Description = $"{income.Year}-{income.Month:D2} Aidat ({income.PaymentStartDate:dd.MM}-{income.PaymentEndDate:dd.MM})";
+        income.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
+        return true;
+    }
+
     public async Task<bool> DeleteAsync(Guid incomeId, CancellationToken ct = default)
     {
         var paid = await GetPaidAmountAsync(incomeId, ct);

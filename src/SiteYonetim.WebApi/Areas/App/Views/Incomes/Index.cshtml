@@ -83,6 +83,7 @@
                         var paidAmounts = ViewBag.PaidAmounts as Dictionary<Guid, decimal> ?? new Dictionary<Guid, decimal>();
                         var paid = paidAmounts.GetValueOrDefault(i.Id, 0m);
                         var canDelete = paid <= 0;
+                        var remaining = i.Amount - paid;
                         <tr>
                             <td>
                                 @if (canDelete)
@@ -102,9 +103,6 @@
                             <td><strong>@(i.Apartment?.ApartmentNumber ?? "-")</strong></td>
                             <td>@(i.Apartment?.OwnerName ?? "-")</td>
                             <td>
-                                @{
-                                    var remaining = i.Amount - paid;
-                                }
                                 @if (paid > 0 && remaining > 0)
                                 {
                                     <span>@(paid.ToString("N2") + " / " + i.Amount.ToString("N2") + " ₺")</span>
@@ -137,6 +135,7 @@
                                 }
                                 @if (canDelete)
                                 {
+                                    <a asp-area="App" asp-controller="Incomes" asp-action="Edit" asp-route-id="@i.Id" class="btn btn-sm btn-outline-primary" title="Düzenle"><i class="bi bi-pencil"></i></a>
                                     <button type="button" class="btn btn-sm btn-outline-danger" title="Sil" data-delete-id="@i.Id" data-site-id="@siteId" data-year="@year" data-month="@month"><i class="bi bi-trash"></i></button>
                                 }
                             </td>

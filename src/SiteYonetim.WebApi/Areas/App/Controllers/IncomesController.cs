@@ -160,6 +160,67 @@ public class IncomesController : Controller
         return RedirectToAction(nameof(Index), new { area = "App", siteId = income.SiteId, year = income.Year, month = income.Month });
     }
 
+    public async Task<IActionResult> Edit(Guid id, CancellationToken ct = default)
+    {
+        var income = await _incomeService.GetByIdAsync(id, ct);
+        if (income == null) return NotFound();
+        var paid = await _incomeService.GetPaidAmountAsync(id, ct);
+        if (paid > 0)
+        {
+            TempData["Error"] = "Tahsilat yapılmış gelir düzenlenemez.";
+            return RedirectToAction(nameof(Index), new { area = "App", siteId = income.SiteId, year = income.Year, month = income.Month });
+        }
+        ViewBag.Income = income;
+        return View(new EditIncomeModel
+        {
+            Id = income.Id,
+            Amount = income.Amount,
+            Description = income.Description,
+            PaymentStartDate = income.PaymentStartDate,
+            PaymentEndDate = income.PaymentEndDate,
+            DueDate = income.DueDate,
+            Type = income.Type,
+            Year = income.Year,
+            Month = income.Month
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(EditIncomeModel model, CancellationToken ct = default)
+    {
+        var income = await _incomeService.GetByIdAsync(model.Id, ct);
+        if (income == null) return NotFound();
+        var paid = await _incomeService.GetPaidAmountAsync(model.Id, ct);
+        if (paid > 0)
+        {
+            TempData["Error"] = "Tahsilat yapılmış gelir düzenlenemez.";
+            return RedirectToAction(nameof(Index), new { area = "App", siteId = income.SiteId, year = income.Year, month = income.Month });
+        }
+        if (model.Amount <= 0)
+        {
+            ModelState.AddModelError("Amount", "Tutar 0'dan büyük olmalı.");
+        }
+        if (income.Type == IncomeType.ExtraCollection && string.IsNullOrWhiteSpace(model.Description))
+        {
+            ModelState.AddModelError("Description", "Açıklama gerekli.");
+        }
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Income = income;
+            return View(model);
+        }
+        var ok = await _incomeService.UpdateAsync(model.Id, model.Amount, model.Description?.Trim(),
+            model.PaymentStartDate, model.PaymentEndDate, model.DueDate, ct);
+        if (!ok)
+        {
+            TempData["Error"] = "Güncelleme yapılamadı.";
+            return RedirectToAction(nameof(Index), new { area = "App", siteId = income.SiteId, year = income.Year, month = income.Month });
+        }
+        TempData["Message"] = "Gelir güncellendi.";
+        return RedirectToAction(nameof(Index), new { area = "App", siteId = income.SiteId, year = income.Year, month = income.Month });
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id, Guid siteId, int year, int month, CancellationToken ct = default)
@@ -199,4 +260,17 @@ public class CreateExtraCollectionModel
     public int Month { get; set; }
     public decimal TotalAmount { get; set; }
     public string? Description { get; set; }
+}
+
+public class EditIncomeModel
+{
+    public Guid Id { get; set; }
+    public decimal Amount { get; set; }
+    public string? Description { get; set; }
+    public DateTime PaymentStartDate { get; set; }
+    public DateTime PaymentEndDate { get; set; }
+    public DateTime DueDate { get; set; }
+    public IncomeType Type { get; set; }
+    public int Year { get; set; }
+    public int Month { get; set; }
 }
