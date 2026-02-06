@@ -128,8 +128,10 @@ public class IncomesController : Controller
         if (income == null) return NotFound();
         var paidAmount = await _incomeService.GetPaidAmountAsync(model.IncomeId, ct);
         var remainingAmount = income.Amount - paidAmount;
-        if (model.Amount <= 0) { ModelState.AddModelError("Amount", "Tutar 0'dan büyük olmalı."); }
-        else if (model.Amount > remainingAmount) { ModelState.AddModelError("Amount", $"Kalan tutar {remainingAmount:N2} ₺'den fazla olamaz."); }
+        if (model.Amount <= 0)
+        {
+            ModelState.AddModelError("Amount", "Tutar 0'dan büyük olmalı.");
+        }
         if (!ModelState.IsValid)
         {
             ViewBag.Income = income;

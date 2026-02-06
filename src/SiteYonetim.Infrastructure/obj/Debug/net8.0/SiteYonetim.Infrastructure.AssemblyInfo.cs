@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SiteYonetim.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+92fa75cc9a06355ad94151fadf4466730e383ba7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+349ed24eceff5db520ab7154e8d6d90f6779f584")]
 [assembly: System.Reflection.AssemblyProductAttribute("SiteYonetim.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SiteYonetim.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
