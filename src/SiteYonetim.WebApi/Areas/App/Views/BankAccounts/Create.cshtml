@@ -12,6 +12,20 @@
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-6">
+                    <label asp-for="AccountType" class="form-label">Hesap Türü *</label>
+                    <select asp-for="AccountType" class="form-select">
+                        <option value="0">Vadesiz</option>
+                        <option value="1">Vadeli</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Varsayılan Hesap</label>
+                    <div class="form-check mt-2">
+                        <input asp-for="IsDefault" class="form-check-input" />
+                        <label asp-for="IsDefault" class="form-check-label">Tahsilat ve giderlerde otomatik seçilsin</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
                     <label asp-for="BankName" class="form-label">Banka Adı *</label>
                     <input asp-for="BankName" class="form-control" placeholder="Ziraat Bankası" />
                 </div>

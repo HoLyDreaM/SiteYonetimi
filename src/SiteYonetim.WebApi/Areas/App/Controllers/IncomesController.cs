@@ -113,11 +113,12 @@ public class IncomesController : Controller
         var paidAmount = await _incomeService.GetPaidAmountAsync(id, ct);
         var remainingAmount = income.Amount - paidAmount;
         var banks = await _bankService.GetBySiteIdAsync(income.SiteId, ct);
+        var defaultBank = await _bankService.GetDefaultBankAsync(income.SiteId, ct);
         ViewBag.Income = income;
         ViewBag.PaidAmount = paidAmount;
         ViewBag.RemainingAmount = remainingAmount;
         ViewBag.BankAccounts = banks;
-        return View(new CollectIncomeModel { IncomeId = id, Amount = remainingAmount, PaymentDate = DateTime.Today });
+        return View(new CollectIncomeModel { IncomeId = id, Amount = remainingAmount, PaymentDate = DateTime.Today, BankAccountId = defaultBank?.Id });
     }
 
     [HttpPost]

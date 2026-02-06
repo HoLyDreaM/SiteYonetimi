@@ -30,9 +30,6 @@ public class ReportsController : Controller
             return View("SelectSite");
         }
         ViewBag.SiteId = siteId;
-        var refStart = new DateTime(2023, 10, 1);
-        var refEnd = new DateTime(2024, 12, 31);
-        ViewBag.PeriodVerification = await _reportService.GetPeriodVerificationAsync(siteId.Value, refStart, refEnd, ct);
         return View();
     }
 
@@ -189,12 +186,15 @@ public class ReportsController : Controller
         ws.Cell(row, 1).Value = $"Tahsil Edilen ({year})";
         ws.Cell(row, 2).Value = $"{report.TotalIncome:N2} ₺";
         row++;
+        ws.Cell(row, 1).Value = "Bekleyen Aidat ve Diğer Gelirler (Bu yıl için - sadece bilgi)";
+        ws.Cell(row, 2).Value = $"{report.PendingIncome:N2} ₺";
+        row++;
         ws.Cell(row, 1).Value = "Yıllık Toplam Gider";
         ws.Cell(row, 2).Value = $"{report.TotalExpense:N2} ₺";
         row++;
         ws.Cell(row, 1).Value = "Yıllık Bakiye (Devir + Tahsil - Gider)";
         ws.Cell(row, 2).Value = $"{report.Balance:N2} ₺";
-        ws.Range(row - 4, 1, row, 1).Style.Font.Bold = true;
+        ws.Range(row - 5, 1, row, 1).Style.Font.Bold = true;
         row += 2;
 
         ws.Cell(row, 1).Value = "AYLIK ÖZET";

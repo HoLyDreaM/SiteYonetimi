@@ -41,6 +41,11 @@
                 <h5 class="mb-0 text-success">@Model.TotalIncome.ToString("N2") ₺</h5>
             </div>
             <div class="col-md-6 col-lg-3">
+                <p class="mb-0 text-muted small">Bekleyen Aidat ve Diğer Gelirler</p>
+                <p class="mb-0 small text-muted">(Bu yıl için - sadece bilgi)</p>
+                <h5 class="mb-0 text-secondary">@Model.PendingIncome.ToString("N2") ₺</h5>
+            </div>
+            <div class="col-md-6 col-lg-3">
                 <p class="mb-0 text-muted small">Yıllık Toplam Gider</p>
                 <p class="mb-0 small text-muted">(O yıl içinde girilen tüm giderler)</p>
                 <h5 class="mb-0 text-danger">@Model.TotalExpense.ToString("N2") ₺</h5>

@@ -5,14 +5,23 @@
 }
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">Banka Hesapları</h1>
-    <div>
-        @if (Model == null || Model.Count == 0)
+    <div class="d-flex gap-2">
+        <a asp-area="App" asp-controller="BankAccounts" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Hesap</a>
+        @if (Model != null && Model.Count >= 2)
         {
-            <a asp-area="App" asp-controller="BankAccounts" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yeni Hesap</a>
+            <a asp-area="App" asp-controller="BankAccounts" asp-action="Transfer" asp-route-siteId="@siteId" class="btn btn-outline-primary"><i class="bi bi-arrow-left-right me-1"></i> Transfer</a>
         }
         <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
     </div>
 </div>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
 @if (Model != null && Model.Count > 0)
 {
     <div class="card border-0 shadow-sm">
@@ -21,6 +30,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Banka</th>
+                        <th>Tür</th>
                         <th>Şube</th>
                         <th>Hesap No</th>
                         <th>IBAN</th>
@@ -34,7 +44,19 @@
                         var b = item.Account;
                         var bal = item.Balance;
                         <tr>
-                            <td><strong>@b.BankName</strong></td>
+                            <td>
+                                <strong>@b.BankName</strong>
+                                @if (b.IsDefault)
+                                {
+                                    <span class="badge bg-primary ms-1">Varsayılan</span>
+                                }
+                            </td>
+                            <td>
+                                @if (b.AccountType == SiteYonetim.Domain.Entities.BankAccountType.Vadeli)
+                                { <span class="badge bg-info">Vadeli</span> }
+                                else
+                                { <span class="badge bg-secondary">Vadesiz</span> }
+                            </td>
                             <td>@b.BranchName</td>
                             <td>@b.AccountNumber</td>
                             <td class="small">@b.IBAN</td>
@@ -56,5 +78,5 @@
 }
 else
 {
-    <div class="alert alert-info">Henüz banka hesabı eklenmemiş. <a asp-area="App" asp-controller="BankAccounts" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary btn-sm">Yeni hesap ekleyin</a> ve güncel bakiyeyi girin. Tahsilatlar ve giderler bu bakiyeyi güncelleyecektir. <em class="small">(Sadece bir banka hesabı eklenebilir.)</em></div>
+    <div class="alert alert-info">Henüz banka hesabı eklenmemiş. <a asp-area="App" asp-controller="BankAccounts" asp-action="Create" asp-route-siteId="@siteId" class="btn btn-primary btn-sm">Yeni hesap ekleyin</a> ve güncel bakiyeyi girin. Tahsilatlar ve giderler bu bakiyeyi güncelleyecektir. İstediğiniz kadar banka hesabı ekleyebilirsiniz.</div>
 }

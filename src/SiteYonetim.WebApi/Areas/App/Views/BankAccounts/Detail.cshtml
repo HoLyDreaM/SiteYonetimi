@@ -17,7 +17,8 @@
         <h5 class="card-title mb-3">Banka Bilgileri</h5>
         <div class="row">
             <div class="col-md-6">
-                <p class="mb-1"><strong>Banka:</strong> @b.BankName</p>
+                <p class="mb-1"><strong>Banka:</strong> @b.BankName @if (b.IsDefault) { <span class="badge bg-primary">Varsayılan</span> }</p>
+                <p class="mb-1"><strong>Tür:</strong> @(b.AccountType == SiteYonetim.Domain.Entities.BankAccountType.Vadeli ? "Vadeli" : "Vadesiz")</p>
                 <p class="mb-1"><strong>Şube:</strong> @b.BranchName</p>
                 <p class="mb-1"><strong>Hesap No:</strong> @b.AccountNumber</p>
             </div>

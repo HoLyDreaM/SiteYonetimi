@@ -24,6 +24,14 @@ public class BankAccountService : IBankAccountService
     public async Task<BankAccount> CreateAsync(BankAccount account, CancellationToken ct = default)
     {
         account.OpeningBalance = account.CurrentBalance;
+        var existing = await _db.BankAccounts.Where(b => b.SiteId == account.SiteId && !b.IsDeleted).ToListAsync(ct);
+        if (existing.Count == 0)
+            account.IsDefault = true;
+        else if (account.IsDefault)
+        {
+            foreach (var b in existing)
+                b.IsDefault = false;
+        }
         _db.BankAccounts.Add(account);
         await _db.SaveChangesAsync(ct);
         return account;
@@ -33,6 +41,13 @@ public class BankAccountService : IBankAccountService
     {
         var existing = await _db.BankAccounts.FirstOrDefaultAsync(x => x.Id == account.Id && !x.IsDeleted, ct);
         if (existing == null) throw new InvalidOperationException("Banka hesabı bulunamadı.");
+        if (account.IsDefault && !existing.IsDefault)
+        {
+            var others = await _db.BankAccounts.Where(b => b.SiteId == existing.SiteId && b.Id != account.Id && !b.IsDeleted).ToListAsync(ct);
+            foreach (var b in others)
+                b.IsDefault = false;
+        }
+        existing.AccountType = account.AccountType;
         existing.BankName = account.BankName;
         existing.BranchName = account.BranchName;
         existing.AccountNumber = account.AccountNumber;
@@ -54,6 +69,49 @@ public class BankAccountService : IBankAccountService
             bank.CurrentBalance += amountDelta;
             await _db.SaveChangesAsync(ct);
         }
+    }
+
+    public async Task<BankAccount?> GetDefaultBankAsync(Guid siteId, CancellationToken ct = default) =>
+        await _db.BankAccounts.AsNoTracking()
+            .Where(b => b.SiteId == siteId && !b.IsDeleted)
+            .OrderByDescending(b => b.IsDefault).ThenBy(b => b.BankName)
+            .FirstOrDefaultAsync(ct);
+
+    public async Task<bool> TransferAsync(Guid fromBankAccountId, Guid toBankAccountId, decimal amount, DateTime transactionDate, string? description, CancellationToken ct = default)
+    {
+        if (fromBankAccountId == toBankAccountId || amount <= 0) return false;
+        var fromBank = await _db.BankAccounts.FirstOrDefaultAsync(b => b.Id == fromBankAccountId && !b.IsDeleted, ct);
+        var toBank = await _db.BankAccounts.FirstOrDefaultAsync(b => b.Id == toBankAccountId && !b.IsDeleted, ct);
+        if (fromBank == null || toBank == null || fromBank.SiteId != toBank.SiteId) return false;
+        var fromBalance = await GetEffectiveBalanceAsync(fromBankAccountId, ct);
+        if (fromBalance < amount) return false;
+
+        var desc = description?.Trim() ?? "Banka transferi";
+        _db.BankTransactions.Add(new BankTransaction
+        {
+            BankAccountId = fromBankAccountId,
+            TransactionDate = transactionDate,
+            Amount = -amount,
+            Type = TransactionType.Transfer,
+            Description = $"{desc} → {toBank.BankName} {toBank.AccountNumber}",
+            BalanceAfter = fromBank.CurrentBalance - amount,
+            IsDeleted = false
+        });
+        fromBank.CurrentBalance -= amount;
+
+        _db.BankTransactions.Add(new BankTransaction
+        {
+            BankAccountId = toBankAccountId,
+            TransactionDate = transactionDate,
+            Amount = amount,
+            Type = TransactionType.Transfer,
+            Description = $"{desc} ← {fromBank.BankName} {fromBank.AccountNumber}",
+            BalanceAfter = toBank.CurrentBalance + amount,
+            IsDeleted = false
+        });
+        toBank.CurrentBalance += amount;
+        await _db.SaveChangesAsync(ct);
+        return true;
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)
@@ -107,8 +165,13 @@ public class BankAccountService : IBankAccountService
                 .SumAsync(e => Math.Abs(e.Amount), ct);
         }
 
-        // 3) Bakiye = Başlangıç + Tahsilat - Gider (rapor formülü)
-        return bank.OpeningBalance + tahsilat - gider;
+        // 4) Transferler: Bu hesaba giren/çıkan transferler
+        var transferNet = await _db.BankTransactions
+            .Where(bt => bt.BankAccountId == bankAccountId && !bt.IsDeleted && bt.Type == TransactionType.Transfer)
+            .SumAsync(bt => bt.Amount, ct);
+
+        // 5) Bakiye = Başlangıç + Tahsilat - Gider + Transfer
+        return bank.OpeningBalance + tahsilat - gider + transferNet;
     }
 
     /// <summary>
@@ -167,6 +230,10 @@ public class BankAccountService : IBankAccountService
             .Where(p => p.BankAccountId == bankAccountId && !p.IsDeleted)
             .SumAsync(p => p.Amount, ct);
 
+        var transferNet = await _db.BankTransactions
+            .Where(bt => bt.BankAccountId == bankAccountId && !bt.IsDeleted && bt.Type == TransactionType.Transfer)
+            .SumAsync(bt => bt.Amount, ct);
+
         var today = DateTime.Today;
         var firstBankId = await _db.BankAccounts
             .Where(b => b.SiteId == bank.SiteId && !b.IsDeleted)
@@ -191,7 +258,7 @@ public class BankAccountService : IBankAccountService
                 .SumAsync(e => Math.Abs(e.Amount), ct);
         }
 
-        bank.OpeningBalance = realBalance - tahsilat + gider;
+        bank.OpeningBalance = realBalance - tahsilat + gider - transferNet;
         bank.CurrentBalance = realBalance;
         await _db.SaveChangesAsync(ct);
     }

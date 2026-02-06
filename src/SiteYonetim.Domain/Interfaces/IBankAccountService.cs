@@ -29,6 +29,8 @@ public interface IBankAccountService
     Task<BankAccount> CreateAsync(BankAccount account, CancellationToken ct = default);
     Task<BankAccount> UpdateAsync(BankAccount account, CancellationToken ct = default);
     Task UpdateBalanceAsync(Guid bankAccountId, decimal amountDelta, CancellationToken ct = default);
+    Task<BankAccount?> GetDefaultBankAsync(Guid siteId, CancellationToken ct = default);
+    Task<bool> TransferAsync(Guid fromBankAccountId, Guid toBankAccountId, decimal amount, DateTime transactionDate, string? description, CancellationToken ct = default);
     Task DeleteAsync(Guid id, CancellationToken ct = default);
     Task<decimal> GetEffectiveBalanceAsync(Guid bankAccountId, CancellationToken ct = default);
     Task SyncBalancesForSiteAsync(Guid siteId, CancellationToken ct = default);

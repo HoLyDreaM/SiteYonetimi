@@ -45,9 +45,6 @@ public class BankAccountsController : Controller
     {
         var site = await _siteService.GetByIdAsync(siteId, ct);
         if (site == null) return NotFound();
-        var existing = await _bankService.GetBySiteIdAsync(siteId, ct);
-        if (existing.Count > 0)
-            return RedirectToAction(nameof(Index), new { area = "App", siteId });
         ViewBag.SiteId = siteId;
         ViewBag.SiteName = site.Name;
         return View(new BankAccount { SiteId = siteId, Currency = "TRY", IsDeleted = false });
@@ -57,9 +54,6 @@ public class BankAccountsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(BankAccount model, CancellationToken ct = default)
     {
-        var existing = await _bankService.GetBySiteIdAsync(model.SiteId, ct);
-        if (existing.Count > 0)
-            return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId });
         if (string.IsNullOrWhiteSpace(model.BankName) || string.IsNullOrWhiteSpace(model.AccountNumber))
         {
             ModelState.AddModelError("", "Banka adı ve hesap numarası gerekli.");
@@ -97,6 +91,57 @@ public class BankAccountsController : Controller
         return RedirectToAction(nameof(Index), new { area = "App", siteId });
     }
 
+    public async Task<IActionResult> Transfer(Guid siteId, CancellationToken ct = default)
+    {
+        var banks = await _bankService.GetBySiteIdAsync(siteId, ct);
+        if (banks.Count < 2)
+        {
+            TempData["Error"] = "Transfer için en az 2 banka hesabı gerekli.";
+            return RedirectToAction(nameof(Index), new { area = "App", siteId });
+        }
+        ViewBag.SiteId = siteId;
+        ViewBag.Banks = banks;
+        return View(new BankTransferModel { SiteId = siteId, TransactionDate = DateTime.Today });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Transfer(BankTransferModel model, CancellationToken ct = default)
+    {
+        var banks = await _bankService.GetBySiteIdAsync(model.SiteId, ct);
+        if (banks.Count < 2)
+        {
+            TempData["Error"] = "Transfer için en az 2 banka hesabı gerekli.";
+            return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId });
+        }
+        if (!model.FromBankAccountId.HasValue || !model.ToBankAccountId.HasValue)
+        {
+            ModelState.AddModelError("", "Kaynak ve hedef hesap seçilmeli.");
+        }
+        if (model.FromBankAccountId == model.ToBankAccountId)
+        {
+            ModelState.AddModelError("", "Kaynak ve hedef hesap aynı olamaz.");
+        }
+        if (model.Amount <= 0)
+        {
+            ModelState.AddModelError("Amount", "Tutar 0'dan büyük olmalı.");
+        }
+        if (!ModelState.IsValid)
+        {
+            ViewBag.SiteId = model.SiteId;
+            ViewBag.Banks = banks;
+            return View(model);
+        }
+        var ok = await _bankService.TransferAsync(model.FromBankAccountId!.Value, model.ToBankAccountId!.Value, model.Amount, model.TransactionDate, model.Description, ct);
+        if (!ok)
+        {
+            TempData["Error"] = "Transfer yapılamadı. Bakiyeyi kontrol edin.";
+            return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId });
+        }
+        TempData["Message"] = "Transfer başarıyla tamamlandı.";
+        return RedirectToAction(nameof(Index), new { area = "App", siteId = model.SiteId });
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Reconcile(Guid id, Guid siteId, decimal realBalance, CancellationToken ct = default)
@@ -114,4 +159,14 @@ public class BankAccountsController : Controller
         ViewBag.SiteId = siteId;
         return View(result);
     }
+}
+
+public class BankTransferModel
+{
+    public Guid SiteId { get; set; }
+    public Guid? FromBankAccountId { get; set; }
+    public Guid? ToBankAccountId { get; set; }
+    public decimal Amount { get; set; }
+    public DateTime TransactionDate { get; set; }
+    public string? Description { get; set; }
 }

@@ -1,0 +1,60 @@
+@model SiteYonetim.WebApi.Areas.App.Controllers.BankTransferModel
+@{
+    ViewData["Title"] = "Banka Transferi";
+    var siteId = (Guid)ViewBag.SiteId;
+    var banks = ViewBag.Banks as IReadOnlyList<SiteYonetim.Domain.Entities.BankAccount> ?? new List<SiteYonetim.Domain.Entities.BankAccount>();
+}
+<h1 class="h3 mb-4">Banka Transferi</h1>
+@if (!ViewData.ModelState.IsValid)
+{
+    <div asp-validation-summary="All" class="alert alert-danger text-dark mb-3" role="alert"></div>
+}
+<form asp-area="App" asp-controller="BankAccounts" asp-action="Transfer" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="SiteId" />
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <p class="text-muted small mb-3">Vadeli hesabınızdan vadesiz hesabınıza veya tersi para transferi yapabilirsiniz. Kasayı güncel tutmak için kullanın.</p>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label">Kaynak Hesap (Para çıkacak) *</label>
+                    <select asp-for="FromBankAccountId" class="form-select" required>
+                        <option value="">-- Seçin --</option>
+                        @foreach (var b in banks)
+                        {
+                            var typeStr = b.AccountType == SiteYonetim.Domain.Entities.BankAccountType.Vadeli ? "Vadeli" : "Vadesiz";
+                            <option value="@b.Id">@b.BankName - @b.AccountNumber (@typeStr)</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Hedef Hesap (Para girecek) *</label>
+                    <select asp-for="ToBankAccountId" class="form-select" required>
+                        <option value="">-- Seçin --</option>
+                        @foreach (var b in banks)
+                        {
+                            var typeStr = b.AccountType == SiteYonetim.Domain.Entities.BankAccountType.Vadeli ? "Vadeli" : "Vadesiz";
+                            <option value="@b.Id">@b.BankName - @b.AccountNumber (@typeStr)</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Amount" class="form-label">Tutar (₺) *</label>
+                    <input asp-for="Amount" type="number" step="0.01" min="0.01" class="form-control" required />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="TransactionDate" class="form-label">Transfer Tarihi *</label>
+                    <input asp-for="TransactionDate" type="date" class="form-control" required />
+                </div>
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label">Açıklama (opsiyonel)</label>
+                    <input asp-for="Description" class="form-control" placeholder="Örn: Vadeli'den vadesize aktarım" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-arrow-left-right me-1"></i> Transfer Yap</button>
+            <a asp-action="Index" asp-route-siteId="@siteId" class="btn btn-secondary">İptal</a>
+        </div>
+    </div>
+</form>

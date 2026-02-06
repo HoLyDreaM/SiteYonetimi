@@ -37,7 +37,7 @@
                             <option value="">-- Seçin --</option>
                             @foreach (var b in banks)
                             {
-                                <option value="@b.Id">@b.BankName - @b.AccountNumber</option>
+                                <option value="@b.Id" selected="@(Model.BankAccountId == b.Id)">@b.BankName - @b.AccountNumber @(b.IsDefault ? "(Varsayılan)" : "")</option>
                             }
                         </select>
                         <span class="form-text">Seçilirse tahsilat banka bakiyesine eklenir.</span>

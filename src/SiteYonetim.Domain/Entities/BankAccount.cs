@@ -6,6 +6,8 @@ namespace SiteYonetim.Domain.Entities;
 public class BankAccount : BaseEntity
 {
     public Guid SiteId { get; set; }
+    /// <summary>Vadesiz = 0, Vadeli = 1</summary>
+    public BankAccountType AccountType { get; set; } = BankAccountType.Vadesiz;
     public string BankName { get; set; } = string.Empty;
     public string BranchName { get; set; } = string.Empty;
     public string AccountNumber { get; set; } = string.Empty;
@@ -21,4 +23,10 @@ public class BankAccount : BaseEntity
     public Site Site { get; set; } = null!;
     public ICollection<BankTransaction> Transactions { get; set; } = new List<BankTransaction>();
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+}
+
+public enum BankAccountType
+{
+    Vadesiz = 0,
+    Vadeli = 1
 }

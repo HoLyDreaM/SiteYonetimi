@@ -4,51 +4,11 @@
     var currentYear = DateTime.Today.Year;
     var currentMonth = DateTime.Today.Month;
     var minYear = currentYear - 10;
-    var verification = ViewBag.PeriodVerification as SiteYonetim.Domain.Interfaces.PeriodVerificationDto;
-    var refKasa = 39841.80m;
-    var verificationOk = verification != null && Math.Abs(verification.Kasa - refKasa) < 0.01m;
 }
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">Raporlar</h1>
     <a asp-area="App" asp-controller="Sites" asp-action="Index" class="btn btn-outline-secondary">Site Değiştir</a>
 </div>
-@if (verification != null)
-{
-    <div class="card border-0 shadow-sm mb-4 @(verificationOk ? "border-success" : "border-warning")">
-        <div class="card-header bg-light">
-            <strong>Referans Doğrulama (2023 Ekim – 2024 Aralık)</strong>
-            @if (verificationOk)
-            {
-                <span class="badge bg-success ms-2">✓ Tutarlı</span>
-            }
-            else
-            {
-                <span class="badge bg-warning text-dark ms-2">Kontrol edin</span>
-            }
-        </div>
-        <div class="card-body">
-            <p class="mb-1 small text-muted">KASA = TOPLAM TAHSİLAT – TOPLAM GİDER. Son kasa mutlaka 39.841,80 ₺ olmalıdır.</p>
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <span class="text-muted small">Toplam Tahsilat:</span>
-                    <strong>@verification.TotalTahsilat.ToString("N2") ₺</strong>
-                </div>
-                <div class="col-md-4">
-                    <span class="text-muted small">Toplam Gider:</span>
-                    <strong>@verification.TotalGider.ToString("N2") ₺</strong>
-                </div>
-                <div class="col-md-4">
-                    <span class="text-muted small">Kasa (Tahsilat - Gider):</span>
-                    <strong class="@(verificationOk ? "text-success" : "text-warning")">@verification.Kasa.ToString("N2") ₺</strong>
-                    @if (!verificationOk)
-                    {
-                        <span class="small text-muted">(Beklenen: 39.841,80 ₺)</span>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-}
 <div class="row g-3">
     <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
