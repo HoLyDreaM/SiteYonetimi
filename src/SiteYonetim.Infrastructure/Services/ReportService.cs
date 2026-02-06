@@ -16,45 +16,53 @@ public class ReportService : IReportService
         var start = new DateTime(year, month, 1);
         var end = start.AddMonths(1).AddDays(-1);
 
+        // Tahsil Edilen = Bu ay yapılan GERÇEK para girişleri (Payment tablosu, PaymentDate bu ay)
+        var totalIncome = await _db.Payments
+            .Where(p => p.SiteId == siteId && p.IncomeId != null && !p.IsDeleted && p.Amount > 0)
+            .Where(p => p.PaymentDate >= start && p.PaymentDate <= end)
+            .SumAsync(p => p.Amount, ct);
+
+        // Bekleyen Aidat ve Diğer Gelirler (Bu ay için) - Sadece bilgi amaçlı, bakiyeye girmez
         var incomesInPeriod = await _db.Incomes
             .Where(x => x.SiteId == siteId && x.Year == year && x.Month == month && !x.IsDeleted)
             .ToListAsync(ct);
         var incomeIds = incomesInPeriod.Select(x => x.Id).ToList();
-        var totalIncome = incomeIds.Count > 0
-            ? await _db.Payments
-                .Where(x => x.IncomeId != null && incomeIds.Contains(x.IncomeId!.Value) && !x.IsDeleted)
-                .SumAsync(x => x.Amount, ct)
-            : 0m;
         var totalIncomeAmount = incomesInPeriod.Sum(x => x.Amount);
-        var pendingIncome = totalIncomeAmount - totalIncome;
-
-        // Ek gelir (Özel Toplama + Diğer) - Aidat dışındaki tüm gelirler
-        var extraIncomes = incomesInPeriod.Where(x => x.Type == IncomeType.ExtraCollection || x.Type == IncomeType.Other).ToList();
-        var extraIncomeIds = extraIncomes.Select(x => x.Id).ToList();
-        var extraCollectionIncome = extraIncomeIds.Count > 0
+        var incomeCollectedForPeriod = incomeIds.Count > 0
             ? await _db.Payments
-                .Where(x => x.IncomeId != null && extraIncomeIds.Contains(x.IncomeId!.Value) && !x.IsDeleted)
-                .SumAsync(x => x.Amount, ct)
+                .Where(p => p.IncomeId != null && incomeIds.Contains(p.IncomeId!.Value) && !p.IsDeleted && p.Amount > 0)
+                .SumAsync(p => p.Amount, ct)
             : 0m;
-        var extraCollectionAmount = extraIncomes.Sum(x => x.Amount);
-        var extraCollectionPending = extraCollectionAmount - extraCollectionIncome;
+        var pendingIncome = Math.Max(0, totalIncomeAmount - incomeCollectedForPeriod);
 
-        // 1) ExcludeFromReport=true olan gider türleri (Aidat vb.)
-        var excludedByFlag = await _db.ExpenseTypes
-            .Where(et => et.SiteId == siteId && !et.IsDeleted && et.ExcludeFromReport)
-            .Select(et => et.Id)
+        // Ek Gelir (Bu ay) = Özel Toplama + Diğer, bu ay tahsil edilen (PaymentDate bu ay)
+        var extraIncomeIdsAll = await _db.Incomes
+            .Where(x => x.SiteId == siteId && (x.Type == IncomeType.ExtraCollection || x.Type == IncomeType.Other) && !x.IsDeleted)
+            .Select(x => x.Id)
             .ToListAsync(ct);
+        var extraCollectionIncome = extraIncomeIdsAll.Count > 0
+            ? await _db.Payments
+                .Where(p => p.IncomeId != null && extraIncomeIdsAll.Contains(p.IncomeId!.Value) && !p.IsDeleted && p.Amount > 0)
+                .Where(p => p.PaymentDate >= start && p.PaymentDate <= end)
+                .SumAsync(p => p.Amount, ct)
+            : 0m;
+        var extraIncomes = incomesInPeriod.Where(x => x.Type == IncomeType.ExtraCollection || x.Type == IncomeType.Other).ToList();
+        var extraCollectionIdsThisMonth = extraIncomes.Select(x => x.Id).ToList();
+        var extraCollectionAmount = extraIncomes.Sum(x => x.Amount);
+        var extraCollectionCollected = extraCollectionIdsThisMonth.Count > 0
+            ? await _db.Payments
+                .Where(p => p.IncomeId != null && extraCollectionIdsThisMonth.Contains(p.IncomeId!.Value) && !p.IsDeleted && p.Amount > 0)
+                .SumAsync(p => p.Amount, ct)
+            : 0m;
+        var extraCollectionPending = Math.Max(0, extraCollectionAmount - extraCollectionCollected);
 
-        // Sadece ExcludeFromReport=true olan gider türlerini hariç tut
-        var expensesInPeriod = await _db.Expenses
+        // Toplam Gider = Bu ayın TÜM giderleri (gider olarak girilen her kalem giderdir)
+        var totalExpense = await _db.Expenses
             .Where(x => x.SiteId == siteId && !x.IsDeleted)
             .Where(x => (x.InvoiceDate ?? x.ExpenseDate) >= start && (x.InvoiceDate ?? x.ExpenseDate) <= end)
-            .ToListAsync(ct);
+            .SumAsync(x => x.Amount, ct);
 
-        var totalExpense = expensesInPeriod
-            .Where(x => !excludedByFlag.Contains(x.ExpenseTypeId))
-            .Sum(x => x.Amount);
-
+        // Devir Bakiyesi = Bir önceki ayın kapanış bakiyesi
         var openingBalance = await GetOpeningBalanceForMonthAsync(siteId, year, month, ct);
         return new MonthlyReportDto
         {
@@ -86,9 +94,9 @@ public class ReportService : IReportService
 
         var incomeIds = incomes.Select(x => x.Id).ToList();
         var paymentsByIncome = await _db.Payments
-            .Where(x => x.IncomeId != null && incomeIds.Contains(x.IncomeId!.Value) && !x.IsDeleted)
-            .GroupBy(x => x.IncomeId!.Value)
-            .ToDictionaryAsync(g => g.Key, g => g.Sum(x => x.Amount), ct);
+            .Where(p => p.IncomeId != null && incomeIds.Contains(p.IncomeId!.Value) && !p.IsDeleted && p.Amount > 0)
+            .GroupBy(p => p.IncomeId!.Value)
+            .ToDictionaryAsync(g => g.Key, g => g.Sum(p => p.Amount), ct);
 
         var incomeTypeNames = new Dictionary<int, string>
         {
@@ -109,29 +117,22 @@ public class ReportService : IReportService
             DueDate = i.DueDate
         }).ToList();
 
-        var excludedByFlag = await _db.ExpenseTypes
-            .Where(et => et.SiteId == siteId && !et.IsDeleted && et.ExcludeFromReport)
-            .Select(et => et.Id)
-            .ToListAsync(ct);
-
         var expensesInPeriod = await _db.Expenses
             .Include(x => x.ExpenseType)
             .Where(x => x.SiteId == siteId && !x.IsDeleted)
             .Where(x => (x.InvoiceDate ?? x.ExpenseDate) >= start && (x.InvoiceDate ?? x.ExpenseDate) <= end)
+            .OrderBy(x => x.ExpenseType != null ? x.ExpenseType.Name : "")
+            .ThenBy(x => x.ExpenseDate)
             .ToListAsync(ct);
 
-        var expenseItems = expensesInPeriod
-            .Where(x => !excludedByFlag.Contains(x.ExpenseTypeId))
-            .OrderBy(x => x.ExpenseType?.Name).ThenBy(x => x.ExpenseDate)
-            .Select(e => new MonthlyReportExpenseItemDto
-            {
-                ExpenseTypeName = e.ExpenseType?.Name ?? "",
-                Description = e.Description,
-                Amount = e.Amount,
-                ExpenseDate = e.InvoiceDate ?? e.ExpenseDate,
-                InvoiceNumber = e.InvoiceNumber
-            })
-            .ToList();
+        var expenseItems = expensesInPeriod.Select(e => new MonthlyReportExpenseItemDto
+        {
+            ExpenseTypeName = e.ExpenseType?.Name ?? "",
+            Description = e.Description,
+            Amount = e.Amount,
+            ExpenseDate = e.InvoiceDate ?? e.ExpenseDate,
+            InvoiceNumber = e.InvoiceNumber
+        }).ToList();
 
         return new MonthlyReportDetailDto
         {
@@ -150,7 +151,7 @@ public class ReportService : IReportService
 
     public async Task<YearlyReportDto> GetYearlyReportAsync(Guid siteId, int year, CancellationToken ct = default)
     {
-        var (cumulativeIncome, cumulativeExpense, openingBalance) = await GetCumulativeTotalsAsync(siteId, year, ct);
+        var (yearIncome, yearExpense, openingBalance) = await GetYearlyTotalsAsync(siteId, year, ct);
 
         var byMonth = new List<MonthlyReportDto>();
         for (var m = 1; m <= 12; m++)
@@ -159,21 +160,19 @@ public class ReportService : IReportService
         return new YearlyReportDto
         {
             Year = year,
-            TotalIncome = byMonth.Sum(x => x.TotalIncome),
+            TotalIncome = yearIncome,
             PendingIncome = byMonth.Sum(x => x.PendingIncome),
             ExtraCollectionIncome = byMonth.Sum(x => x.ExtraCollectionIncome),
             ExtraCollectionPending = byMonth.Sum(x => x.ExtraCollectionPending),
-            TotalExpense = byMonth.Sum(x => x.TotalExpense),
+            TotalExpense = yearExpense,
             ByMonth = byMonth,
-            CumulativeIncomeToDate = cumulativeIncome,
-            CumulativeExpenseToDate = cumulativeExpense,
             OpeningBalance = openingBalance
         };
     }
 
     public async Task<YearlyReportDetailDto> GetYearlyReportDetailAsync(Guid siteId, int year, CancellationToken ct = default)
     {
-        var (cumulativeIncome, cumulativeExpense, openingBalance) = await GetCumulativeTotalsAsync(siteId, year, ct);
+        var (yearIncome, yearExpense, openingBalance) = await GetYearlyTotalsAsync(siteId, year, ct);
 
         var byMonthDetail = new List<MonthlyReportDetailDto>();
         for (var m = 1; m <= 12; m++)
@@ -182,108 +181,91 @@ public class ReportService : IReportService
         return new YearlyReportDetailDto
         {
             Year = year,
-            TotalIncome = byMonthDetail.Sum(x => x.TotalIncome),
+            TotalIncome = yearIncome,
             PendingIncome = byMonthDetail.Sum(x => x.PendingIncome),
             ExtraCollectionIncome = byMonthDetail.Sum(x => x.ExtraCollectionIncome),
             ExtraCollectionPending = byMonthDetail.Sum(x => x.ExtraCollectionPending),
-            TotalExpense = byMonthDetail.Sum(x => x.TotalExpense),
+            TotalExpense = yearExpense,
             ByMonth = byMonthDetail.Cast<MonthlyReportDto>().ToList(),
             ByMonthDetail = byMonthDetail,
-            CumulativeIncomeToDate = cumulativeIncome,
-            CumulativeExpenseToDate = cumulativeExpense,
             OpeningBalance = openingBalance
         };
     }
 
-    /// <summary>Belirtilen ayın başındaki devir bakiyesi (önceki tüm dönemlerin tahsil - gider). Eylül'de toplanan ek gelir Aralık bakiyesine yansır.</summary>
+    /// <summary>Devir Bakiyesi = Bir önceki ayın kapanış bakiyesi. Sadece Payment (gerçek tahsilat) - Gider.</summary>
     private async Task<decimal> GetOpeningBalanceForMonthAsync(Guid siteId, int year, int month, CancellationToken ct)
     {
         var startOfMonth = new DateTime(year, month, 1);
-        var incomeIdsBefore = await _db.Incomes
-            .Where(x => x.SiteId == siteId && !x.IsDeleted)
-            .Where(x => x.Year < year || (x.Year == year && x.Month < month))
-            .Select(x => x.Id)
-            .ToListAsync(ct);
-        var incomeBefore = incomeIdsBefore.Count > 0
-            ? await _db.Payments
-                .Where(x => x.IncomeId != null && incomeIdsBefore.Contains(x.IncomeId!.Value) && !x.IsDeleted)
-                .SumAsync(x => x.Amount, ct)
-            : 0m;
 
-        var excludedByFlag = await _db.ExpenseTypes
-            .Where(et => et.SiteId == siteId && !et.IsDeleted && et.ExcludeFromReport)
-            .Select(et => et.Id)
-            .ToListAsync(ct);
+        var incomeBefore = await _db.Payments
+            .Where(p => p.SiteId == siteId && p.IncomeId != null && !p.IsDeleted && p.Amount > 0)
+            .Where(p => p.PaymentDate < startOfMonth)
+            .SumAsync(p => p.Amount, ct);
 
-        var expensesBefore = await _db.Expenses
+        var expenseBefore = await _db.Expenses
             .Where(x => x.SiteId == siteId && !x.IsDeleted)
             .Where(x => (x.InvoiceDate ?? x.ExpenseDate) < startOfMonth)
-            .ToListAsync(ct);
-
-        var expenseBefore = expensesBefore
-            .Where(x => !excludedByFlag.Contains(x.ExpenseTypeId))
-            .Sum(x => x.Amount);
+            .SumAsync(x => x.Amount, ct);
 
         return incomeBefore - expenseBefore;
     }
 
-    /// <summary>Seçilen yıla kadar (dahil) kümülatif tahsilat ve gider, önceki yıllar devir bakiyesi.</summary>
-    private async Task<(decimal CumulativeIncome, decimal CumulativeExpense, decimal OpeningBalance)> GetCumulativeTotalsAsync(Guid siteId, int year, CancellationToken ct)
+    /// <summary>Yıllık rapor için: Önceki Yıllar Devir, Tahsil Edilen (YIL), Yıllık Toplam Gider.
+    /// TAHSİLAT = Sadece Payment tablosundaki gerçek para girişleri. Bekleyen/tahakkuk/borç ASLA dahil değil.</summary>
+    private async Task<(decimal YearIncome, decimal YearExpense, decimal OpeningBalance)> GetYearlyTotalsAsync(Guid siteId, int year, CancellationToken ct)
     {
-        // Tahsilat: Income'a bağlı ödemeler (Year <= year)
-        var incomeIdsUpToYear = await _db.Incomes
-            .Where(x => x.SiteId == siteId && x.Year <= year && !x.IsDeleted)
-            .Select(x => x.Id)
-            .ToListAsync(ct);
-        var cumulativeIncome = await _db.Payments
-            .Where(x => x.IncomeId != null && incomeIdsUpToYear.Contains(x.IncomeId!.Value) && !x.IsDeleted)
+        var startOfYear = new DateTime(year, 1, 1);
+        var endOfYear = new DateTime(year, 12, 31);
+
+        // Yıllık Tahsil = SADECE ilgili yıl içinde GERÇEKLEŞMİŞ para girişleri (Payment tablosu)
+        // Her Payment = banka/kasa girişi, tarihi belli, gerçekten ödenmiş. Çift sayım YOK.
+        var yearIncome = await _db.Payments
+            .Where(p => p.SiteId == siteId && !p.IsDeleted && p.IncomeId != null && p.Amount > 0)
+            .Where(p => p.PaymentDate >= startOfYear && p.PaymentDate <= endOfYear)
+            .SumAsync(p => p.Amount, ct);
+
+        // Yıllık Toplam Gider = O yıl içinde girilen TÜM giderler
+        var yearExpense = await _db.Expenses
+            .Where(x => x.SiteId == siteId && !x.IsDeleted)
+            .Where(x => (x.InvoiceDate ?? x.ExpenseDate) >= startOfYear && (x.InvoiceDate ?? x.ExpenseDate) <= endOfYear)
             .SumAsync(x => x.Amount, ct);
 
-        // Gider: ExcludeFromReport hariç, (InvoiceDate ?? ExpenseDate) <= yıl sonu
-        var endOfYear = new DateTime(year, 12, 31);
-        var excludedByFlag = await _db.ExpenseTypes
-            .Where(et => et.SiteId == siteId && !et.IsDeleted && et.ExcludeFromReport)
-            .Select(et => et.Id)
-            .ToListAsync(ct);
+        // Önceki Yıllar Devir Bakiyesi (Açılış) = Yıl başındaki kasa (önceki tahsilat - önceki gider)
+        var incomeBeforeYear = await _db.Payments
+            .Where(p => p.SiteId == siteId && !p.IsDeleted && p.IncomeId != null && p.Amount > 0)
+            .Where(p => p.PaymentDate < startOfYear)
+            .SumAsync(p => p.Amount, ct);
 
-        var expensesUpToYear = await _db.Expenses
-            .Include(x => x.ExpenseType)
+        var expenseBeforeYear = await _db.Expenses
             .Where(x => x.SiteId == siteId && !x.IsDeleted)
-            .Where(x => (x.InvoiceDate ?? x.ExpenseDate) <= endOfYear)
-            .ToListAsync(ct);
+            .Where(x => (x.InvoiceDate ?? x.ExpenseDate) < startOfYear)
+            .SumAsync(x => x.Amount, ct);
 
-        // Sadece ExcludeFromReport=true olan gider türlerini hariç tut. Tüm gerçek giderler sayılır.
-        var cumulativeExpense = expensesUpToYear
-            .Where(x => !excludedByFlag.Contains(x.ExpenseTypeId))
-            .Sum(x => x.Amount);
+        var openingBalance = incomeBeforeYear - expenseBeforeYear;
 
-        // Önceki yıllar devir bakiyesi (seçilen yıldan önceki tahsil - gider)
-        decimal incomeBeforeYear = 0;
-        decimal expenseBeforeYear = 0;
-        if (year > 1)
+        return (yearIncome, yearExpense, openingBalance);
+    }
+
+    /// <summary>Belirli dönem için KASA = TOPLAM TAHSİLAT - TOPLAM GİDER. Sadece Payment (gerçek para girişi).</summary>
+    public async Task<PeriodVerificationDto> GetPeriodVerificationAsync(Guid siteId, DateTime startDate, DateTime endDate, CancellationToken ct = default)
+    {
+        var totalTahsilat = await _db.Payments
+            .Where(p => p.SiteId == siteId && p.IncomeId != null && !p.IsDeleted && p.Amount > 0)
+            .Where(p => p.PaymentDate >= startDate && p.PaymentDate <= endDate)
+            .SumAsync(p => p.Amount, ct);
+
+        var totalGider = await _db.Expenses
+            .Where(x => x.SiteId == siteId && !x.IsDeleted)
+            .Where(x => (x.InvoiceDate ?? x.ExpenseDate) >= startDate && (x.InvoiceDate ?? x.ExpenseDate) <= endDate)
+            .SumAsync(x => x.Amount, ct);
+
+        return new PeriodVerificationDto
         {
-            var incomeIdsBeforeYear = await _db.Incomes
-                .Where(x => x.SiteId == siteId && x.Year < year && !x.IsDeleted)
-                .Select(x => x.Id)
-                .ToListAsync(ct);
-            incomeBeforeYear = await _db.Payments
-                .Where(x => x.IncomeId != null && incomeIdsBeforeYear.Contains(x.IncomeId!.Value) && !x.IsDeleted)
-                .SumAsync(x => x.Amount, ct);
-
-            var endOfPrevYear = new DateTime(year - 1, 12, 31);
-            var expensesBeforeYear = await _db.Expenses
-                .Where(x => x.SiteId == siteId && !x.IsDeleted)
-                .Where(x => (x.InvoiceDate ?? x.ExpenseDate) <= endOfPrevYear)
-                .ToListAsync(ct);
-
-            expenseBeforeYear = expensesBeforeYear
-                .Where(x => !excludedByFlag.Contains(x.ExpenseTypeId))
-                .Sum(x => x.Amount);
-        }
-
-        var openingBalance = year > 1 ? incomeBeforeYear - expenseBeforeYear : 0;
-
-        return (cumulativeIncome, cumulativeExpense, openingBalance);
+            StartDate = startDate,
+            EndDate = endDate,
+            TotalTahsilat = totalTahsilat,
+            TotalGider = totalGider
+        };
     }
 
     /// <summary>Sadece aidat ve ek para toplama borçlarını getirir. Gider (elektrik vb.) borçları dahil değildir.</summary>

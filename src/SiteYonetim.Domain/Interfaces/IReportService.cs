@@ -15,7 +15,7 @@ public class MonthlyReportDto
     /// <summary>Ek gelir (Özel Toplama) bekleyen</summary>
     public decimal ExtraCollectionPending { get; set; }
     public decimal TotalExpense { get; set; }
-    /// <summary>Bakiye: Devir + Tahsil - Gider (kümülatif kasa)</summary>
+    /// <summary>Bakiye = Devir Bakiyesi + Tahsil Edilen - Toplam Gider</summary>
     public decimal Balance => OpeningBalance + TotalIncome - TotalExpense;
 }
 
@@ -62,14 +62,10 @@ public class YearlyReportDto
     /// <summary>Ek gelir (Özel Toplama) bekleyen</summary>
     public decimal ExtraCollectionPending { get; set; }
     public decimal TotalExpense { get; set; }
-    /// <summary>Yıllık bakiye: Devir + Tahsil - Gider</summary>
+    /// <summary>Yıllık Bakiye = Önceki Yıllar Devir + Tahsil Edilen - Yıllık Toplam Gider</summary>
     public decimal Balance => OpeningBalance + TotalIncome - TotalExpense;
     public IReadOnlyList<MonthlyReportDto> ByMonth { get; set; } = Array.Empty<MonthlyReportDto>();
-    /// <summary>Seçilen yıla kadar (dahil) toplam tahsilat - kasa devir</summary>
-    public decimal CumulativeIncomeToDate { get; set; }
-    /// <summary>Seçilen yıla kadar (dahil) toplam gider - kasa devir</summary>
-    public decimal CumulativeExpenseToDate { get; set; }
-    /// <summary>Önceki yıllardan devir bakiyesi (Kasa Toplam Devir gösterimi için)</summary>
+    /// <summary>Önceki Yıllar Devir Bakiyesi (Açılış)</summary>
     public decimal OpeningBalance { get; set; }
 }
 
@@ -95,12 +91,24 @@ public class DebtorDto
     public int? DaysOverdue { get; set; }
 }
 
+/// <summary>Belirli dönem için tahsilat, gider ve kasa toplamları. Referans doğrulama için.</summary>
+public class PeriodVerificationDto
+{
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public decimal TotalTahsilat { get; set; }
+    public decimal TotalGider { get; set; }
+    /// <summary>KASA = TOPLAM TAHSİLAT - TOPLAM GİDER</summary>
+    public decimal Kasa => TotalTahsilat - TotalGider;
+}
+
 public interface IReportService
 {
     Task<MonthlyReportDto> GetMonthlyReportAsync(Guid siteId, int year, int month, CancellationToken ct = default);
     Task<MonthlyReportDetailDto> GetMonthlyReportDetailAsync(Guid siteId, int year, int month, CancellationToken ct = default);
     Task<YearlyReportDto> GetYearlyReportAsync(Guid siteId, int year, CancellationToken ct = default);
     Task<YearlyReportDetailDto> GetYearlyReportDetailAsync(Guid siteId, int year, CancellationToken ct = default);
+    Task<PeriodVerificationDto> GetPeriodVerificationAsync(Guid siteId, DateTime startDate, DateTime endDate, CancellationToken ct = default);
     Task<IReadOnlyList<DebtorDto>> GetDebtorsAsync(Guid siteId, CancellationToken ct = default);
     Task<HazirunCetveliDto> GetHazirunCetveliAsync(Guid siteId, DateTime? date = null, CancellationToken ct = default);
 }

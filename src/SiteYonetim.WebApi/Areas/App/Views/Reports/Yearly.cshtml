@@ -27,82 +27,41 @@
     <h2 class="h4">@year - @siteName</h2>
 </div>
 <div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-info text-white py-2">
-        <h6 class="mb-0"><i class="bi bi-bank me-2"></i>Kasa Toplam Devir (@year Yılına Kadar)</h6>
-    </div>
+    <div class="card-header bg-light"><strong>Yıllık Finans Özeti (@year)</strong></div>
     <div class="card-body">
         <div class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-3">
                 <p class="mb-0 text-muted small">Önceki Yıllar Devir Bakiyesi (Açılış)</p>
-                <h5 class="mb-0 @(Model.OpeningBalance >= 0 ? "text-success" : "text-danger")">@Model.OpeningBalance.ToString("N2") ₺</h5>
+                <p class="mb-0 small text-muted">(Yıl başındaki kasa)</p>
+                <h5 class="mb-0">@Model.OpeningBalance.ToString("N2") ₺</h5>
             </div>
-            <div class="col-md-4">
-                <p class="mb-0 text-muted small">@year Yılına Kadar Toplam Tahsilat</p>
-                <h5 class="mb-0 text-success">@Model.CumulativeIncomeToDate.ToString("N2") ₺</h5>
+            <div class="col-md-6 col-lg-3">
+                <p class="mb-0 text-muted small">Tahsil Edilen (@year)</p>
+                <p class="mb-0 small text-muted">(O yıl içinde tahsil edilen tüm gelirler)</p>
+                <h5 class="mb-0 text-success">@Model.TotalIncome.ToString("N2") ₺</h5>
             </div>
-            <div class="col-md-4">
-                <p class="mb-0 text-muted small">@year Yılına Kadar Toplam Gider</p>
-                <h5 class="mb-0 text-danger">@Model.CumulativeExpenseToDate.ToString("N2") ₺</h5>
+            <div class="col-md-6 col-lg-3">
+                <p class="mb-0 text-muted small">Yıllık Toplam Gider</p>
+                <p class="mb-0 small text-muted">(O yıl içinde girilen tüm giderler)</p>
+                <h5 class="mb-0 text-danger">@Model.TotalExpense.ToString("N2") ₺</h5>
             </div>
-        </div>
-    </div>
-</div>
-<div class="row g-3 mb-4 report-summary-row">
-    <div class="col-md-3">
-        <div class="card border-0 bg-success text-white">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-1">Tahsil Edilen (@year)</h6>
-                <h4 class="card-title mb-0">@Model.TotalIncome.ToString("N2") ₺</h4>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-secondary text-white">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-1">Bekleyen aidat ve diğer gelirler</h6>
-                <h4 class="card-title mb-0">@Model.PendingIncome.ToString("N2") ₺</h4>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-danger text-white">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-1">Yıllık Toplam Gider</h6>
-                <h4 class="card-title mb-0">@Model.TotalExpense.ToString("N2") ₺</h4>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 @(Model.Balance >= 0 ? "bg-primary" : "bg-warning") text-white">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-1">Yıllık Bakiye</h6>
-                <h4 class="card-title mb-0">@Model.Balance.ToString("N2") ₺</h4>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row mb-3">
-    <div class="col-12">
-        <div class="card border-0 bg-info text-white">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-1">Ek Gelir (Özel Toplama) - @year</h6>
-                <p class="mb-0">Tahsil: @Model.ExtraCollectionIncome.ToString("N2") ₺ · Bekleyen: @Model.ExtraCollectionPending.ToString("N2") ₺</p>
+            <div class="col-md-6 col-lg-3">
+                <p class="mb-0 text-muted small">Yıllık Bakiye</p>
+                <p class="mb-0 small text-muted">Devir + Tahsil - Gider</p>
+                <h5 class="mb-0 @(Model.Balance >= 0 ? "text-primary" : "text-warning")">@Model.Balance.ToString("N2") ₺</h5>
             </div>
         </div>
     </div>
 </div>
 <div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-transparent"><strong>Aylık Özet</strong></div>
+    <div class="card-header bg-transparent"><strong>Aylık Özet (Tutarlılık kontrolü için)</strong></div>
     <div class="table-responsive">
         <table class="table table-hover mb-0">
             <thead class="table-light">
                 <tr>
                     <th>Ay</th>
                     <th>Devir</th>
-                    <th>Tahsil</th>
-                    <th>Bekleyen</th>
-                    <th>Ek Gelir Tahsil</th>
-                    <th>Ek Gelir Bekleyen</th>
+                    <th>Gelir (Tahsil)</th>
                     <th>Gider</th>
                     <th>Bakiye</th>
                 </tr>
@@ -114,9 +73,6 @@
                         <td>@monthNames[m.Month]</td>
                         <td>@m.OpeningBalance.ToString("N2") ₺</td>
                         <td>@m.TotalIncome.ToString("N2") ₺</td>
-                        <td>@m.PendingIncome.ToString("N2") ₺</td>
-                        <td>@m.ExtraCollectionIncome.ToString("N2") ₺</td>
-                        <td>@m.ExtraCollectionPending.ToString("N2") ₺</td>
                         <td>@m.TotalExpense.ToString("N2") ₺</td>
                         <td>@m.Balance.ToString("N2") ₺</td>
                     </tr>
@@ -178,11 +134,6 @@
                                         <tr>
                                             <td colspan="5" class="text-end">Toplam Tahsil:</td>
                                             <td class="text-end" colspan="2">@monthDetail.TotalIncome.ToString("N2") ₺</td>
-                                            <td colspan="2"></td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="5" class="text-end">Bekleyen:</td>
-                                            <td class="text-end" colspan="2">@monthDetail.PendingIncome.ToString("N2") ₺</td>
                                             <td colspan="2"></td>
                                         </tr>
                                     </tfoot>
