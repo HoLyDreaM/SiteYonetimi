@@ -24,7 +24,16 @@
     <h2 class="h4">@year @monthName - @siteName</h2>
 </div>
 <div class="row g-3 mb-4 report-summary-row">
-    <div class="col-md-3">
+    <div class="col-md-2">
+        <div class="card border-0 bg-dark text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-1">Devir Bakiyesi</h6>
+                <h4 class="card-title mb-0">@Model.OpeningBalance.ToString("N2") ₺</h4>
+                <small class="opacity-75">Önceki aylardan</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
         <div class="card border-0 bg-success text-white">
             <div class="card-body">
                 <h6 class="card-subtitle mb-1">Tahsil Edilen</h6>
@@ -32,7 +41,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card border-0 bg-secondary text-white">
             <div class="card-body">
                 <h6 class="card-subtitle mb-1">Bekleyen aidat ve diğer gelirler</h6>
@@ -40,7 +49,16 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
+        <div class="card border-0 bg-info text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-1">Ek Gelir (bu ay)</h6>
+                <h4 class="card-title mb-0">@Model.ExtraCollectionIncome.ToString("N2") ₺</h4>
+                <small class="opacity-75">Bekleyen: @Model.ExtraCollectionPending.ToString("N2") ₺</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
         <div class="card border-0 bg-danger text-white">
             <div class="card-body">
                 <h6 class="card-subtitle mb-1">Toplam Gider</h6>
@@ -48,10 +66,10 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card border-0 @(Model.Balance >= 0 ? "bg-primary" : "bg-warning") text-white">
             <div class="card-body">
-                <h6 class="card-subtitle mb-1">Bakiye ((Tahsil+Bekleyen)-Gider)</h6>
+                <h6 class="card-subtitle mb-1">Bakiye (Devir+Tahsil-Gider)</h6>
                 <h4 class="card-title mb-0">@Model.Balance.ToString("N2") ₺</h4>
             </div>
         </div>
@@ -109,6 +127,16 @@
                             <tr>
                                 <td colspan="5" class="text-end">Bekleyen Gelir:</td>
                                 <td class="text-end" colspan="2">@Model.PendingIncome.ToString("N2") ₺</td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr class="table-info">
+                                <td colspan="5" class="text-end">Ek Gelir (Özel Toplama) bu ay - Tahsil / Bekleyen:</td>
+                                <td class="text-end" colspan="2">@Model.ExtraCollectionIncome.ToString("N2") ₺ / @Model.ExtraCollectionPending.ToString("N2") ₺</td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr class="table-secondary">
+                                <td colspan="5" class="text-end">Devir (ay başı kasa - önceki tahsilat - gider):</td>
+                                <td class="text-end" colspan="2">@Model.OpeningBalance.ToString("N2") ₺</td>
                                 <td colspan="2"></td>
                             </tr>
                         </tfoot>
@@ -171,7 +199,7 @@
         <div class="row align-items-center">
             <div class="col-md-8">
                 <h5 class="mb-0">Genel Toplam - Bakiye</h5>
-                <p class="text-muted small mb-0">(Tahsil Edilen + Bekleyen Gelir) - Toplam Gider</p>
+                <p class="text-muted small mb-0">Devir (@Model.OpeningBalance.ToString("N2") ₺) + Tahsil - Gider = Ay sonu kasa</p>
             </div>
             <div class="col-md-4 text-end">
                 <h3 class="mb-0 @(Model.Balance >= 0 ? "text-success" : "text-danger")">@Model.Balance.ToString("N2") ₺</h3>
@@ -185,7 +213,7 @@
         .no-print { display: none !important; }
         .print-only { display: block !important; }
         .report-summary-row { display: flex !important; flex-wrap: nowrap !important; }
-        .report-summary-row > div { flex: 0 0 25% !important; max-width: 25% !important; }
+        .report-summary-row > div { flex: 0 0 16.67% !important; max-width: 16.67% !important; }
         body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .card-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }

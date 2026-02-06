@@ -81,6 +81,16 @@
         </div>
     </div>
 </div>
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card border-0 bg-info text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-1">Ek Gelir (Özel Toplama) - @year</h6>
+                <p class="mb-0">Tahsil: @Model.ExtraCollectionIncome.ToString("N2") ₺ · Bekleyen: @Model.ExtraCollectionPending.ToString("N2") ₺</p>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-transparent"><strong>Aylık Özet</strong></div>
     <div class="table-responsive">
@@ -88,8 +98,11 @@
             <thead class="table-light">
                 <tr>
                     <th>Ay</th>
+                    <th>Devir</th>
                     <th>Tahsil</th>
                     <th>Bekleyen</th>
+                    <th>Ek Gelir Tahsil</th>
+                    <th>Ek Gelir Bekleyen</th>
                     <th>Gider</th>
                     <th>Bakiye</th>
                 </tr>
@@ -99,8 +112,11 @@
                 {
                     <tr>
                         <td>@monthNames[m.Month]</td>
+                        <td>@m.OpeningBalance.ToString("N2") ₺</td>
                         <td>@m.TotalIncome.ToString("N2") ₺</td>
                         <td>@m.PendingIncome.ToString("N2") ₺</td>
+                        <td>@m.ExtraCollectionIncome.ToString("N2") ₺</td>
+                        <td>@m.ExtraCollectionPending.ToString("N2") ₺</td>
                         <td>@m.TotalExpense.ToString("N2") ₺</td>
                         <td>@m.Balance.ToString("N2") ₺</td>
                     </tr>

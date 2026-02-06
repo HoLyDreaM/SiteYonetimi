@@ -93,6 +93,18 @@ public class ReportsController : Controller
         ws.Cell(row, 4).Value = "BEKLEYEN GELİR";
         ws.Cell(row, 6).Value = $"{report.PendingIncome:N2} ₺";
         ws.Range(row, 4, row, 6).Style.Font.Bold = true;
+        row++;
+        ws.Cell(row, 4).Value = "EK GELİR (Özel Toplama) Tahsil";
+        ws.Cell(row, 6).Value = $"{report.ExtraCollectionIncome:N2} ₺";
+        ws.Range(row, 4, row, 6).Style.Font.Bold = true;
+        row++;
+        ws.Cell(row, 4).Value = "EK GELİR (Özel Toplama) Bekleyen";
+        ws.Cell(row, 6).Value = $"{report.ExtraCollectionPending:N2} ₺";
+        ws.Range(row, 4, row, 6).Style.Font.Bold = true;
+        row++;
+        ws.Cell(row, 4).Value = "DEVİR BAKİYESİ (Önceki aylardan)";
+        ws.Cell(row, 6).Value = $"{report.OpeningBalance:N2} ₺";
+        ws.Range(row, 4, row, 6).Style.Font.Bold = true;
         row += 2;
 
         ws.Cell(row, 1).Value = "GİDERLER";
@@ -122,7 +134,7 @@ public class ReportsController : Controller
 
         ws.Cell(row, 1).Value = "GENEL TOPLAM";
         ws.Cell(row, 1).Style.Font.Bold = true;
-        ws.Cell(row, 2).Value = $"Bakiye: {report.Balance:N2} ₺";
+        ws.Cell(row, 2).Value = $"Bakiye (Devir + Tahsil - Gider): {report.Balance:N2} ₺";
         row++;
 
         ws.Columns().AdjustToContents();
@@ -196,29 +208,38 @@ public class ReportsController : Controller
         ws.Cell(row, 1).Style.Font.Bold = true;
         row++;
         ws.Cell(row, 1).Value = "Ay";
-        ws.Cell(row, 2).Value = "Tahsil";
-        ws.Cell(row, 3).Value = "Bekleyen";
-        ws.Cell(row, 4).Value = "Gider";
-        ws.Cell(row, 5).Value = "Bakiye";
-        ws.Range(row, 1, row, 5).Style.Font.Bold = true;
+        ws.Cell(row, 2).Value = "Devir";
+        ws.Cell(row, 3).Value = "Tahsil";
+        ws.Cell(row, 4).Value = "Bekleyen";
+        ws.Cell(row, 5).Value = "Ek Gelir Tahsil";
+        ws.Cell(row, 6).Value = "Ek Gelir Bekleyen";
+        ws.Cell(row, 7).Value = "Gider";
+        ws.Cell(row, 8).Value = "Bakiye";
+        ws.Range(row, 1, row, 8).Style.Font.Bold = true;
         row++;
 
         foreach (var m in report.ByMonth)
         {
             ws.Cell(row, 1).Value = monthNames[m.Month];
-            ws.Cell(row, 2).Value = $"{m.TotalIncome:N2} ₺";
-            ws.Cell(row, 3).Value = $"{m.PendingIncome:N2} ₺";
-            ws.Cell(row, 4).Value = $"{m.TotalExpense:N2} ₺";
-            ws.Cell(row, 5).Value = $"{m.Balance:N2} ₺";
+            ws.Cell(row, 2).Value = $"{m.OpeningBalance:N2} ₺";
+            ws.Cell(row, 3).Value = $"{m.TotalIncome:N2} ₺";
+            ws.Cell(row, 4).Value = $"{m.PendingIncome:N2} ₺";
+            ws.Cell(row, 5).Value = $"{m.ExtraCollectionIncome:N2} ₺";
+            ws.Cell(row, 6).Value = $"{m.ExtraCollectionPending:N2} ₺";
+            ws.Cell(row, 7).Value = $"{m.TotalExpense:N2} ₺";
+            ws.Cell(row, 8).Value = $"{m.Balance:N2} ₺";
             row++;
         }
 
         ws.Cell(row, 1).Value = "TOPLAM";
-        ws.Cell(row, 2).Value = $"{report.TotalIncome:N2} ₺";
-        ws.Cell(row, 3).Value = $"{report.PendingIncome:N2} ₺";
-        ws.Cell(row, 4).Value = $"{report.TotalExpense:N2} ₺";
-        ws.Cell(row, 5).Value = $"{report.Balance:N2} ₺";
-        ws.Range(row, 1, row, 5).Style.Font.Bold = true;
+        ws.Cell(row, 2).Value = "";
+        ws.Cell(row, 3).Value = $"{report.TotalIncome:N2} ₺";
+        ws.Cell(row, 4).Value = $"{report.PendingIncome:N2} ₺";
+        ws.Cell(row, 5).Value = $"{report.ExtraCollectionIncome:N2} ₺";
+        ws.Cell(row, 6).Value = $"{report.ExtraCollectionPending:N2} ₺";
+        ws.Cell(row, 7).Value = $"{report.TotalExpense:N2} ₺";
+        ws.Cell(row, 8).Value = $"{report.Balance:N2} ₺";
+        ws.Range(row, 1, row, 8).Style.Font.Bold = true;
         row += 2;
 
         foreach (var monthDetail in report.ByMonthDetail)

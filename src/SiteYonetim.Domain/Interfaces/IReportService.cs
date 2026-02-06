@@ -4,13 +4,19 @@ public class MonthlyReportDto
 {
     public int Year { get; set; }
     public int Month { get; set; }
-    /// <summary>Tahsil edilen gelir (aidat vb.)</summary>
+    /// <summary>Önceki dönemlerden devreden bakiye (ay başı kasa)</summary>
+    public decimal OpeningBalance { get; set; }
+    /// <summary>Tahsil edilen gelir (aidat + ek gelir) - bu ay</summary>
     public decimal TotalIncome { get; set; }
     /// <summary>Tahsil edilmemiş, bekleyen gelir</summary>
     public decimal PendingIncome { get; set; }
+    /// <summary>Ek gelir (Özel Toplama) tahsil edilen - bu ay</summary>
+    public decimal ExtraCollectionIncome { get; set; }
+    /// <summary>Ek gelir (Özel Toplama) bekleyen</summary>
+    public decimal ExtraCollectionPending { get; set; }
     public decimal TotalExpense { get; set; }
-    /// <summary>Bakiye: (Tahsil + Bekleyen aidat) - Gider</summary>
-    public decimal Balance => (TotalIncome + PendingIncome) - TotalExpense;
+    /// <summary>Bakiye: Devir + Tahsil - Gider (kümülatif kasa)</summary>
+    public decimal Balance => OpeningBalance + TotalIncome - TotalExpense;
 }
 
 /// <summary>Kalem kalem gelir satırı</summary>
@@ -51,14 +57,19 @@ public class YearlyReportDto
     public decimal TotalIncome { get; set; }
     /// <summary>Tahsil edilmemiş, bekleyen gelir</summary>
     public decimal PendingIncome { get; set; }
+    /// <summary>Ek gelir (Özel Toplama) tahsil edilen</summary>
+    public decimal ExtraCollectionIncome { get; set; }
+    /// <summary>Ek gelir (Özel Toplama) bekleyen</summary>
+    public decimal ExtraCollectionPending { get; set; }
     public decimal TotalExpense { get; set; }
-    public decimal Balance => (TotalIncome + PendingIncome) - TotalExpense;
+    /// <summary>Yıllık bakiye: Devir + Tahsil - Gider</summary>
+    public decimal Balance => OpeningBalance + TotalIncome - TotalExpense;
     public IReadOnlyList<MonthlyReportDto> ByMonth { get; set; } = Array.Empty<MonthlyReportDto>();
     /// <summary>Seçilen yıla kadar (dahil) toplam tahsilat - kasa devir</summary>
     public decimal CumulativeIncomeToDate { get; set; }
     /// <summary>Seçilen yıla kadar (dahil) toplam gider - kasa devir</summary>
     public decimal CumulativeExpenseToDate { get; set; }
-    /// <summary>Seçilen yılın başındaki devir bakiyesi (önceki yılların toplam tahsil - gider)</summary>
+    /// <summary>Önceki yıllardan devir bakiyesi (Kasa Toplam Devir gösterimi için)</summary>
     public decimal OpeningBalance { get; set; }
 }
 
