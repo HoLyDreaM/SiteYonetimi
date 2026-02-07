@@ -20,6 +20,7 @@ Apartman ve site yöneticilerinin günlük işlemlerini dijital ortamda yönetme
 10. [API Referansı](#api-referansı)
 11. [Teknolojiler](#teknolojiler)
 12. [Sorun Giderme](#sorun-giderme)
+13. [Yapılan Güncellemeler](#yapılan-güncellemeler)
 
 ---
 
@@ -69,6 +70,7 @@ Site Yönetim Sistemi, .NET 8 ve ASP.NET Core MVC ile geliştirilmiş, SQL Serve
 - Ödeme kaydı (nakit, havale, kredi kartı vb.)
 - Makbuz oluşturma
 - Banka hesabına bağlama
+- **Tahsilat İptal:** Yanlış tahsil edilen aidat iptal edilebilir; aidat tekrar tahsil edilebilir hale gelir, banka bakiyesi ve gelir durumu güncellenir
 
 ### Banka Hesapları
 - Site banka hesapları (**sadece bir banka hesabı** eklenebilir)
@@ -146,6 +148,13 @@ Site Yönetim Sistemi, .NET 8 ve ASP.NET Core MVC ile geliştirilmiş, SQL Serve
 ### Teklifler
 - Site teklif kayıtları (şirket adı, tarih, aylık/yıllık ücret, açıklama)
 - **Otomatik klasör oluşturma:** Teklifler, Gider faturaları ve Destek kayıtları için gerekli upload klasörleri (`uploads/teklifler`, `uploads/giderler`, `uploads/destek`) uygulama başlangıcında otomatik oluşturulur
+
+### Evrak Arşivi
+- Site bazlı evrak arşivi (sözleşmeler, belgeler vb.)
+- **Evrak Adı**, **Açıklama** ve **Dosya** alanları
+- PDF, Word (.doc, .docx), Excel (.xls, .xlsx) dosya desteği
+- **Site bazlı klasör yapısı:** `uploads/evraklar/{siteId}/{documentId}.{uzantı}` — her site kendi klasöründe, üye siteleri birbirinden ayrılır
+- Ekler, düzenleme ve silme
 
 ### Önemli Telefonlar
 - Site bazlı acil ve önemli telefon listesi
@@ -403,6 +412,7 @@ Port numarası (7xxx) `launchSettings.json` veya çalışma ortamına göre değ
 | Banka Hesapları | Banka hesapları, bakiye |
 | Borçlular | Aidat/ek toplama borçlu daire listesi |
 | Teklifler | Site teklif kayıtları |
+| Evrak Arşivi | Sözleşme, belge arşivi (PDF, Word, Excel) |
 | Site Sakinleri | Dairelerde oturan kişiler (ev sahibi/kiracı) listesi |
 | Önemli Telefonlar | Acil ve önemli telefon listesi |
 | Destek Kayıtları | Destek talepleri listesi |
@@ -538,6 +548,49 @@ Veritabanı kurulumu yapılmamıştır. [Veritabanı Kurulumu](#veritabanı-kuru
 
 ### NU1902 güvenlik uyarısı (JWT paketleri)
 `System.IdentityModel.Tokens.Jwt` ve `Microsoft.IdentityModel.Tokens` paketleri 8.15.0 veya üzeri sürüme güncellenmiştir. Eski sürümlerde bilinen güvenlik açıkları bulunmaktadır.
+
+---
+
+## Yapılan Güncellemeler
+
+### Evrak Arşivi Modülü
+
+Site bazlı evrak arşivi eklendi. Teklifler gibi sözleşme, belge ve benzeri evrakları saklamak için kullanılır.
+
+| Özellik | Açıklama |
+|---------|----------|
+| **Entity** | `SiteDocument` (SiteId, Name, Description, FilePath, FileName) |
+| **Veritabanı** | `SiteDocuments` tablosu |
+| **Servis** | `ISiteDocumentService`, `SiteDocumentService` |
+| **Controller** | `SiteDocumentsController` — Index, Create, Edit, Delete |
+| **Dosya türleri** | PDF, Word (.doc, .docx), Excel (.xls, .xlsx) |
+| **Dosya yolu** | `uploads/evraklar/{siteId}/{documentId}.{uzantı}` — SiteId ile ayrılmış |
+| **Menü** | Teklifler'in yanında "Evrak Arşivi" linki |
+
+**Kullanım:** Site seçin → Evrak Arşivi → Yeni Evrak → Evrak adı, açıklama ve dosya yükleyin.
+
+---
+
+### Tahsilat İptal Özelliği
+
+Yanlış tahsil edilen aidatın iptal edilmesi için "Tahsilat İptal" özelliği eklendi.
+
+| Özellik | Açıklama |
+|---------|----------|
+| **Servis** | `IPaymentService.DeleteAsync` — Tahsilatı soft delete ile iptal eder |
+| **Controller** | `PaymentsController.Delete` (POST) |
+| **UI** | Tahsilatlar sayfasında her tahsilat satırında **İptal** butonu |
+| **Onay** | İptal öncesi onay penceresi |
+
+**İptal sonrası otomatik güncellemeler:**
+- Tahsilat kaydı silinir (soft delete)
+- Aidat durumu "Bekliyor" / "Kısmi" olarak güncellenir; tekrar tahsil edilebilir
+- Banka hesabı bakiyesi düşürülür
+- Banka hareketi (BankTransaction) iptal edilir
+- İlişkili makbuz iptal edilir
+- Gider payı (ExpenseShare) tahsilatı ise PaidAmount geri alınır
+
+**Kullanım:** Tahsilatlar sayfası → İlgili ay ve siteyi seçin → İptal etmek istediğiniz tahsilatın yanındaki **İptal** butonuna tıklayın → Onaylayın.
 
 ---
 
