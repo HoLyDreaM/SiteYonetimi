@@ -73,10 +73,13 @@ Site Yönetim Sistemi, .NET 8 ve ASP.NET Core MVC ile geliştirilmiş, SQL Serve
 - **Tahsilat İptal:** Yanlış tahsil edilen aidat iptal edilebilir; aidat tekrar tahsil edilebilir hale gelir, banka bakiyesi ve gelir durumu güncellenir
 
 ### Banka Hesapları
-- Site banka hesapları (**sadece bir banka hesabı** eklenebilir)
+- **İstediğiniz kadar banka hesabı** eklenebilir (sınır yok)
+- **Hesap türü:** Vadeli / Vadesiz seçeneği
+- **Varsayılan hesap:** Tahsilat ve giderlerde otomatik seçilen hesap (checkbox ile işaretlenir)
 - Güncel bakiye takibi
 - Tahsilatlar bakiyeyi artırır, gider ödemeleri azaltır
 - Başlangıç bakiyesi (OpeningBalance) desteği
+- **Bankalar arası para transferi:** En az 2 hesap varken Transfer butonu ile hesaplar arası para aktarımı
 - **Detay sayfası:** Banka, şube, hesap no, IBAN, güncel bakiye bilgilerinin altında tüm gelen ve giden ödemeler/tahsilatlar sayfalanmış listelenir
 
 ### Bildirimler (Çan İkonu)
@@ -409,7 +412,7 @@ Port numarası (7xxx) `launchSettings.json` veya çalışma ortamına göre değ
 | Gider Türleri | Gider türü tanımları |
 | Giderler | Gider kayıtları, düzenleme, silme |
 | Tahsilatlar | Ödeme kayıtları |
-| Banka Hesapları | Banka hesapları, bakiye |
+| Banka Hesapları | Banka hesapları (istediğiniz kadar), vadeli/vadesiz, varsayılan hesap, bankalar arası transfer, bakiye |
 | Borçlular | Aidat/ek toplama borçlu daire listesi |
 | Teklifler | Site teklif kayıtları |
 | Evrak Arşivi | Sözleşme, belge arşivi (PDF, Word, Excel) |
@@ -568,6 +571,21 @@ Site bazlı evrak arşivi eklendi. Teklifler gibi sözleşme, belge ve benzeri e
 | **Menü** | Teklifler'in yanında "Evrak Arşivi" linki |
 
 **Kullanım:** Site seçin → Evrak Arşivi → Yeni Evrak → Evrak adı, açıklama ve dosya yükleyin.
+
+---
+
+### Banka Hesapları Geliştirmeleri
+
+Banka hesapları modülü aşağıdaki özellikleri destekler:
+
+| Özellik | Açıklama |
+|---------|----------|
+| **İstediğiniz kadar banka** | Sınır yok; istediğiniz sayıda hesap ekleyebilirsiniz |
+| **Vadeli / Vadesiz** | Hesap türü seçimi (Create ve Edit formlarında) |
+| **Varsayılan hesap** | "Tahsilat ve giderlerde otomatik seçilsin" checkbox'ı |
+| **Bankalar arası transfer** | 2+ hesap varken **Transfer** butonu ile hesaplar arası para aktarımı |
+
+**Kullanım:** Banka Hesapları → Yeni Hesap (istediğiniz kadar) → Hesap türü ve varsayılan işaretleyin → 2+ hesap varken Transfer ile para aktarın.
 
 ---
 
