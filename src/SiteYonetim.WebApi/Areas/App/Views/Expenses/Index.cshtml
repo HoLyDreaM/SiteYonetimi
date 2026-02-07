@@ -48,7 +48,7 @@
                     @foreach (var e in Model)
                     {
                         var faturaTarihi = e.InvoiceDate ?? e.ExpenseDate;
-                        var durumMetni = faturaTarihi.Date <= DateTime.Today ? "Ödendi" : "Bekleniyor";
+                        var durumMetni = e.Status == SiteYonetim.Domain.Entities.ExpenseStatus.Paid ? "Ödendi" : (e.Status == SiteYonetim.Domain.Entities.ExpenseStatus.Cancelled ? "İptal" : "Bekliyor");
                         <tr>
                             <td>@faturaTarihi.ToString("dd.MM.yyyy")</td>
                             <td>@(e.ExpenseType?.Name ?? "-")</td>

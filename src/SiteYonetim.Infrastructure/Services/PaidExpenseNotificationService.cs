@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SiteYonetim.Domain.Entities;
 using SiteYonetim.Domain.Interfaces;
 using SiteYonetim.Infrastructure.Data;
 
@@ -10,28 +11,32 @@ public class PaidExpenseNotificationService : IPaidExpenseNotificationService
 
     public PaidExpenseNotificationService(SiteYonetimDbContext db) => _db = db;
 
-    public async Task<IReadOnlyList<PaidExpenseNotificationDto>> GetRecentlyPaidExpensesAsync(Guid siteId, int lastDays = 30, CancellationToken ct = default)
+    /// <summary>Süresi geçmiş ve ödenmemiş (Bekliyor) giderler. Status != Paid, BankTransaction yok.</summary>
+    public async Task<IReadOnlyList<OverdueExpenseNotificationDto>> GetOverdueExpensesAsync(Guid siteId, CancellationToken ct = default)
     {
-        var fromDate = DateTime.Today.AddDays(-lastDays);
-        var list = await _db.BankTransactions
+        var today = DateTime.Today;
+        // Aidat türü giderler (ExcludeFromReport veya adında aidat geçen) hariç
+        var list = await _db.Expenses
             .AsNoTracking()
-            .Where(bt => bt.ExpenseId != null && !bt.IsDeleted && bt.TransactionDate >= fromDate)
-            .Join(_db.Expenses.Where(e => e.SiteId == siteId && !e.IsDeleted),
-                bt => bt.ExpenseId,
-                e => e.Id,
-                (bt, e) => new { bt, e })
-            .Join(_db.ExpenseTypes.Where(et => !et.IsDeleted),
-                x => x.e.ExpenseTypeId,
+            .Where(e => e.SiteId == siteId && !e.IsDeleted
+                && e.Status != ExpenseStatus.Paid
+                && e.Status != ExpenseStatus.Cancelled
+                && (e.InvoiceDate ?? e.ExpenseDate) < today
+                && !_db.BankTransactions.Any(bt => bt.ExpenseId == e.Id && !bt.IsDeleted))
+            .Join(_db.ExpenseTypes.Where(et => !et.IsDeleted
+                && !et.ExcludeFromReport
+                && (et.Name == null || (!et.Name.Contains("aidat") && !et.Name.Contains("Aidat") && !et.Name.Contains("AİDAT")))),
+                e => e.ExpenseTypeId,
                 et => et.Id,
-                (x, et) => new PaidExpenseNotificationDto
+                (e, et) => new OverdueExpenseNotificationDto
                 {
-                    ExpenseId = x.e.Id,
-                    Description = x.e.Description,
+                    ExpenseId = e.Id,
+                    Description = e.Description,
                     ExpenseTypeName = et.Name ?? "",
-                    Amount = Math.Abs(x.bt.Amount),
-                    TransactionDate = x.bt.TransactionDate
+                    Amount = Math.Abs(e.Amount),
+                    DueDate = e.InvoiceDate ?? e.ExpenseDate
                 })
-            .OrderByDescending(x => x.TransactionDate)
+            .OrderBy(x => x.DueDate)
             .Take(20)
             .ToListAsync(ct);
         return list;
@@ -64,13 +69,17 @@ public class PaidExpenseNotificationService : IPaidExpenseNotificationService
             if (remaining <= 0) continue;
             if (result.Count >= 20) break;
 
+            var apt = i.Apartment;
+            var ownerDisplay = apt?.OccupancyType == ApartmentOccupancyType.TenantOccupied
+                ? $"Ev Sahibi: {apt?.OwnerName ?? "-"} / Kiracı: {apt?.TenantName ?? "-"}"
+                : (apt?.OwnerName ?? "");
             result.Add(new OverdueAidatNotificationDto
             {
                 IncomeId = i.Id,
-                ApartmentInfo = $"{(i.Apartment?.BlockOrBuildingName ?? "")} - {(i.Apartment?.ApartmentNumber ?? "")}".Trim(' ', '-'),
-                BlockOrBuilding = i.Apartment?.BlockOrBuildingName ?? "",
-                ApartmentNumber = i.Apartment?.ApartmentNumber ?? "",
-                OwnerName = i.Apartment?.OwnerName ?? "",
+                ApartmentInfo = $"{(apt?.BlockOrBuildingName ?? "")} - {(apt?.ApartmentNumber ?? "")}".Trim(' ', '-'),
+                BlockOrBuilding = apt?.BlockOrBuildingName ?? "",
+                ApartmentNumber = apt?.ApartmentNumber ?? "",
+                OwnerName = ownerDisplay,
                 Amount = i.Amount,
                 RemainingAmount = remaining,
                 PaymentEndDate = i.PaymentEndDate,

@@ -9,4 +9,6 @@ public interface IPaymentService
     Task<IReadOnlyList<Payment>> GetByApartmentIdAsync(Guid apartmentId, CancellationToken ct = default);
     Task<Payment> CreateAsync(Payment payment, CancellationToken ct = default);
     Task<Receipt?> CreateReceiptAsync(Guid paymentId, CancellationToken ct = default);
+    /// <summary>Yanlış tahsilatı iptal eder (soft delete). Aidat tekrar tahsil edilebilir hale gelir.</summary>
+    Task<bool> DeleteAsync(Guid paymentId, CancellationToken ct = default);
 }

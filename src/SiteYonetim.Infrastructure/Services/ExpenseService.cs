@@ -44,6 +44,8 @@ public class ExpenseService : IExpenseService
     {
         var existing = await _db.Expenses.FirstOrDefaultAsync(x => x.Id == expense.Id && !x.IsDeleted, ct);
         if (existing == null) throw new InvalidOperationException("Gider bulunamadı.");
+        var wasPaid = existing.Status == ExpenseStatus.Paid;
+        var willBePaid = expense.Status == ExpenseStatus.Paid;
         existing.Description = expense.Description;
         existing.Amount = expense.Amount;
         existing.ExpenseDate = expense.ExpenseDate;
@@ -52,19 +54,38 @@ public class ExpenseService : IExpenseService
         existing.InvoiceNumber = expense.InvoiceNumber;
         existing.InvoiceDate = expense.InvoiceDate;
         existing.Notes = expense.Notes;
+        existing.Status = expense.Status == ExpenseStatus.Paid ? ExpenseStatus.Paid : ExpenseStatus.Draft;
         await _db.SaveChangesAsync(ct);
-        await DeductFromBankIfDueAsync(existing, ct);
+        if (wasPaid && !willBePaid)
+            await RevertBankDeductionAsync(existing, ct);
+        else
+            await DeductFromBankIfDueAsync(existing, ct);
         return existing;
     }
 
+    /// <summary>Ödendi → Bekliyor değişince banka hareketini geri alır. Bildirimde görünmesi için.</summary>
+    private async Task RevertBankDeductionAsync(Expense expense, CancellationToken ct)
+    {
+        var bankTx = await _db.BankTransactions
+            .FirstOrDefaultAsync(bt => bt.ExpenseId == expense.Id && !bt.IsDeleted, ct);
+        if (bankTx == null) return;
+        var bank = await _db.BankAccounts.FirstOrDefaultAsync(b => b.Id == bankTx.BankAccountId && !b.IsDeleted, ct);
+        if (bank == null) return;
+        var amount = Math.Abs(bankTx.Amount);
+        bankTx.IsDeleted = true;
+        bankTx.UpdatedAt = DateTime.UtcNow;
+        bank.CurrentBalance += amount;
+        await _db.SaveChangesAsync(ct);
+    }
+
     /// <summary>
-    /// Fatura tarihi geçmiş ve Aidat olmayan giderleri bankadan hemen düşer.
+    /// Kullanıcı "Ödendi" işaretlediyse bankadan düşer. "Bekliyor" ise düşülmez.
     /// </summary>
     private async Task DeductFromBankIfDueAsync(Expense expense, CancellationToken ct)
     {
-        var expenseDate = expense.InvoiceDate ?? expense.ExpenseDate;
-        if (expenseDate.Date > DateTime.Today || expense.Status == ExpenseStatus.Cancelled)
+        if (expense.Status != ExpenseStatus.Paid)
             return;
+        var expenseDate = expense.InvoiceDate ?? expense.ExpenseDate;
         if (await _db.BankTransactions.AnyAsync(bt => bt.ExpenseId == expense.Id && !bt.IsDeleted, ct))
             return;
 

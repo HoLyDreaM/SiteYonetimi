@@ -105,16 +105,23 @@ public class ReportService : IReportService
             [2] = "Özel Toplama"
         };
 
-        var incomeItems = incomes.Select(i => new MonthlyReportIncomeItemDto
+        var incomeItems = incomes.Select(i =>
         {
-            BlockOrBuildingName = i.Apartment?.BlockOrBuildingName ?? "",
-            ApartmentNumber = i.Apartment?.ApartmentNumber ?? "",
-            OwnerName = i.Apartment?.OwnerName,
-            TypeName = incomeTypeNames.GetValueOrDefault((int)i.Type, "Diğer"),
-            Description = i.Description,
-            Amount = i.Amount,
-            PaidAmount = paymentsByIncome.TryGetValue(i.Id, out var paid) ? paid : 0,
-            DueDate = i.DueDate
+            var apt = i.Apartment;
+            var ownerDisplay = apt?.OccupancyType == ApartmentOccupancyType.TenantOccupied
+                ? $"Ev Sahibi: {apt?.OwnerName ?? "-"} / Kiracı: {apt?.TenantName ?? "-"}"
+                : (apt?.OwnerName ?? "-");
+            return new MonthlyReportIncomeItemDto
+            {
+                BlockOrBuildingName = apt?.BlockOrBuildingName ?? "",
+                ApartmentNumber = apt?.ApartmentNumber ?? "",
+                OwnerName = ownerDisplay,
+                TypeName = incomeTypeNames.GetValueOrDefault((int)i.Type, "Diğer"),
+                Description = i.Description,
+                Amount = i.Amount,
+                PaidAmount = paymentsByIncome.TryGetValue(i.Id, out var paid) ? paid : 0,
+                DueDate = i.DueDate
+            };
         }).ToList();
 
         var expensesInPeriod = await _db.Expenses

@@ -16,18 +16,18 @@ public class PaidExpenseNotificationViewComponent : ViewComponent
     {
         var siteIdStr = Request.Query["siteId"].FirstOrDefault() ?? ViewData["SiteId"]?.ToString();
         if (string.IsNullOrEmpty(siteIdStr) || !Guid.TryParse(siteIdStr, out var siteId))
-            return View(new NotificationViewModel(Array.Empty<PaidExpenseNotificationDto>(), Array.Empty<OverdueAidatNotificationDto>()));
+            return View(new NotificationViewModel(Array.Empty<OverdueExpenseNotificationDto>(), Array.Empty<OverdueAidatNotificationDto>()));
 
-        var (expenses, overdueAidat) = (
-            await _notificationService.GetRecentlyPaidExpensesAsync(siteId, 30, HttpContext.RequestAborted),
+        var (overdueExpenses, overdueAidat) = (
+            await _notificationService.GetOverdueExpensesAsync(siteId, HttpContext.RequestAborted),
             await _notificationService.GetOverdueAidatAsync(siteId, HttpContext.RequestAborted)
         );
         ViewData["SiteId"] = siteId.ToString();
-        return View(new NotificationViewModel(expenses, overdueAidat));
+        return View(new NotificationViewModel(overdueExpenses, overdueAidat));
     }
 }
 
 public record NotificationViewModel(
-    IReadOnlyList<PaidExpenseNotificationDto> PaidExpenses,
+    IReadOnlyList<OverdueExpenseNotificationDto> OverdueExpenses,
     IReadOnlyList<OverdueAidatNotificationDto> OverdueAidat
 );

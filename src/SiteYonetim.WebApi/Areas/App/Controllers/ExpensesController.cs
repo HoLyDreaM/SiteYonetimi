@@ -158,7 +158,7 @@ public class ExpensesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("SiteId,ExpenseTypeId,Description,Amount,InvoiceDate,InvoiceNumber,Notes")] Expense model, IFormFile? Fatura, CancellationToken ct)
+    public async Task<IActionResult> Create([Bind("SiteId,ExpenseTypeId,Description,Amount,InvoiceDate,InvoiceNumber,Notes,Status")] Expense model, IFormFile? Fatura, CancellationToken ct)
     {
         ModelState.Remove("Site");
         ModelState.Remove("ExpenseType");
@@ -182,7 +182,8 @@ public class ExpensesController : Controller
         {
             model.ExpenseDate = model.InvoiceDate!.Value;
             model.DueDate = model.InvoiceDate.Value;
-            model.Status = ExpenseStatus.Draft;
+            if (model.Status != ExpenseStatus.Paid)
+                model.Status = ExpenseStatus.Draft;
             model.IsDeleted = false;
             await _expenseService.CreateAsync(model, ct);
             if (Fatura != null && Fatura.Length > 0)

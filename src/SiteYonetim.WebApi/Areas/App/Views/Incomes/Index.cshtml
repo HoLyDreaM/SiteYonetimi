@@ -70,7 +70,7 @@
                         <th>Tür</th>
                         <th>Blok / Bina</th>
                         <th>Daire No</th>
-                        <th>Malik</th>
+                        <th>Ev Sahibi / Kiracı</th>
                         <th>Tutar</th>
                         <th>Ödeme Dönemi</th>
                         <th>Durum</th>
@@ -101,7 +101,17 @@
                             </td>
                             <td>@(i.Apartment?.BlockOrBuildingName ?? "-")</td>
                             <td><strong>@(i.Apartment?.ApartmentNumber ?? "-")</strong></td>
-                            <td>@(i.Apartment?.OwnerName ?? "-")</td>
+                            <td>
+                                @if (i.Apartment?.OccupancyType == SiteYonetim.Domain.Entities.ApartmentOccupancyType.TenantOccupied)
+                                {
+                                    <span class="text-muted small">Ev Sahibi: @(i.Apartment?.OwnerName ?? "-")</span><br />
+                                    <strong>Kiracı: @(i.Apartment?.TenantName ?? "-")</strong>
+                                }
+                                else
+                                {
+                                    @(i.Apartment?.OwnerName ?? "-")
+                                }
+                            </td>
                             <td>
                                 @if (paid > 0 && remaining > 0)
                                 {

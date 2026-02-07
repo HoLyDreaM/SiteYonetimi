@@ -67,7 +67,7 @@ public class ReportsController : Controller
         row++;
         ws.Cell(row, 1).Value = "Blok/Bina";
         ws.Cell(row, 2).Value = "Daire No";
-        ws.Cell(row, 3).Value = "Ev Sahibi";
+        ws.Cell(row, 3).Value = "Ev Sahibi / Kiracı";
         ws.Cell(row, 4).Value = "Tür";
         ws.Cell(row, 5).Value = "Tutar";
         ws.Cell(row, 6).Value = "Tahsil Edilen";
@@ -234,7 +234,7 @@ public class ReportsController : Controller
             row++;
             ws.Cell(row, 1).Value = "Blok/Bina";
             ws.Cell(row, 2).Value = "Daire No";
-            ws.Cell(row, 3).Value = "Ev Sahibi";
+            ws.Cell(row, 3).Value = "Ev Sahibi / Kiracı";
             ws.Cell(row, 4).Value = "Tür";
             ws.Cell(row, 5).Value = "Tutar";
             ws.Cell(row, 6).Value = "Tahsil Edilen";

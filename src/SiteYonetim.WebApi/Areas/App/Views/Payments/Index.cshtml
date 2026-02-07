@@ -30,6 +30,10 @@
 </div>
 @if (Model != null && Model.Count > 0)
 {
+    <form id="voidPaymentForm" method="post" asp-action="Delete" asp-route-siteId="@siteId" asp-route-year="@year" asp-route-month="@month">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" id="voidPaymentId" value="" />
+    </form>
     <div class="card border-0 shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
@@ -40,6 +44,7 @@
                         <th>Tutar</th>
                         <th>Yöntem</th>
                         <th>Açıklama</th>
+                        <th width="100"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,6 +56,11 @@
                             <td><strong>@p.Amount.ToString("N2") ₺</strong></td>
                             <td>@p.Method</td>
                             <td>@(p.Description ?? "-")</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-danger" title="Tahsilatı İptal Et" data-payment-id="@p.Id" data-amount="@p.Amount" data-apt="@(p.Apartment?.BlockOrBuildingName) @(p.Apartment?.ApartmentNumber)">
+                                    <i class="bi bi-x-circle"></i> İptal
+                                </button>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -58,8 +68,38 @@
         </div>
     </div>
     <p class="text-muted small mt-2">@year @monthNames[month]: Toplam @Model.Count tahsilat</p>
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success mt-2">@TempData["Message"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger mt-2">@TempData["Error"]</div>
+    }
 }
 else
 {
     <div class="alert alert-info">@year @monthNames[month] ayında tahsilat kaydı yok.</div>
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success mt-2">@TempData["Message"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger mt-2">@TempData["Error"]</div>
+    }
+}
+@section Scripts {
+<script>
+document.querySelectorAll('button[data-payment-id]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var id = btn.dataset.paymentId;
+        var amount = btn.dataset.amount || '';
+        var apt = btn.dataset.apt || '';
+        if (!confirm('Bu tahsilatı iptal etmek istediğinize emin misiniz?\n\nDaire: ' + apt + '\nTutar: ' + amount + ' ₺\n\nİptal sonrası aidat tekrar tahsil edilebilir.')) return;
+        document.getElementById('voidPaymentId').value = id;
+        document.getElementById('voidPaymentForm').submit();
+    });
+});
+</script>
 }

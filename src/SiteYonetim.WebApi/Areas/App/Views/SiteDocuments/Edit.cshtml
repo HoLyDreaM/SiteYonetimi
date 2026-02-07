@@ -1,0 +1,41 @@
+@model SiteYonetim.Domain.Entities.SiteDocument
+@{
+    ViewData["Title"] = "Evrak Düzenle";
+    var siteId = ViewBag.SiteId as Guid? ?? Model.SiteId;
+}
+<h1 class="h3 mb-4">Evrak Düzenle</h1>
+@if (!ViewData.ModelState.IsValid)
+{
+    <div asp-validation-summary="All" class="alert alert-danger text-dark mb-3" role="alert"></div>
+}
+<form asp-area="App" asp-controller="SiteDocuments" asp-action="Edit" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="SiteId" />
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="Name" class="form-label">Evrak Adı *</label>
+                    <input asp-for="Name" class="form-control" required />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label">Açıklama</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Dosya (PDF, Word, Excel)</label>
+                    <input name="Dosya" type="file" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx" />
+                    @if (!string.IsNullOrEmpty(Model.FilePath))
+                    {
+                        <span class="form-text">Mevcut: <a href="@Model.FilePath" target="_blank">@(Model.FileName ?? "Görüntüle")</a>. Yeni dosya seçerseniz değiştirilir.</span>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+            <button type="submit" class="btn btn-primary">Güncelle</button>
+            <a asp-action="Index" asp-route-siteId="@siteId" class="btn btn-secondary">İptal</a>
+        </div>
+    </div>
+</form>

@@ -14,7 +14,6 @@
 <form asp-area="App" asp-controller="Expenses" asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="SiteId" />
-    <input type="hidden" asp-for="Status" />
     <div class="card border-0 shadow-sm">
         <div class="card-body">
             <div class="row g-3">
@@ -47,6 +46,22 @@
                 <div class="col-md-6">
                     <label asp-for="InvoiceNumber" class="form-label">Fatura No (opsiyonel)</label>
                     <input asp-for="InvoiceNumber" class="form-control" />
+                </div>
+                <div class="col-12">
+                    <label asp-for="Status" class="form-label">Ödeme Durumu *</label>
+                    <select name="Status" class="form-select">
+                        @if (Model.Status == SiteYonetim.Domain.Entities.ExpenseStatus.Paid)
+                        {
+                            <option value="0">Bekliyor</option>
+                            <option value="3" selected>Ödendi</option>
+                        }
+                        else
+                        {
+                            <option value="0" selected>Bekliyor</option>
+                            <option value="3">Ödendi</option>
+                        }
+                    </select>
+                    <span class="form-text">"Bekliyor" = süresi geçince bildirimde görünür. "Ödendi" = bankadan düşülür.</span>
                 </div>
                 <div class="col-12">
                     <label class="form-label">Fatura Dosyası (JPG, PDF)</label>

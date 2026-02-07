@@ -521,6 +521,20 @@ CREATE TABLE dbo.Quotations (
     CONSTRAINT FK_Quotations_Site FOREIGN KEY (SiteId) REFERENCES dbo.Sites(Id)
 );
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SiteDocuments')
+CREATE TABLE dbo.SiteDocuments (
+    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    SiteId UNIQUEIDENTIFIER NOT NULL,
+    Name NVARCHAR(200) NOT NULL,
+    Description NVARCHAR(MAX) NULL,
+    FilePath NVARCHAR(500) NULL,
+    FileName NVARCHAR(255) NULL,
+    CreatedAt DATETIME2(2) NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2(2) NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_SiteDocuments_Site FOREIGN KEY (SiteId) REFERENCES dbo.Sites(Id)
+);
+
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ResidentContacts')
 CREATE TABLE dbo.ResidentContacts (
     Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),

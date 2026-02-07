@@ -100,4 +100,78 @@ public class PaymentService : IPaymentService
         await _db.SaveChangesAsync(ct);
         return receipt;
     }
+
+    public async Task<bool> DeleteAsync(Guid paymentId, CancellationToken ct = default)
+    {
+        var payment = await _db.Payments
+            .Include(x => x.BankAccount)
+            .FirstOrDefaultAsync(x => x.Id == paymentId && !x.IsDeleted, ct);
+        if (payment == null) return false;
+
+        payment.IsDeleted = true;
+        payment.UpdatedAt = DateTime.UtcNow;
+
+        if (payment.IncomeId.HasValue)
+        {
+            var income = await _db.Incomes.FirstOrDefaultAsync(x => x.Id == payment.IncomeId.Value && !x.IsDeleted, ct);
+            if (income != null)
+            {
+                var remainingPaid = await _db.Payments
+                    .Where(x => x.IncomeId == payment.IncomeId && x.Id != paymentId && !x.IsDeleted)
+                    .SumAsync(x => x.Amount, ct);
+                income.PaymentId = null;
+                income.Status = remainingPaid >= income.Amount
+                    ? IncomeStatus.Paid
+                    : remainingPaid > 0
+                        ? IncomeStatus.PartiallyPaid
+                        : IncomeStatus.Unpaid;
+                income.UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
+        if (payment.ExpenseShareId.HasValue)
+        {
+            var share = await _db.ExpenseShares.FirstOrDefaultAsync(x => x.Id == payment.ExpenseShareId && !x.IsDeleted, ct);
+            if (share != null)
+            {
+                share.PaidAmount = Math.Max(0, share.PaidAmount - payment.Amount);
+                share.Status = share.PaidAmount >= share.Amount + (share.LateFeeAmount ?? 0)
+                    ? ExpenseShareStatus.Paid
+                    : share.PaidAmount > 0
+                        ? ExpenseShareStatus.PartiallyPaid
+                        : ExpenseShareStatus.Pending;
+                share.UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
+        if (payment.BankAccountId.HasValue)
+        {
+            var bank = await _db.BankAccounts.FirstOrDefaultAsync(x => x.Id == payment.BankAccountId && !x.IsDeleted, ct);
+            if (bank != null)
+            {
+                bank.CurrentBalance -= payment.Amount;
+                bank.UpdatedAt = DateTime.UtcNow;
+
+                var tx = await _db.BankTransactions.FirstOrDefaultAsync(x => x.PaymentId == paymentId && !x.IsDeleted, ct);
+                if (tx != null)
+                {
+                    tx.IsDeleted = true;
+                    tx.UpdatedAt = DateTime.UtcNow;
+                }
+            }
+        }
+
+        if (payment.ReceiptId.HasValue)
+        {
+            var receipt = await _db.Receipts.FirstOrDefaultAsync(x => x.Id == payment.ReceiptId && !x.IsDeleted, ct);
+            if (receipt != null)
+            {
+                receipt.IsDeleted = true;
+                receipt.UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
+        await _db.SaveChangesAsync(ct);
+        return true;
+    }
 }

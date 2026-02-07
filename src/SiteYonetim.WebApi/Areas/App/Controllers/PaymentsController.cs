@@ -41,4 +41,16 @@ public class PaymentsController : Controller
         ViewBag.SiteName = (await _siteService.GetByIdAsync(siteId.Value, ct))?.Name ?? "";
         return View(list);
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id, Guid siteId, int year, int month, CancellationToken ct = default)
+    {
+        var ok = await _paymentService.DeleteAsync(id, ct);
+        if (ok)
+            TempData["Message"] = "Tahsilat iptal edildi. Aidat tekrar tahsil edilebilir.";
+        else
+            TempData["Error"] = "Tahsilat iptal edilemedi.";
+        return RedirectToAction(nameof(Index), new { area = "App", siteId, year, month });
+    }
 }

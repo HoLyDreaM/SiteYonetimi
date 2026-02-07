@@ -10,7 +10,16 @@
     var remainingAmount = ViewBag.RemainingAmount as decimal? ?? income.Amount;
     <h1 class="h3 mb-4">Tahsil Et - @(income.Apartment?.BlockOrBuildingName) @(income.Apartment?.ApartmentNumber)</h1>
     <div class="alert alert-info mb-3">
-        <strong>@(income.Apartment?.OwnerName)</strong> - Toplam: @(income.Amount.ToString("N2") + " ₺") (@(income.Year + "/" + income.Month.ToString("D2")))
+        @if (income.Apartment?.OccupancyType == SiteYonetim.Domain.Entities.ApartmentOccupancyType.TenantOccupied)
+        {
+            <span class="text-muted">Ev Sahibi: @(income.Apartment?.OwnerName ?? "-")</span><br />
+            <strong>Kiracı: @(income.Apartment?.TenantName ?? "-")</strong>
+        }
+        else
+        {
+            <strong>@(income.Apartment?.OwnerName ?? "-")</strong>
+        }
+        — Toplam: @(income.Amount.ToString("N2") + " ₺") (@(income.Year + "/" + income.Month.ToString("D2")))
         @if (paidAmount > 0)
         {
             <br /><span>Tahsil edilen: @(paidAmount.ToString("N2") + " ₺") · <strong>Kalan: @(remainingAmount.ToString("N2") + " ₺")</strong></span>

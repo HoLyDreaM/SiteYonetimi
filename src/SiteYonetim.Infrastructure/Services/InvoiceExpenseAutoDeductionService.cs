@@ -22,7 +22,7 @@ public class InvoiceExpenseAutoDeductionService : IInvoiceExpenseAutoDeductionSe
         var expensesToProcess = await _db.Expenses
             .Where(e => (e.InvoiceDate ?? e.ExpenseDate) <= today
                 && !e.IsDeleted
-                && e.Status != ExpenseStatus.Cancelled
+                && e.Status == ExpenseStatus.Paid
                 && !_db.BankTransactions.Any(bt => bt.ExpenseId == e.Id && !bt.IsDeleted))
             .Include(e => e.ExpenseType)
             .ToListAsync(ct);

@@ -33,6 +33,7 @@ public class SiteYonetimDbContext : DbContext
     public DbSet<SurveyOption> SurveyOptions => Set<SurveyOption>();
     public DbSet<SurveyVote> SurveyVotes => Set<SurveyVote>();
     public DbSet<Quotation> Quotations => Set<Quotation>();
+    public DbSet<SiteDocument> SiteDocuments => Set<SiteDocument>();
     public DbSet<ResidentContact> ResidentContacts => Set<ResidentContact>();
     public DbSet<ImportantPhone> ImportantPhones => Set<ImportantPhone>();
 

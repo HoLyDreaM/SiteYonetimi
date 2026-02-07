@@ -1,11 +1,11 @@
 @model SiteYonetim.WebApi.Areas.App.ViewComponents.NotificationViewModel
 @{
     var siteId = ViewData["SiteId"]?.ToString() ?? ViewContext.HttpContext.Request.Query["siteId"].FirstOrDefault() ?? "";
-    var paidExpenses = Model?.PaidExpenses ?? Array.Empty<SiteYonetim.Domain.Interfaces.PaidExpenseNotificationDto>();
+    var overdueExpenses = Model?.OverdueExpenses ?? Array.Empty<SiteYonetim.Domain.Interfaces.OverdueExpenseNotificationDto>();
     var overdueAidat = Model?.OverdueAidat ?? Array.Empty<SiteYonetim.Domain.Interfaces.OverdueAidatNotificationDto>();
     var monthNames = new[] { "", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
-    var hasNotifications = paidExpenses.Count > 0 || overdueAidat.Count > 0;
-    var totalCount = paidExpenses.Count + overdueAidat.Count;
+    var hasNotifications = overdueExpenses.Count > 0 || overdueAidat.Count > 0;
+    var totalCount = overdueExpenses.Count + overdueAidat.Count;
 }
 <div class="dropdown">
     <button class="btn btn-link text-dark text-decoration-none p-2 position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Bildirimler">
@@ -22,28 +22,28 @@
         }
         else
         {
-        <li><h6 class="dropdown-header">Ödemesi Gelen Giderler</h6></li>
-        @if (paidExpenses.Count > 0)
+        <li><h6 class="dropdown-header">Süresi Geçen Giderler</h6></li>
+        @if (overdueExpenses.Count > 0)
         {
-            @foreach (var item in paidExpenses.Take(5))
+            @foreach (var item in overdueExpenses.Take(5))
             {
                 <li>
                     <a class="dropdown-item py-2" asp-area="App" asp-controller="Expenses" asp-action="Edit" asp-route-id="@item.ExpenseId" asp-route-siteId="@siteId">
                         <strong>@item.ExpenseTypeName</strong>: @item.Description<br />
-                        <small class="text-muted">@item.Amount.ToString("N2") ₺ - @item.TransactionDate.ToString("dd.MM.yyyy")</small>
+                        <small class="text-muted">@item.Amount.ToString("N2") ₺ - Vade: @item.DueDate.ToString("dd.MM.yyyy")</small>
                     </a>
                 </li>
             }
-            @if (paidExpenses.Count > 5)
+            @if (overdueExpenses.Count > 5)
             {
                 <li>
-                    <a class="dropdown-item text-primary py-1" asp-area="App" asp-controller="Expenses" asp-action="Index" asp-route-siteId="@siteId">Tümünü gör (@paidExpenses.Count gider)</a>
+                    <a class="dropdown-item text-primary py-1" asp-area="App" asp-controller="Expenses" asp-action="Index" asp-route-siteId="@siteId">Tümünü gör (@overdueExpenses.Count gider)</a>
                 </li>
             }
         }
         else
         {
-            <li><span class="dropdown-item text-muted py-1">Son 30 günde ödenen gider yok.</span></li>
+            <li><span class="dropdown-item text-muted py-1">Süresi geçen gider yok.</span></li>
         }
 
         <li><hr class="dropdown-divider" /></li>
