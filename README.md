@@ -85,10 +85,10 @@ Site Yönetim Sistemi, .NET 8 ve ASP.NET Core MVC ile geliştirilmiş, SQL Serve
 ### Bildirimler (Çan İkonu)
 - **Bildirim simgesi** (çan ikonu) ile site anasayfasından itibaren tüm sayfalarda yer alır
 - Tıklanınca **dropdown** açılır:
-  - **Ödemesi Gelen Giderler:** Son 30 gün içinde bankadan ödenen (düşülen) giderler listelenir
-  - **Süresi Geçen Aidatlar:** Ödeme süresi geçmiş ve tahsil edilmemiş/kısmi tahsil edilmiş aidatlar listelenir
+  - **Süresi Geçen Giderler:** Vadesi geçmiş ve ödenmemiş giderler listelenir
+  - **Borçlular:** Borçlular sayfasıyla aynı veri — Blok, Daire, Malik, Telefon, Vade, Gecikme, Tutar
 - Bildirim varsa simgede kırmızı badge ile toplam sayı gösterilir
-- Her gider için detay linki ile Giderler sayfasına, her aidat için tahsilat linki ile Gelirler sayfasına hızlı erişim
+- Her gider için Giderler sayfasına, her borçlu için Borçlular sayfasına hızlı erişim
 
 ### Raporlar
 
@@ -135,7 +135,7 @@ Site Yönetim Sistemi, .NET 8 ve ASP.NET Core MVC ile geliştirilmiş, SQL Serve
 - Blok No, Daire No, İsim Soyisim, Telefon, Konu, Açıklama alanları
 
 ### Üst Bar (Giriş Sonrası)
-- **Bildirim simgesi:** Ödemesi gelen giderler dropdown’u
+- **Bildirim simgesi:** Süresi geçen giderler ve borçlular dropdown’u
 - **Profil:** Hesap bilgileri ve ayarlar sayfasına gider (Hesap Ayarları menüden kaldırılmıştır)
 
 ### Panel (Dashboard)
@@ -609,6 +609,27 @@ Yanlış tahsil edilen aidatın iptal edilmesi için "Tahsilat İptal" özelliğ
 - Gider payı (ExpenseShare) tahsilatı ise PaidAmount geri alınır
 
 **Kullanım:** Tahsilatlar sayfası → İlgili ay ve siteyi seçin → İptal etmek istediğiniz tahsilatın yanındaki **İptal** butonuna tıklayın → Onaylayın.
+
+---
+
+### Bildirim (Borçlular) Uyarlaması
+
+Bildirim çanı artık **Borçlular** sayfasıyla aynı veriyi kullanır. Borçlular sayfasında görünen kayıtlar bildirim dropdown'unda da gösterilir.
+
+| Özellik | Açıklama |
+|---------|----------|
+| **Veri kaynağı** | `ReportService.GetDebtorsAsync` — Borçlular sayfasıyla aynı mantık |
+| **DebtorDto** | `SiteId` alanı eklendi (çoklu site bildiriminde site bilgisi için) |
+| **Görüntüleme** | Blok, Daire No, Malik, Telefon, Vade Tarihi, Gecikme Süresi, Tutar |
+| **Link** | Tıklanınca ilgili sitenin Borçlular sayfasına yönlendirir |
+
+**Değişiklikler:**
+- `PaidExpenseNotificationViewComponent` artık `IReportService.GetDebtorsAsync` kullanıyor
+- Bildirim dropdown'unda "Süresi Geçen Aidatlar" yerine "Borçlular" bölümü gösteriliyor
+- Tek site seçiliyse o sitenin borçluları; seçili değilse tüm kullanıcı sitelerinden borçlular birleştirilerek gösteriliyor
+- En eski borç tarihine göre sıralanır, en fazla 20 kayıt listelenir
+
+**Kullanım:** Bildirim çanına tıklayın → Borçlular bölümünde Blok, Daire, Malik, Telefon, Vade, Gecikme, Tutar bilgileri görünür → Tıklayarak Borçlular sayfasına geçin.
 
 ---
 

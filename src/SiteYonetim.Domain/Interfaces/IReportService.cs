@@ -77,6 +77,7 @@ public class YearlyReportDetailDto : YearlyReportDto
 
 public class DebtorDto
 {
+    public Guid SiteId { get; set; }
     public Guid ApartmentId { get; set; }
     public string BlockOrBuildingName { get; set; } = string.Empty;
     public string ApartmentNumber { get; set; } = string.Empty;

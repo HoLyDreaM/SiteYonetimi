@@ -1,0 +1,84 @@
+@{
+    ViewData["Title"] = "Süresi Geçen Aidat Tanılama";
+    var now = ViewBag.Now as DateTime? ?? DateTime.Now;
+    var sites = ViewBag.Sites as IReadOnlyList<SiteYonetim.Domain.Entities.Site> ?? Array.Empty<SiteYonetim.Domain.Entities.Site>();
+    var ocak2026Count = ViewBag.Ocak2026Count as int? ?? 0;
+    var bekleyenCount = ViewBag.BekleyenCount as int? ?? 0;
+    var bekleyenList = ViewBag.BekleyenList as IEnumerable<dynamic> ?? Enumerable.Empty<object>();
+    var overdueCount = ViewBag.OverdueFromServiceCount as int? ?? 0;
+    var overdueList = ViewBag.OverdueFromService as IReadOnlyList<SiteYonetim.Domain.Interfaces.OverdueAidatNotificationDto> ?? Array.Empty<SiteYonetim.Domain.Interfaces.OverdueAidatNotificationDto>();
+}
+<h1 class="h4 mb-4">Süresi Geçen Aidat - Tanılama</h1>
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+else
+{
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Sistem Bilgisi</h5>
+            <p class="mb-1"><strong>Sunucu tarihi:</strong> @now.ToString("dd.MM.yyyy HH:mm")</p>
+            <p class="mb-1"><strong>Yıl:</strong> @now.Year, <strong>Ay:</strong> @now.Month</p>
+            <p class="mb-0"><strong>Kullanıcı siteleri:</strong> @sites.Count adet</p>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Veritabanı - Ocak 2026 Aidat</h5>
+            <p class="mb-1"><strong>Toplam Ocak 2026 gelir kaydı:</strong> @ocak2026Count</p>
+            <p class="mb-1"><strong>Tahsil edilmemiş (kalan &gt; 0):</strong> @bekleyenCount</p>
+            <p class="mb-1"><strong>Bugün (today):</strong> @((ViewBag.Today as DateTime?)?.ToString("dd.MM.yyyy") ?? "-")</p>
+            @if (bekleyenCount > 0)
+            {
+                <p class="small text-muted mb-1">@bekleyenCount adet aidat tahsil bekliyor.</p>
+                <table class="table table-sm table-bordered small">
+                    <thead><tr><th>PaymentEndDate</th><th>Remaining</th><th>PaymentEndDate &lt; today?</th></tr></thead>
+                    <tbody>
+                        @foreach (var x in bekleyenList.Take(10))
+                        {
+                            <tr>
+                                <td>@((x as dynamic)?.PaymentEndDate?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                                <td>@((x as dynamic)?.Remaining?.ToString("N2") ?? "-") ₺</td>
+                                <td>@((x as dynamic)?.IsOverdue == true ? "EVET" : "HAYIR")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Bildirim Servisi Sonucu</h5>
+            <p class="mb-1"><strong>Year/Month sorgusu (siteIds.Contains):</strong> @(ViewBag.ServiceQueryCount ?? 0) kayıt</p>
+            <p class="mb-1"><strong>Year/Month sorgusu (SiteId==siteIds[0]):</strong> @(ViewBag.ServiceQueryWithSingleSite ?? 0) kayıt</p>
+            <p class="mb-1"><strong>SiteId eşleşiyor mu?</strong> @(ViewBag.SiteIdMatches == true ? "EVET" : "HAYIR")</p>
+            <p class="mb-1"><strong>GetOverdueAidat dönen kayıt:</strong> @overdueCount</p>
+            @if (overdueCount > 0)
+            {
+                <ul class="mb-0 small">
+                    @foreach (var item in overdueList.Take(5))
+                    {
+                        <li>@item.BlockOrBuilding @item.ApartmentNumber - @item.RemainingAmount.ToString("N2") ₺</li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+    <div class="alert @(bekleyenCount > 0 && overdueCount == 0 ? "alert-warning" : "alert-info")">
+        @if (bekleyenCount > 0 && overdueCount == 0)
+        {
+            <strong>Uyumsuzluk:</strong> @($"Veritabanında {bekleyenCount} bekleyen Ocak 2026 aidat var ama bildirim servisi 0 döndürüyor. Yukarıdaki bilgileri geliştiriciye iletin.")
+        }
+        else if (overdueCount > 0)
+        {
+            <strong>Bildirim çalışıyor.</strong> @($"{overdueCount} süresi geçmiş aidat tespit edildi. Çan ikonunda gözükmüyorsa sayfayı yenileyin veya site seçin.")
+        }
+        else
+        {
+            @:Veritabanında bekleyen Ocak 2026 aidat yok veya tümü tahsil edilmiş.
+        }
+    </div>
+    <a asp-area="App" asp-controller="Dashboard" asp-action="Index" class="btn btn-secondary">Panele Dön</a>
+}

@@ -2,10 +2,9 @@
 @{
     var siteId = ViewData["SiteId"]?.ToString() ?? ViewContext.HttpContext.Request.Query["siteId"].FirstOrDefault() ?? "";
     var overdueExpenses = Model?.OverdueExpenses ?? Array.Empty<SiteYonetim.Domain.Interfaces.OverdueExpenseNotificationDto>();
-    var overdueAidat = Model?.OverdueAidat ?? Array.Empty<SiteYonetim.Domain.Interfaces.OverdueAidatNotificationDto>();
-    var monthNames = new[] { "", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
-    var hasNotifications = overdueExpenses.Count > 0 || overdueAidat.Count > 0;
-    var totalCount = overdueExpenses.Count + overdueAidat.Count;
+    var debtors = Model?.Debtors ?? Array.Empty<SiteYonetim.Domain.Interfaces.DebtorDto>();
+    var hasNotifications = overdueExpenses.Count > 0 || debtors.Count > 0;
+    var totalCount = overdueExpenses.Count + debtors.Count;
 }
 <div class="dropdown">
     <button class="btn btn-link text-dark text-decoration-none p-2 position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Bildirimler">
@@ -28,7 +27,7 @@
             @foreach (var item in overdueExpenses.Take(5))
             {
                 <li>
-                    <a class="dropdown-item py-2" asp-area="App" asp-controller="Expenses" asp-action="Edit" asp-route-id="@item.ExpenseId" asp-route-siteId="@siteId">
+                    <a class="dropdown-item py-2" asp-area="App" asp-controller="Expenses" asp-action="Edit" asp-route-id="@item.ExpenseId" asp-route-siteId="@item.SiteId">
                         <strong>@item.ExpenseTypeName</strong>: @item.Description<br />
                         <small class="text-muted">@item.Amount.ToString("N2") ₺ - Vade: @item.DueDate.ToString("dd.MM.yyyy")</small>
                     </a>
@@ -36,8 +35,9 @@
             }
             @if (overdueExpenses.Count > 5)
             {
+                var firstExp = overdueExpenses.First();
                 <li>
-                    <a class="dropdown-item text-primary py-1" asp-area="App" asp-controller="Expenses" asp-action="Index" asp-route-siteId="@siteId">Tümünü gör (@overdueExpenses.Count gider)</a>
+                    <a class="dropdown-item text-primary py-1" asp-area="App" asp-controller="Expenses" asp-action="Index" asp-route-siteId="@firstExp.SiteId">Tümünü gör (@overdueExpenses.Count gider)</a>
                 </li>
             }
         }
@@ -47,29 +47,29 @@
         }
 
         <li><hr class="dropdown-divider" /></li>
-        <li><h6 class="dropdown-header">Süresi Geçen Aidatlar</h6></li>
-        @if (overdueAidat.Count > 0)
+        <li><h6 class="dropdown-header">Borçlular</h6></li>
+        @if (debtors.Count > 0)
         {
-            @foreach (var item in overdueAidat.Take(5))
+            @foreach (var d in debtors.Take(5))
             {
                 <li>
-                    <a class="dropdown-item py-2" asp-area="App" asp-controller="Incomes" asp-action="Collect" asp-route-id="@item.IncomeId">
-                        <strong>@(item.BlockOrBuilding) @item.ApartmentNumber</strong> - @item.OwnerName<br />
-                        <small class="text-muted">@item.RemainingAmount.ToString("N2") ₺ - @item.Year @monthNames[item.Month] (Vade: @item.PaymentEndDate.ToString("dd.MM.yyyy"))</small>
+                    <a class="dropdown-item py-2" asp-area="App" asp-controller="Debtors" asp-action="Index" asp-route-siteId="@d.SiteId">
+                        <strong>@d.BlockOrBuildingName @d.ApartmentNumber</strong> - @(d.OwnerName ?? "-")<br />
+                        <small class="text-muted">@(d.OwnerPhone ?? "-") · @(d.OldestDebtDate?.ToString("dd.MM.yyyy") ?? "-") · @(d.DaysOverdue.HasValue ? $"{d.DaysOverdue} gün gecikmiş" : "-") · @d.UnpaidIncome.ToString("N2") ₺</small>
                     </a>
                 </li>
             }
-            @if (overdueAidat.Count > 5)
+            @if (debtors.Count > 5)
             {
-                var firstOverdue = overdueAidat.First();
+                var firstDebtor = debtors.First();
                 <li>
-                    <a class="dropdown-item text-primary py-1" asp-area="App" asp-controller="Incomes" asp-action="Index" asp-route-siteId="@siteId" asp-route-year="@firstOverdue.Year" asp-route-month="@firstOverdue.Month">Tümünü gör (@overdueAidat.Count aidat)</a>
+                    <a class="dropdown-item text-primary py-1" asp-area="App" asp-controller="Debtors" asp-action="Index" asp-route-siteId="@firstDebtor.SiteId">Tümünü gör (@debtors.Count borçlu)</a>
                 </li>
             }
         }
         else
         {
-            <li><span class="dropdown-item text-muted py-1">Süresi geçen aidat yok.</span></li>
+            <li><span class="dropdown-item text-muted py-1">Borcu bulunan daire yok.</span></li>
         }
         }
     </ul>

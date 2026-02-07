@@ -279,35 +279,58 @@ public class ReportService : IReportService
     public async Task<IReadOnlyList<DebtorDto>> GetDebtorsAsync(Guid siteId, CancellationToken ct = default)
     {
         var apartments = await _db.Apartments
+            .AsNoTracking()
             .Where(x => x.SiteId == siteId && !x.IsDeleted)
             .OrderBy(x => x.BlockOrBuildingName).ThenBy(x => x.ApartmentNumber)
             .ToListAsync(ct);
 
+        var aptIds = apartments.Select(a => a.Id).ToList();
+        if (aptIds.Count == 0) return new List<DebtorDto>();
+
+        var incomes = await _db.Incomes
+            .AsNoTracking()
+            .Where(i => aptIds.Contains(i.ApartmentId) && !i.IsDeleted)
+            .ToListAsync(ct);
+
+        var incomeIds = incomes.Select(i => i.Id).ToList();
+        var paidByIncome = incomeIds.Count > 0
+            ? await _db.Payments
+                .Where(p => p.IncomeId != null && incomeIds.Contains(p.IncomeId.Value) && !p.IsDeleted)
+                .GroupBy(p => p.IncomeId!.Value)
+                .Select(g => new { IncomeId = g.Key, Paid = g.Sum(p => p.Amount) })
+                .ToDictionaryAsync(x => x.IncomeId, x => x.Paid, ct)
+            : new Dictionary<Guid, decimal>();
+
         var result = new List<DebtorDto>();
+        var today = DateTime.Today;
+
         foreach (var apt in apartments)
         {
-            var unpaidIncomes = await _db.Incomes
-                .Where(x => x.ApartmentId == apt.Id && !x.IsDeleted)
-                .ToListAsync(ct);
+            var aptIncomes = incomes.Where(i => i.ApartmentId == apt.Id).ToList();
             var unpaidIncome = 0m;
-            foreach (var inc in unpaidIncomes)
+            var debtDates = new List<DateTime>();
+            foreach (var inc in aptIncomes)
             {
-                var paid = await _db.Payments.Where(p => p.IncomeId == inc.Id && !p.IsDeleted).SumAsync(x => x.Amount, ct);
-                unpaidIncome += Math.Max(0, inc.Amount - paid);
+                var paid = paidByIncome.GetValueOrDefault(inc.Id, 0m);
+                var remaining = Math.Max(0, inc.Amount - paid);
+                if (remaining > 0)
+                {
+                    unpaidIncome += remaining;
+                    debtDates.Add(inc.DueDate);
+                }
             }
 
             if (unpaidIncome <= 0) continue;
 
-            var debtDates = unpaidIncomes.Select(i => i.DueDate).ToList();
             var oldestDebt = debtDates.Count > 0 ? debtDates.Min() : (DateTime?)null;
-            var today = DateTime.Today;
             var daysOverdue = oldestDebt.HasValue && oldestDebt.Value < today ? (int)(today - oldestDebt.Value).TotalDays : (int?)null;
 
             result.Add(new DebtorDto
             {
+                SiteId = siteId,
                 ApartmentId = apt.Id,
-                BlockOrBuildingName = apt.BlockOrBuildingName,
-                ApartmentNumber = apt.ApartmentNumber,
+                BlockOrBuildingName = apt.BlockOrBuildingName ?? "",
+                ApartmentNumber = apt.ApartmentNumber ?? "",
                 OwnerName = apt.OwnerName,
                 OwnerPhone = apt.OwnerPhone,
                 UnpaidExpenseShare = 0,

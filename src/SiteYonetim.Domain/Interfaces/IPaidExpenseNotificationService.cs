@@ -6,6 +6,7 @@ namespace SiteYonetim.Domain.Interfaces;
 public class OverdueExpenseNotificationDto
 {
     public Guid ExpenseId { get; set; }
+    public Guid SiteId { get; set; }
     public string Description { get; set; } = string.Empty;
     public string ExpenseTypeName { get; set; } = string.Empty;
     public decimal Amount { get; set; }
@@ -18,6 +19,7 @@ public class OverdueExpenseNotificationDto
 public class OverdueAidatNotificationDto
 {
     public Guid IncomeId { get; set; }
+    public Guid SiteId { get; set; }
     public string ApartmentInfo { get; set; } = string.Empty;
     public string BlockOrBuilding { get; set; } = string.Empty;
     public string ApartmentNumber { get; set; } = string.Empty;
@@ -37,7 +39,17 @@ public interface IPaidExpenseNotificationService
     Task<IReadOnlyList<OverdueExpenseNotificationDto>> GetOverdueExpensesAsync(Guid siteId, CancellationToken ct = default);
 
     /// <summary>
+    /// Birden fazla siteden süresi geçmiş giderleri toplar
+    /// </summary>
+    Task<IReadOnlyList<OverdueExpenseNotificationDto>> GetOverdueExpensesForSitesAsync(IEnumerable<Guid> siteIds, CancellationToken ct = default);
+
+    /// <summary>
     /// Ödeme süresi geçmiş ve tahsil edilmemiş/kısmi tahsil edilmiş aidatları getirir
     /// </summary>
     Task<IReadOnlyList<OverdueAidatNotificationDto>> GetOverdueAidatAsync(Guid siteId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Birden fazla siteden süresi geçmiş aidatları toplar (tüm kullanıcı siteleri için)
+    /// </summary>
+    Task<IReadOnlyList<OverdueAidatNotificationDto>> GetOverdueAidatForSitesAsync(IEnumerable<Guid> siteIds, CancellationToken ct = default);
 }
