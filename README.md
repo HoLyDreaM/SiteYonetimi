@@ -633,6 +633,20 @@ Bildirim çanı artık **Borçlular** sayfasıyla aynı veriyi kullanır. Borçl
 
 ---
 
+### Sabit Sol Menü (Layout)
+
+Sol menü (sidebar) sayfa kaydırıldığında sabit kalır; sadece sağdaki içerik alanı hareket eder.
+
+| Özellik | Açıklama |
+|---------|----------|
+| **Sidebar** | `position: fixed` — Ekranın solunda sabit |
+| **İçerik alanı** | `margin-left: 240px` — Sağda, yalnızca bu alan kaydırılır |
+| **Yazdırma** | Sidebar gizlenir, içerik tam genişlikte yazdırılır |
+
+**Kullanım:** Gelirler, Daireler vb. menüye tıkladığınızda sol menü sabit kalır; uzun sayfalarda kaydırırken sadece sağdaki içerik hareket eder.
+
+---
+
 ## Lisans
 
 Bu proje eğitim ve kişisel kullanım amaçlıdır.
