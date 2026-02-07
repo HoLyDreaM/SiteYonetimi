@@ -94,7 +94,7 @@ public class ExpensesController : Controller
                 var ext = (Path.GetExtension(Fatura.FileName) ?? "").ToLowerInvariant();
                 if (ext is ".jpg" or ".jpeg" or ".pdf")
                 {
-                    var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "giderler");
+                    var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "giderler", model.SiteId.ToString("N"));
                     Directory.CreateDirectory(uploadsDir);
                     var fileName = $"{model.Id}_{Guid.NewGuid():N}{ext}";
                     var filePath = Path.Combine(uploadsDir, fileName);
@@ -104,7 +104,7 @@ public class ExpensesController : Controller
                     {
                         ExpenseId = model.Id,
                         FileName = Fatura.FileName,
-                        FilePath = $"/uploads/giderler/{fileName}",
+                        FilePath = $"/uploads/giderler/{model.SiteId:N}/{fileName}",
                         IsDeleted = false
                     }, ct);
                 }
@@ -191,7 +191,7 @@ public class ExpensesController : Controller
                 var ext = (Path.GetExtension(Fatura.FileName) ?? "").ToLowerInvariant();
                 if (ext is ".jpg" or ".jpeg" or ".pdf")
                 {
-                    var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "giderler");
+                    var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "giderler", model.SiteId.ToString("N"));
                     Directory.CreateDirectory(uploadsDir);
                     var fileName = $"{model.Id}_{Guid.NewGuid():N}{ext}";
                     var filePath = Path.Combine(uploadsDir, fileName);
@@ -201,7 +201,7 @@ public class ExpensesController : Controller
                     {
                         ExpenseId = model.Id,
                         FileName = Fatura.FileName,
-                        FilePath = $"/uploads/giderler/{fileName}",
+                        FilePath = $"/uploads/giderler/{model.SiteId:N}/{fileName}",
                         IsDeleted = false
                     }, ct);
                 }

@@ -82,9 +82,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Teklifler, Gider faturaları, Destek kayıtları için upload klasörlerini otomatik oluştur
+// Upload klasörleri: uploads/{modul}/{siteId}/ — Teklifler, Gider faturaları, Destek, Evraklar
 var webRoot = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
-foreach (var folder in new[] { "uploads", "uploads/teklifler", "uploads/destek", "uploads/giderler" })
+foreach (var folder in new[] { "uploads", "uploads/teklifler", "uploads/destek", "uploads/giderler", "uploads/evraklar" })
 {
     try { Directory.CreateDirectory(Path.Combine(webRoot, folder)); } catch { /* yoksa devam */ }
 }

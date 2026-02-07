@@ -64,14 +64,14 @@ public class QuotationsController : Controller
         }
         if (Dosya != null && Dosya.Length > 0)
         {
-            var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "teklifler");
+            var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "teklifler", model.SiteId.ToString("N"));
             Directory.CreateDirectory(uploadsDir);
             var ext = Path.GetExtension(Dosya.FileName) ?? ".pdf";
             var fileName = $"{Guid.NewGuid():N}{ext}";
             var filePath = Path.Combine(uploadsDir, fileName);
             await using (var stream = new FileStream(filePath, FileMode.Create))
                 await Dosya.CopyToAsync(stream);
-            model.FilePath = $"/uploads/teklifler/{fileName}";
+            model.FilePath = $"/uploads/teklifler/{model.SiteId:N}/{fileName}";
         }
         model.IsDeleted = false;
         await _quotationService.CreateAsync(model, ct);
@@ -100,14 +100,14 @@ public class QuotationsController : Controller
         var existing = await _quotationService.GetByIdAsync(id, ct);
         if (existing != null && Dosya != null && Dosya.Length > 0)
         {
-            var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "teklifler");
+            var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "teklifler", model.SiteId.ToString("N"));
             Directory.CreateDirectory(uploadsDir);
             var ext = Path.GetExtension(Dosya.FileName) ?? ".pdf";
             var fileName = $"{Guid.NewGuid():N}{ext}";
             var filePath = Path.Combine(uploadsDir, fileName);
             await using (var stream = new FileStream(filePath, FileMode.Create))
                 await Dosya.CopyToAsync(stream);
-            model.FilePath = $"/uploads/teklifler/{fileName}";
+            model.FilePath = $"/uploads/teklifler/{model.SiteId:N}/{fileName}";
         }
         else if (existing != null && string.IsNullOrEmpty(model.FilePath))
         {

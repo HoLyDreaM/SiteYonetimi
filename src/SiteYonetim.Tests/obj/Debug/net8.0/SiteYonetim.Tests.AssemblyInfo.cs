@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SiteYonetim.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+79d4a47c9d2c3f194537b03eaa64b95fa997053b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4509d09e9c9b744f496828c82984ca2dd3e62522")]
 [assembly: System.Reflection.AssemblyProductAttribute("SiteYonetim.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SiteYonetim.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

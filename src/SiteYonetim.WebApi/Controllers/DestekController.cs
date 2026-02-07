@@ -111,7 +111,7 @@ public class DestekController : Controller
 
         if (Resim != null && Resim.Length > 0)
         {
-            var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "destek");
+            var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "destek", model.SiteId.ToString("N"));
             Directory.CreateDirectory(uploadsDir);
             var ext = Path.GetExtension(Resim.FileName) ?? ".jpg";
             var fileName = $"{ticket.Id}_{Guid.NewGuid():N}{ext}";
@@ -122,7 +122,7 @@ public class DestekController : Controller
             {
                 SupportTicketId = ticket.Id,
                 FileName = Resim.FileName,
-                FilePath = $"/uploads/destek/{fileName}",
+                FilePath = $"/uploads/destek/{model.SiteId:N}/{fileName}",
                 IsDeleted = false
             }, ct);
         }

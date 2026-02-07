@@ -311,3 +311,4 @@ C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\ne
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\SiteYonetim.WebApi.staticwebassets.runtime.json
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\appsettings.Development.example.json
 C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\bin\Debug\net8.0\appsettings.example.json
+C:\Users\HoLyDreaM\.cursor-tutor\SiteYonetim\src\SiteYonetim.WebApi\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
